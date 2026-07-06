@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../lib/supabase/client';
 import { Megaphone, Calendar, Star, Wrench, BarChart3, LineChart, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as RechartsLineChart, Line, AreaChart, Area, Legend } from 'recharts';
 
 export default function Home() {
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -36,7 +37,7 @@ export default function Home() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-[var(--border-color)] border-t-[var(--accent)]" />
       </div>
     );
@@ -59,7 +60,7 @@ export default function Home() {
 
 function Nav() {
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur border-b" style={{ background: 'rgba(13, 13, 13, 0.95)', borderColor: 'var(--border-subtle)' }}>
+    <nav className="sticky top-0 z-50 backdrop-blur border-b" style={{ background: 'rgba(255, 255, 255, 0.95)', borderColor: 'var(--border-color)' }}>
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
@@ -81,7 +82,7 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+    <section className="relative overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       {/* Subtle radial glow */}
       <div className="absolute inset-0 flex items-end justify-center pointer-events-none" style={{
         background: 'radial-gradient(ellipse 800px 400px at center bottom, rgba(29, 185, 84, 0.07) 0%, transparent 70%)'
@@ -108,43 +109,50 @@ function Hero() {
           </Link>
         </div>
 
-        {/* Hero visual mockup */}
-        <div className="max-w-2xl mx-auto p-8 rounded-2xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-          <h3 className="text-sm font-semibold mb-6" style={{ color: 'var(--text-secondary)' }}>Your Property at a Glance</h3>
-
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {/* Revenue card */}
-            <div className="p-4 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
-              <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>Earned</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>$8,240</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>This month</p>
+        {/* Hero visual with animated chart */}
+        <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Your Property at a Glance</h3>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Last 7 months overview</p>
+              </div>
+              <div className="flex gap-4">
+                <div className="text-right">
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Total Earned</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>₹58,240</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Total Expenses</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--color-red)' }}>₹12,840</p>
+                </div>
+              </div>
             </div>
 
-            {/* Bookings card */}
-            <div className="p-4 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
-              <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>Bookings</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>14</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>87% occupancy</p>
+            {/* Animated Revenue vs Expenses Chart */}
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsBarChart data={[
+                { month: 'Jan', revenue: 8200, expenses: 1800, net: 6400 },
+                { month: 'Feb', revenue: 7800, expenses: 1600, net: 6200 },
+                { month: 'Mar', revenue: 9200, expenses: 2000, net: 7200 },
+                { month: 'Apr', revenue: 8900, expenses: 1900, net: 7000 },
+                { month: 'May', revenue: 9800, expenses: 2100, net: 7700 },
+                { month: 'Jun', revenue: 8540, expenses: 1740, net: 6800 },
+                { month: 'Jul', revenue: 7800, expenses: 1700, net: 6100 }
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} />
+                <YAxis tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                <Bar dataKey="revenue" fill="var(--accent)" radius={[8, 8, 0, 0]} isAnimationActive={true} animationDuration={800} />
+                <Bar dataKey="expenses" fill="var(--color-red)" radius={[8, 8, 0, 0]} isAnimationActive={true} animationDuration={800} />
+              </RechartsBarChart>
+            </ResponsiveContainer>
+
+            <div className="flex items-center justify-center gap-2 text-xs mt-6" style={{ color: 'var(--text-secondary)' }}>
+              <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />
+              Managed by Airaroots
             </div>
-
-            {/* Expenses card */}
-            <div className="p-4 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
-              <p className="text-xs mb-2" style={{ color: 'var(--text-tertiary)' }}>Expenses</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--color-red)' }}>$1,240</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Managed</p>
-            </div>
-          </div>
-
-          {/* Mini chart */}
-          <div className="flex items-end justify-center gap-2 mb-6 h-24">
-            {[5, 8, 6, 9, 7, 8, 9].map((h, i) => (
-              <div key={i} className="flex-1 rounded-t" style={{ height: `${(h / 9) * 100}%`, background: 'var(--accent)' }} />
-            ))}
-          </div>
-
-          <div className="flex items-center justify-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-            <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />
-            Managed by Airaroots
           </div>
         </div>
       </div>
@@ -172,7 +180,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-24" style={{ background: 'var(--bg-base)' }}>
+    <section id="how-it-works" className="py-24" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
@@ -189,8 +197,8 @@ function HowItWorks() {
                 <div className="absolute top-8 -right-4 w-8 h-0.5 md:block hidden" style={{ background: 'var(--border-color)' }} />
               )}
 
-              <div className="p-6 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mb-4 font-bold text-sm" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
+              <div className="p-6 rounded-xl animate-fade-in-up transition-all hover:shadow-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', animationDelay: `${idx * 150}ms` }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center mb-4 font-bold text-sm animate-pulse-glow" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
                   {step.num}
                 </div>
                 <h3 className="text-xl font-bold mb-2">{step.title}</h3>
@@ -248,17 +256,63 @@ function Services() {
           <p style={{ color: 'var(--text-secondary)' }}>Done for you</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {services.map((service, idx) => {
             const Icon = service.icon;
             return (
-              <div key={idx} className="p-6 rounded-xl" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
-                <Icon size={28} className="mb-4" style={{ color: 'var(--accent)' }} />
+              <div key={idx} className="p-6 rounded-xl animate-fade-in-up transition-all hover:shadow-lg hover:scale-105" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)', animationDelay: `${idx * 100}ms` }}>
+                <Icon size={28} className="mb-4 transition-transform hover:rotate-12" style={{ color: 'var(--accent)' }} />
                 <h3 className="text-lg font-bold mb-2">{service.title}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{service.desc}</p>
               </div>
             );
           })}
+        </div>
+
+        {/* Charts Grid - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Bookings Trend Chart */}
+          <div className="p-8 rounded-xl animate-fade-in-up" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+            <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Bookings & Occupancy</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <RechartsLineChart data={[
+                { month: 'Jan', bookings: 8, occupancy: 65 },
+                { month: 'Feb', bookings: 10, occupancy: 72 },
+                { month: 'Mar', bookings: 14, occupancy: 85 },
+                { month: 'Apr', bookings: 12, occupancy: 78 },
+                { month: 'May', bookings: 16, occupancy: 88 },
+                { month: 'Jun', bookings: 18, occupancy: 92 },
+                { month: 'Jul', bookings: 14, occupancy: 87 }
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-tertiary)', fontSize: 11 }} />
+                <YAxis tick={{ fill: 'var(--text-tertiary)', fontSize: 11 }} />
+                <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line type="monotone" dataKey="bookings" stroke="var(--accent)" strokeWidth={2} dot={{ fill: 'var(--accent)', r: 3 }} isAnimationActive={true} animationDuration={800} />
+                <Line type="monotone" dataKey="occupancy" stroke="var(--color-blue)" strokeWidth={2} dot={{ fill: 'var(--color-blue)', r: 3 }} isAnimationActive={true} animationDuration={800} />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Expense Breakdown Chart */}
+          <div className="p-8 rounded-xl animate-fade-in-up" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)', animationDelay: '100ms' }}>
+            <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Expense Breakdown</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <RechartsBarChart data={[
+                { category: 'Cleaning', amount: 2400 },
+                { category: 'Maintenance', amount: 1890 },
+                { category: 'Marketing', amount: 2800 },
+                { category: 'Commissions', amount: 3200 }
+              ]} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis type="number" tick={{ fill: 'var(--text-tertiary)', fontSize: 11 }} />
+                <YAxis dataKey="category" type="category" tick={{ fill: 'var(--text-tertiary)', fontSize: 11 }} width={80} />
+                <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                <Bar dataKey="amount" fill="var(--color-red)" radius={[0, 8, 8, 0]} isAnimationActive={true} animationDuration={800} />
+              </RechartsBarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </section>
@@ -267,7 +321,7 @@ function Services() {
 
 function OwnerPortal() {
   return (
-    <section className="py-24" style={{ background: 'var(--bg-base)' }}>
+    <section className="py-24" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <div className="max-w-4xl mx-auto px-6">
         <div className="p-8 rounded-2xl" style={{ background: 'var(--bg-surface)', border: '3px solid var(--accent)' }}>
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
@@ -287,22 +341,50 @@ function OwnerPortal() {
           </div>
 
           {/* Portal mockup */}
-          <div className="p-6 rounded-xl" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+          <div className="p-6 rounded-xl mb-6" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
             <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-secondary)' }}>Sample Owner Dashboard</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
                 <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Earned</p>
-                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>$12,480</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>₹12,480</p>
               </div>
               <div className="p-4 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
                 <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Expenses</p>
-                <p className="text-2xl font-bold" style={{ color: 'var(--color-red)' }}>$2,240</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--color-red)' }}>₹2,240</p>
               </div>
               <div className="p-4 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
                 <p className="text-xs mb-1" style={{ color: 'var(--text-tertiary)' }}>Net Income</p>
-                <p className="text-2xl font-bold" style={{ color: 'var(--color-gold)' }}>$10,240</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--color-gold)' }}>₹10,240</p>
               </div>
             </div>
+          </div>
+
+          {/* Net Income Trend Chart */}
+          <div className="p-6 rounded-xl" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+            <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-secondary)' }}>Net Income Trend</h4>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={[
+                { month: 'Jan', netIncome: 6400, target: 7000 },
+                { month: 'Feb', netIncome: 6200, target: 7000 },
+                { month: 'Mar', netIncome: 7200, target: 7000 },
+                { month: 'Apr', netIncome: 7000, target: 7000 },
+                { month: 'May', netIncome: 7700, target: 7000 },
+                { month: 'Jun', netIncome: 6800, target: 7000 },
+                { month: 'Jul', netIncome: 6100, target: 7000 }
+              ]}>
+                <defs>
+                  <linearGradient id="colorNetIncome" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                <XAxis dataKey="month" tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} />
+                <YAxis tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                <Area type="monotone" dataKey="netIncome" stroke="var(--accent)" fillOpacity={1} fill="url(#colorNetIncome)" isAnimationActive={true} animationDuration={1000} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

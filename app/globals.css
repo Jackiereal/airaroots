@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base:     #0D0D0D;
-  --bg-raised:   #141414;
-  --bg-surface:  #1A1A1A;
-  --bg-elevated: #242424;
+  --bg-base:     #FFFFFF;
+  --bg-raised:   #F9F9F9;
+  --bg-surface:  #F5F5F5;
+  --bg-elevated: #EEEEEE;
 
-  --border-color:  #2A2A2A;
-  --border-subtle: #1E1E1E;
-  --border-strong: #3D3D3D;
+  --border-color:  #E0E0E0;
+  --border-subtle: #F0F0F0;
+  --border-strong: #D0D0D0;
 
-  --text-primary:   #FFFFFF;
-  --text-secondary: #A7A7A7;
-  --text-tertiary:  #6A6A6A;
+  --text-primary:   #1A1A1A;
+  --text-secondary: #666666;
+  --text-tertiary:  #999999;
 
   --accent:       #1DB954;
   --accent-hover: #1ED760;
-  --accent-muted: #0A2016;
-  --accent-fg:    #000000;
+  --accent-muted: #E8F5E9;
+  --accent-fg:    #FFFFFF;
 
   --color-gold:        #F0B429;
-  --color-gold-muted:  #1C1500;
+  --color-gold-muted:  #FFF8E1;
   --color-blue:        #4C9EEB;
-  --color-blue-muted:  #081A30;
+  --color-blue-muted:  #E3F2FD;
   --color-red:         #FF4C4C;
-  --color-red-muted:   #1F0A0A;
+  --color-red-muted:   #FFEBEE;
   --color-amber:       #F59E0B;
-  --color-amber-muted: #1C1100;
+  --color-amber-muted: #FEF3C7;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
@@ -47,3 +47,46 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(29, 185, 84, 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
