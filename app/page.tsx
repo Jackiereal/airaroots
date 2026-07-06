@@ -66,7 +66,7 @@ function Nav() {
           <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
             A
           </div>
-          <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
+          <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-rajdhani), sans-serif', color: 'var(--accent)' }}>
             Airaroots
           </span>
         </Link>
@@ -96,7 +96,7 @@ function Hero() {
         </h1>
 
         <p className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-          Airaroots manages your rental property end-to-end — from marketing and bookings to operations and guest experience. You collect the income. We do the work.
+          <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span> manages your rental property end-to-end — from marketing and bookings to operations and guest experience. You collect the income. We do the work.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -151,7 +151,7 @@ function Hero() {
 
             <div className="flex items-center justify-center gap-2 text-xs mt-6" style={{ color: 'var(--text-secondary)' }}>
               <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />
-              Managed by Airaroots
+              Managed by <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span>
             </div>
           </div>
         </div>
@@ -412,7 +412,7 @@ function WhyAiraroots() {
     <section className="py-24" style={{ background: 'var(--bg-raised)' }}>
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-16" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-          Why Property Owners Choose Airaroots
+          Why Property Owners Choose <span style={{ color: 'var(--accent)' }}>Airaroots</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -462,7 +462,7 @@ function FinalCTA() {
           Ready to Put Your Property to Work?
         </h2>
         <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
-          List with Airaroots. We handle the rest.
+          List with <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span>. We handle the rest.
         </p>
         <Link href="/auth/signin" className="inline-block px-8 py-4 rounded-lg text-base font-semibold transition-all hover:scale-105 active:scale-95" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
           Get Started
@@ -486,11 +486,11 @@ function Footer() {
               A
             </div>
             <div>
-              <p className="font-semibold">Airaroots</p>
+              <p className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</p>
               <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Property management, simplified.</p>
             </div>
           </div>
-          <p style={{ color: 'var(--text-tertiary)' }}>© 2025 Airaroots. All rights reserved.</p>
+          <p style={{ color: 'var(--text-tertiary)' }}>© 2025 <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span>. All rights reserved.</p>
         </div>
       </div>
     </footer>
