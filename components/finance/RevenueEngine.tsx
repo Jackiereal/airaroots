@@ -140,7 +140,7 @@ function AddItemForm({
   );
 }
 
-export default function RevenueEngine({ month, propertyId }: { month: string; propertyId: string }) {
+export default function RevenueEngine({ month, propertyId, isReadOnly = false }: { month: string; propertyId: string; isReadOnly?: boolean }) {
   const [items, setItems] = useState<RevItem[]>([]);
   const [dashData, setDashData] = useState<{
     revBySource: Record<string, number>;
@@ -230,14 +230,16 @@ export default function RevenueEngine({ month, propertyId }: { month: string; pr
           <p className="text-sm text-[var(--text-secondary)]">All revenue sources for {month}. Airbnb + Direct auto-calculated.</p>
         </div>
         <Dialog.Root open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) setEditItem(null); }}>
-          <Dialog.Trigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-fg)] hover:opacity-90 transition-opacity"
-            >
-              <Plus className="h-4 w-4" /> Add Revenue
-            </button>
-          </Dialog.Trigger>
+          {!isReadOnly && (
+            <Dialog.Trigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-fg)] hover:opacity-90 transition-opacity"
+              >
+                <Plus className="h-4 w-4" /> Add Revenue
+              </button>
+            </Dialog.Trigger>
+          )}
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
             <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-base)] p-6 shadow-2xl">
@@ -306,7 +308,7 @@ export default function RevenueEngine({ month, propertyId }: { month: string; pr
                       {row.contributionPct > 0 ? `${row.contributionPct.toFixed(1)}%` : '—'}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {row.isManual && (
+                      {row.isManual && !isReadOnly && (
                         <div className="flex items-center gap-1 justify-end">
                           <button
                             type="button"
@@ -359,20 +361,24 @@ export default function RevenueEngine({ month, propertyId }: { month: string; pr
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-[var(--accent)]">{fmt(item.amount)}</span>
-                      <button
-                        type="button"
-                        onClick={() => { setEditItem(item); setDialogOpen(true); }}
-                        className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteItem(item.id)}
-                        className="rounded p-1 text-[var(--text-secondary)] hover:text-rose-300 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {!isReadOnly && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => { setEditItem(item); setDialogOpen(true); }}
+                            className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteItem(item.id)}
+                            className="rounded p-1 text-[var(--text-secondary)] hover:text-rose-300 transition-colors"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}

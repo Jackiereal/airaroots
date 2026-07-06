@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ShieldCheck, User, Plus, X } from 'lucide-react';
+import { ShieldCheck, User, Plus, X, ChevronDown, ChevronRight } from 'lucide-react';
 
 type UserProfile = { id: string; full_name: string | null; role: string; email?: string };
 type Property = { id: string; name: string };
@@ -102,6 +102,11 @@ export default function UsersPage() {
                   <option value="admin">Admin</option>
                   <option value="client">Client</option>
                 </select>
+                {u.role === 'client' && (
+                  isExpanded
+                    ? <ChevronDown className="h-4 w-4 text-[var(--text-tertiary)] shrink-0" />
+                    : <ChevronRight className="h-4 w-4 text-[var(--text-tertiary)] shrink-0" />
+                )}
               </div>
 
               {isExpanded && u.role === 'client' && (

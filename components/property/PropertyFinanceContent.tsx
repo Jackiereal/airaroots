@@ -2,7 +2,6 @@
 
 import FinanceDashboard from '@/components/finance/FinanceDashboard';
 import FinanceTabBar, { type FinanceTab } from '@/components/finance/FinanceTabBar';
-import LoanManager from '@/components/finance/LoanManager';
 import RevenueEngine from '@/components/finance/RevenueEngine';
 import ExpenseEngine from '@/components/finance/ExpenseEngine';
 import PlanningHub from '@/components/finance/PlanningHub';
@@ -384,6 +383,179 @@ function ExpenseCategoryPicker({
           />
         </label>
       )}
+    </div>
+  );
+}
+
+type DirectBooking = SummaryJson['directBookings'][number];
+type Reservation = SummaryJson['reservationPreview'][number];
+
+function BookingsTab({
+  directBookings,
+  reservations,
+  loading,
+  isReadOnly,
+  onEditDirect,
+  onDeleteDirect,
+  onEditAirbnbGuest,
+  formatInr,
+}: {
+  directBookings: DirectBooking[];
+  reservations: Reservation[];
+  loading: boolean;
+  isReadOnly: boolean;
+  onEditDirect: (r: DirectBooking) => void;
+  onDeleteDirect: (id: string) => void;
+  onEditAirbnbGuest: (r: Reservation) => void;
+  formatInr: (n: number) => string;
+}) {
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+        <Loader2 className="w-5 h-5 animate-spin" /> Loading…
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Direct Bookings */}
+      <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+        <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)] flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Direct Bookings</h2>
+          <span className="rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
+            {directBookings.length}
+          </span>
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+          <table className="w-full min-w-[40rem] text-xs sm:text-sm">
+            <thead>
+              <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                <th className="px-4 py-2.5 font-medium">Guest</th>
+                <th className="px-4 py-2.5 font-medium">Phone</th>
+                <th className="px-4 py-2.5 font-medium">Guests</th>
+                <th className="px-4 py-2.5 font-medium">Amount</th>
+                <th className="px-4 py-2.5 font-medium">Stay</th>
+                <th className="px-4 py-2.5 font-medium">Notes</th>
+                {!isReadOnly && <th className="px-4 py-2.5 w-20 text-right font-medium">Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {directBookings.length === 0 ? (
+                <tr>
+                  <td colSpan={isReadOnly ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-tertiary)]">
+                    No direct bookings this month.
+                  </td>
+                </tr>
+              ) : (
+                directBookings.map((r) => (
+                  <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
+                    <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest_name}</td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                      {r.guest_phone ? (
+                        <a href={`tel:${r.guest_phone.replace(/\s/g, '')}`} className="text-[var(--accent)] hover:underline">
+                          {r.guest_phone}
+                        </a>
+                      ) : '—'}
+                    </td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">{r.guest_count ?? '—'}</td>
+                    <td className="px-4 py-2.5 font-medium text-[var(--accent)]">{formatInr(Number(r.amount))}</td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
+                      {r.check_in && r.check_out ? `${r.check_in} → ${r.check_out}` : '—'}
+                      {r.nights != null ? ` (${r.nights}n)` : ''}
+                    </td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)] max-w-[10rem] truncate">{r.notes ?? '—'}</td>
+                    {!isReadOnly && (
+                      <td className="px-4 py-2.5">
+                        <div className="flex justify-end gap-1">
+                          <button type="button" onClick={() => onEditDirect(r)}
+                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button type="button" onClick={() => onDeleteDirect(r.id)}
+                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-400">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Airbnb Reservations */}
+      <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+        <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)] flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Airbnb Reservations</h2>
+          <span className="rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
+            {reservations.length}
+          </span>
+        </div>
+        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+          <table className="w-full min-w-[40rem] text-xs sm:text-sm">
+            <thead>
+              <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                <th className="px-4 py-2.5 font-medium">Guest</th>
+                <th className="px-4 py-2.5 font-medium">Stay</th>
+                <th className="px-4 py-2.5 font-medium">Guests</th>
+                <th className="px-4 py-2.5 font-medium">Gross</th>
+                <th className="px-4 py-2.5 font-medium">Payout</th>
+                <th className="px-4 py-2.5 font-medium">Fee</th>
+                {!isReadOnly && <th className="px-4 py-2.5 w-16 text-right font-medium">Edit</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {reservations.length === 0 ? (
+                <tr>
+                  <td colSpan={isReadOnly ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-tertiary)]">
+                    No Airbnb reservations this month.
+                  </td>
+                </tr>
+              ) : (
+                reservations.map((r) => (
+                  <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
+                    <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
+                      {r.start_date ?? '—'} → {r.end_date ?? '—'}
+                      {r.nights != null ? ` (${r.nights}n)` : ''}
+                    </td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                      {r.guests_effective}
+                      {r.guest_count != null && (
+                        <span className="ml-1 text-[10px] uppercase tracking-wide text-[var(--accent)]">saved</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                      {r.gross_earnings != null ? formatInr(Number(r.gross_earnings)) : '—'}
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-[var(--accent)]">
+                      {r.amount != null ? formatInr(Number(r.amount)) : '—'}
+                    </td>
+                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                      {r.service_fee != null ? formatInr(Number(r.service_fee)) : '—'}
+                    </td>
+                    {!isReadOnly && (
+                      <td className="px-4 py-2.5">
+                        <div className="flex justify-end">
+                          <button type="button" onClick={() => onEditAirbnbGuest(r)}
+                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]"
+                            aria-label="Edit guest count">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
@@ -1029,15 +1201,17 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
             onChange={onCsvImport}
           />
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <button
-              type="button"
-              disabled={importing}
-              onClick={() => csvImportRef.current?.click()}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
-            >
-              {importing ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
-              <span className="truncate">{importing ? 'Importing…' : 'Import Airbnb CSV'}</span>
-            </button>
+            {!isReadOnly && (
+              <button
+                type="button"
+                disabled={importing}
+                onClick={() => csvImportRef.current?.click()}
+                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
+              >
+                {importing ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
+                <span className="truncate">{importing ? 'Importing…' : 'Import Airbnb CSV'}</span>
+              </button>
+            )}
             <button
               type="button"
               disabled={loading || !data}
@@ -1056,24 +1230,28 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
               <FileDown className="h-4 w-4 shrink-0" />
               <span>PDF report</span>
             </button>
-            <button
-              type="button"
-              disabled={loading || !data}
-              onClick={() => setAddExpenseOpen(true)}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span>Add expense</span>
-            </button>
-            <button
-              type="button"
-              disabled={loading || !data}
-              onClick={() => setAddDirectOpen(true)}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              <span>Add direct booking</span>
-            </button>
+            {!isReadOnly && (
+              <>
+                <button
+                  type="button"
+                  disabled={loading || !data}
+                  onClick={() => setAddExpenseOpen(true)}
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span>Add expense</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={loading || !data}
+                  onClick={() => setAddDirectOpen(true)}
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span>Add direct booking</span>
+                </button>
+              </>
+            )}
           </div>
           {importMsg && (
             <p className="text-xs text-emerald-400">{importMsg}</p>
@@ -1082,12 +1260,23 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
         </div>
       </div>
 
-      <FinanceTabBar active={activeTab} onChange={setActiveTab} />
+      <FinanceTabBar active={activeTab} onChange={setActiveTab} isReadOnly={isReadOnly} />
 
-      {activeTab === 'revenue' && <RevenueEngine month={month} propertyId={propertyId} />}
+      {activeTab === 'revenue' && <RevenueEngine month={month} propertyId={propertyId} isReadOnly={isReadOnly} />}
       {activeTab === 'expenses' && <ExpenseEngine month={month} propertyId={propertyId} />}
-      {activeTab === 'loans' && <LoanManager propertyId={propertyId} />}
-      {activeTab === 'planning' && <PlanningHub propertyId={propertyId} />}
+      {activeTab === 'bookings' && (
+        <BookingsTab
+          directBookings={data?.directBookings ?? []}
+          reservations={data?.reservationPreview ?? []}
+          loading={loading}
+          isReadOnly={isReadOnly}
+          onEditDirect={openDirectEdit}
+          onDeleteDirect={deleteDirect}
+          onEditAirbnbGuest={openAirbnbGuestEdit}
+          formatInr={formatInr}
+        />
+      )}
+      {activeTab === 'planning' && !isReadOnly && <PlanningHub propertyId={propertyId} />}
 
       {activeTab === 'overview' && (
         <>
@@ -1325,216 +1514,6 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
             </section>
           </div>
 
-          <section className="flex max-h-[min(22rem,45vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] sm:max-h-[min(26rem,50vh)]">
-            <div className="shrink-0 border-b border-[var(--border-color)] px-4 py-3 sm:px-5">
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Expenses this month</h2>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-contain touch-pan-x">
-              <table className="w-full min-w-[42rem] text-xs sm:text-sm">
-                <thead className="sticky top-0 z-[1] bg-[var(--bg-surface)] shadow-[0_1px_0_var(--border-color)]">
-                  <tr className="text-left text-[var(--text-tertiary)]">
-                    <th className="px-3 sm:px-4 py-2 font-medium">Type</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Paid from</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Amount</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Date</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Notes</th>
-                    <th className="px-2 sm:px-4 py-2 w-[6.5rem] sm:w-24 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(data?.expenses ?? []).length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-6 text-[var(--text-tertiary)] text-center">
-                        No expenses yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    data!.expenses.map((r) => (
-                      <tr key={r.id} className="border-b border-[var(--border-color)]/60">
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-primary)]">{r.expense_type}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] whitespace-nowrap">
-                          {formatExpensePaidLabel(r.paid_from, r.owner_id ? (owners.find(o => o.id === r.owner_id)?.name ?? r.owner_id) : null)}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">{formatInr(Number(r.amount))}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">{r.expense_date ?? '—'}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] max-w-[8rem] sm:max-w-none truncate sm:whitespace-normal">
-                          {stripFinancialTrackerBackfillFromNote(r.notes) ?? '—'}
-                        </td>
-                        <td className="px-2 sm:px-4 py-2">
-                          <div className="flex justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => openExpenseEdit(r)}
-                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)] active:bg-[var(--bg-elevated)] sm:min-h-9 sm:min-w-9"
-                              aria-label="Edit expense"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteExpense(r.id)}
-                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-400 active:bg-red-500/15 sm:min-h-9 sm:min-w-9"
-                              aria-label="Delete expense"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
-            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)]">
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Direct bookings this month</h2>
-            </div>
-            <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-              <table className="w-full min-w-[42rem] text-xs sm:text-sm">
-                <thead>
-                  <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
-                    <th className="px-3 sm:px-4 py-2 font-medium">Guest</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Phone</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Guests</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Amount</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Stay</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Notes</th>
-                    <th className="px-2 sm:px-4 py-2 w-[6.5rem] sm:w-24 text-right font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(data?.directBookings ?? []).length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-6 text-[var(--text-tertiary)] text-center">
-                        No direct bookings logged.
-                      </td>
-                    </tr>
-                  ) : (
-                    data!.directBookings.map((r) => (
-                      <tr key={r.id} className="border-b border-[var(--border-color)]/60">
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-primary)]">{r.guest_name}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">
-                          {r.guest_phone ? (
-                            <a href={`tel:${r.guest_phone.replace(/\s/g, '')}`} className="text-[var(--accent)] hover:underline">
-                              {r.guest_phone}
-                            </a>
-                          ) : (
-                            '—'
-                          )}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">{r.guest_count ?? '—'}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">{formatInr(Number(r.amount))}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] whitespace-nowrap">
-                          {r.check_in && r.check_out ? `${r.check_in} → ${r.check_out}` : '—'}
-                          {r.nights != null ? ` (${r.nights}n)` : ''}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] max-w-[10rem] sm:max-w-none truncate sm:whitespace-normal">
-                          {stripFinancialTrackerBackfillFromNote(r.notes) ?? '—'}
-                        </td>
-                        <td className="px-2 sm:px-4 py-2">
-                          <div className="flex justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => openDirectEdit(r)}
-                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)] active:bg-[var(--bg-elevated)] sm:min-h-9 sm:min-w-9"
-                              aria-label="Edit direct booking"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteDirect(r.id)}
-                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-400 active:bg-red-500/15 sm:min-h-9 sm:min-w-9"
-                              aria-label="Delete booking"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
-            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)] space-y-1">
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Airbnb reservations (imported)</h2>
-              <p className="text-xs text-[var(--text-tertiary)] leading-snug">
-                Guest counts are often missing from the CSV — edit each row to set party size for KPIs (blank saved count uses CSV inference, usually 1).
-              </p>
-            </div>
-            <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-              <table className="w-full min-w-[42rem] text-xs sm:text-sm">
-                <thead>
-                  <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)]">
-                    <th className="px-3 sm:px-4 py-2 font-medium">Guest</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Stay</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Guests</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Gross</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Host payout</th>
-                    <th className="px-3 sm:px-4 py-2 font-medium">Fee</th>
-                    <th className="px-2 sm:px-4 py-2 w-[4rem] text-right font-medium">Edit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(data?.reservationPreview ?? []).length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-6 text-[var(--text-tertiary)] text-center">
-                        Import an Airbnb CSV to populate reservation rows.
-                      </td>
-                    </tr>
-                  ) : (
-                    data!.reservationPreview.map((r) => (
-                      <tr key={r.id} className="border-b border-[var(--border-color)]/60">
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-primary)]">{r.guest ?? '—'}</td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] whitespace-nowrap">
-                          {r.start_date ?? '—'} → {r.end_date ?? '—'}
-                          {r.nights != null ? ` (${r.nights}n)` : ''}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)] tabular-nums">
-                          <span title={r.guest_count != null ? 'Saved manually' : 'From CSV or default'}>
-                            {r.guests_effective}
-                            {r.guest_count != null ? (
-                              <span className="ml-1 text-[10px] uppercase tracking-wide text-[var(--accent)]">
-                                saved
-                              </span>
-                            ) : null}
-                          </span>
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">
-                          {r.gross_earnings != null ? formatInr(Number(r.gross_earnings)) : '—'}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">
-                          {r.amount != null ? formatInr(Number(r.amount)) : '—'}
-                        </td>
-                        <td className="px-3 sm:px-4 py-2 text-[var(--text-secondary)]">
-                          {r.service_fee != null ? formatInr(Number(r.service_fee)) : '—'}
-                        </td>
-                        <td className="px-2 sm:px-4 py-2">
-                          <div className="flex justify-end">
-                            <button
-                              type="button"
-                              onClick={() => openAirbnbGuestEdit(r)}
-                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)] active:bg-[var(--bg-elevated)] sm:min-h-9 sm:min-w-9"
-                              aria-label="Edit guest count"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
         </>
       )}
         </>

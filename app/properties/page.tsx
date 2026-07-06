@@ -31,7 +31,11 @@ export default function PropertiesPage() {
       const res = await fetch('/api/properties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName.trim(), address: newAddress.trim() || null }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          slug: newName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+          address: newAddress.trim() || null,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed');

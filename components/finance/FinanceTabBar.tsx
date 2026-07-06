@@ -1,25 +1,27 @@
 'use client';
 
-export type FinanceTab = 'overview' | 'revenue' | 'expenses' | 'loans' | 'planning';
+export type FinanceTab = 'overview' | 'revenue' | 'expenses' | 'bookings' | 'planning';
 
 const TABS: { id: FinanceTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'revenue', label: 'Revenue' },
   { id: 'expenses', label: 'Expenses' },
-  { id: 'loans', label: 'Loans' },
+  { id: 'bookings', label: 'Bookings' },
   { id: 'planning', label: 'Planning' },
 ];
 
 export default function FinanceTabBar({
   active,
   onChange,
+  isReadOnly = false,
 }: {
   active: FinanceTab;
   onChange: (tab: FinanceTab) => void;
+  isReadOnly?: boolean;
 }) {
   return (
     <div className="flex gap-0.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-1 w-fit">
-      {TABS.map((tab) => (
+      {TABS.filter((tab) => !(isReadOnly && tab.id === 'planning')).map((tab) => (
         <button
           key={tab.id}
           type="button"
