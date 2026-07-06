@@ -404,7 +404,7 @@ function WhyAiraroots() {
     },
     {
       title: 'Full Transparency',
-      desc: 'Unlike traditional property managers, you see every dollar in and out, in real time.'
+      desc: 'Unlike traditional property managers, you see every rupee in and out, in real time.'
     }
   ];
 
