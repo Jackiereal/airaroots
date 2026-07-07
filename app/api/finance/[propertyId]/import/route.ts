@@ -87,16 +87,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
   if (reservationRows.length > 0) {
     const looseDb = createServiceRoleClientLoose();
 
-    const { data: property, error: propErr } = await looseDb
-      .from('properties')
+    const { data: userProfile, error: profileErr } = await looseDb
+      .from('user_profiles')
       .select('organization_id')
-      .eq('id', propertyId)
+      .eq('id', profile!.id)
       .single();
 
-    if (propErr || !property?.organization_id) {
-      reservationErrors.push(`property lookup failed: ${propErr?.message ?? 'no organization_id'}`);
+    if (profileErr || !userProfile?.organization_id) {
+      reservationErrors.push(`org lookup failed: ${profileErr?.message ?? 'no organization_id on user_profiles'}`);
     } else {
-      const organizationId = property.organization_id as string;
+      const organizationId = userProfile.organization_id as string;
       const codes = reservationRows.map(r => r.confirmation_code!);
       const { data: existing } = await looseDb
         .from('reservations')
