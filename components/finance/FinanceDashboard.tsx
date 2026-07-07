@@ -47,22 +47,22 @@ function pct(n: number) {
 
 const KPI_TONE_SHELL = {
   neutral: 'border-[var(--border-color)] bg-[var(--bg-surface)]',
-  income: 'border-[var(--accent)]/50 bg-[var(--accent)]/[0.11]',
-  profit: 'border-teal-500/45 bg-teal-950/35',
-  sky: 'border-sky-500/45 bg-sky-950/30',
-  amber: 'border-amber-500/45 bg-amber-950/30',
-  rose: 'border-rose-500/45 bg-rose-950/30',
-  violet: 'border-violet-500/45 bg-violet-950/30',
+  income:  'border-[var(--tone-income-bd)] bg-[var(--tone-income-bg)]',
+  profit:  'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]',
+  sky:     'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]',
+  amber:   'border-[var(--tone-amber-bd)]  bg-[var(--tone-amber-bg)]',
+  rose:    'border-[var(--tone-rose-bd)]   bg-[var(--tone-rose-bg)]',
+  violet:  'border-[var(--tone-violet-bd)] bg-[var(--tone-violet-bg)]',
 } as const;
 
 const KPI_TONE_VALUE = {
   neutral: 'text-[var(--text-primary)]',
-  income: 'text-[var(--accent)]',
-  profit: 'text-teal-200',
-  sky: 'text-sky-200',
-  amber: 'text-amber-200',
-  rose: 'text-rose-200',
-  violet: 'text-violet-200',
+  income:  'text-[var(--tone-income-tx)]',
+  profit:  'text-[var(--tone-profit-tx)]',
+  sky:     'text-[var(--tone-profit-tx)]',
+  amber:   'text-[var(--tone-amber-tx)]',
+  rose:    'text-[var(--tone-rose-tx)]',
+  violet:  'text-[var(--tone-violet-tx)]',
 } as const;
 
 function KpiCard({
@@ -132,7 +132,7 @@ export default function FinanceDashboard({ month, propertyId }: { month: string;
   }
 
   if (error) return (
-    <div className="rounded-xl border border-rose-500/40 bg-rose-950/30 p-4 text-sm text-rose-300">
+    <div className="rounded-xl border border-[var(--tone-rose-bd)] bg-[var(--tone-rose-bg)] p-4 text-sm text-[var(--tone-rose-tx)]">
       Dashboard error: {error}
     </div>
   );

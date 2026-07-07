@@ -30,6 +30,60 @@
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
+
+  /* card tone tokens — adapt automatically in dark mode */
+  --tone-income-bg:  rgba(29, 185, 84, 0.09);
+  --tone-income-bd:  rgba(29, 185, 84, 0.35);
+  --tone-income-tx:  #1DB954;
+  --tone-profit-bg:  rgba(76, 158, 235, 0.09);
+  --tone-profit-bd:  rgba(76, 158, 235, 0.35);
+  --tone-profit-tx:  #4C9EEB;
+  --tone-amber-bg:   rgba(245, 158, 11, 0.09);
+  --tone-amber-bd:   rgba(245, 158, 11, 0.35);
+  --tone-amber-tx:   #D97706;
+  --tone-rose-bg:    rgba(255, 76, 76, 0.09);
+  --tone-rose-bd:    rgba(255, 76, 76, 0.35);
+  --tone-rose-tx:    #E53535;
+  --tone-violet-bg:  rgba(139, 92, 246, 0.09);
+  --tone-violet-bd:  rgba(139, 92, 246, 0.30);
+  --tone-violet-tx:  #7C3AED;
+}
+
+[data-theme="dark"] {
+  --bg-base:     #0A0A0A;
+  --bg-raised:   #111111;
+  --bg-surface:  #171717;
+  --bg-elevated: #1F1F1F;
+
+  --border-color:  #2B2B2B;
+  --border-subtle: #1E1E1E;
+  --border-strong: #383838;
+
+  --text-primary:   #F0F0F0;
+  --text-secondary: #9A9A9A;
+  --text-tertiary:  #5E5E5E;
+
+  --accent-muted:      rgba(29, 185, 84, 0.14);
+  --color-gold-muted:  rgba(240, 180, 41, 0.13);
+  --color-blue-muted:  rgba(76, 158, 235, 0.13);
+  --color-red-muted:   rgba(255, 76, 76, 0.13);
+  --color-amber-muted: rgba(245, 158, 11, 0.13);
+
+  --tone-income-bg:  rgba(29, 185, 84, 0.12);
+  --tone-income-bd:  rgba(29, 185, 84, 0.40);
+  --tone-income-tx:  #1DB954;
+  --tone-profit-bg:  rgba(76, 158, 235, 0.12);
+  --tone-profit-bd:  rgba(76, 158, 235, 0.38);
+  --tone-profit-tx:  #4C9EEB;
+  --tone-amber-bg:   rgba(245, 158, 11, 0.12);
+  --tone-amber-bd:   rgba(245, 158, 11, 0.38);
+  --tone-amber-tx:   #F59E0B;
+  --tone-rose-bg:    rgba(255, 76, 76, 0.12);
+  --tone-rose-bd:    rgba(255, 76, 76, 0.38);
+  --tone-rose-tx:    #FF4C4C;
+  --tone-violet-bg:  rgba(139, 92, 246, 0.12);
+  --tone-violet-bd:  rgba(139, 92, 246, 0.36);
+  --tone-violet-tx:  #A78BFA;
 }
 
 * {

@@ -162,9 +162,19 @@ export default function CashFlowProjections({ propertyId }: { propertyId: string
           { label: 'Avg Monthly Revenue', value: fmt(Math.round(annualRevenue / 12)), tone: 'sky' },
           { label: 'Avg Monthly Net', value: fmt(Math.round(annualNet / 12)), tone: annualNet >= 0 ? 'profit' : 'rose' },
         ].map((k) => (
-          <div key={k.label} className={`rounded-xl border p-3 ${k.tone === 'income' ? 'border-[var(--accent)]/50 bg-[var(--accent)]/[0.11]' : k.tone === 'profit' ? 'border-teal-500/45 bg-teal-950/35' : k.tone === 'rose' ? 'border-rose-500/45 bg-rose-950/30' : 'border-sky-500/45 bg-sky-950/30'}`}>
+          <div key={k.label} className={`rounded-xl border p-3 ${
+            k.tone === 'income' ? 'border-[var(--tone-income-bd)] bg-[var(--tone-income-bg)]'
+            : k.tone === 'profit' ? 'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]'
+            : k.tone === 'rose'   ? 'border-[var(--tone-rose-bd)]   bg-[var(--tone-rose-bg)]'
+            :                       'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]'
+          }`}>
             <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">{k.label}</p>
-            <p className={`text-xl font-bold mt-1 tabular-nums ${k.tone === 'income' ? 'text-[var(--accent)]' : k.tone === 'profit' ? 'text-teal-200' : k.tone === 'rose' ? 'text-rose-200' : 'text-sky-200'}`}>{k.value}</p>
+            <p className={`text-xl font-bold mt-1 tabular-nums ${
+              k.tone === 'income' ? 'text-[var(--tone-income-tx)]'
+              : k.tone === 'profit' ? 'text-[var(--tone-profit-tx)]'
+              : k.tone === 'rose'   ? 'text-[var(--tone-rose-tx)]'
+              :                       'text-[var(--tone-profit-tx)]'
+            }`}>{k.value}</p>
           </div>
         ))}
       </div>

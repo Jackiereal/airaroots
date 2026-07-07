@@ -108,31 +108,31 @@ const PIE_COLORS = [
   '#6366f1',
 ];
 
-/** Tinted shells + value colors for KPI readability on dark UI */
+/** Tinted shells + value colors — uses CSS tokens so they adapt to light/dark */
 const KPI_TONE_SHELL = {
   neutral: 'border-[var(--border-color)] bg-[var(--bg-surface)]',
-  income: 'border-[var(--accent)]/50 bg-[var(--accent)]/[0.11]',
-  profit: 'border-teal-500/45 bg-teal-950/35',
-  emerald: 'border-emerald-500/45 bg-emerald-950/30',
-  sky: 'border-sky-500/45 bg-sky-950/30',
-  cyan: 'border-cyan-500/45 bg-cyan-950/30',
-  amber: 'border-amber-500/45 bg-amber-950/30',
-  rose: 'border-rose-500/45 bg-rose-950/30',
-  violet: 'border-violet-500/45 bg-violet-950/30',
-  orange: 'border-orange-500/45 bg-orange-950/30',
+  income:  'border-[var(--tone-income-bd)] bg-[var(--tone-income-bg)]',
+  profit:  'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]',
+  emerald: 'border-[var(--tone-income-bd)] bg-[var(--tone-income-bg)]',
+  sky:     'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]',
+  cyan:    'border-[var(--tone-profit-bd)] bg-[var(--tone-profit-bg)]',
+  amber:   'border-[var(--tone-amber-bd)]  bg-[var(--tone-amber-bg)]',
+  rose:    'border-[var(--tone-rose-bd)]   bg-[var(--tone-rose-bg)]',
+  violet:  'border-[var(--tone-violet-bd)] bg-[var(--tone-violet-bg)]',
+  orange:  'border-[var(--tone-amber-bd)]  bg-[var(--tone-amber-bg)]',
 } as const;
 
 const KPI_TONE_VALUE = {
   neutral: 'text-[var(--text-primary)]',
-  income: 'text-[var(--accent)]',
-  profit: 'text-teal-200',
-  emerald: 'text-emerald-200',
-  sky: 'text-sky-200',
-  cyan: 'text-cyan-200',
-  amber: 'text-amber-200',
-  rose: 'text-rose-200',
-  violet: 'text-violet-200',
-  orange: 'text-orange-200',
+  income:  'text-[var(--tone-income-tx)]',
+  profit:  'text-[var(--tone-profit-tx)]',
+  emerald: 'text-[var(--tone-income-tx)]',
+  sky:     'text-[var(--tone-profit-tx)]',
+  cyan:    'text-[var(--tone-profit-tx)]',
+  amber:   'text-[var(--tone-amber-tx)]',
+  rose:    'text-[var(--tone-rose-tx)]',
+  violet:  'text-[var(--tone-violet-tx)]',
+  orange:  'text-[var(--tone-amber-tx)]',
 } as const;
 
 type KpiTone = keyof typeof KPI_TONE_SHELL;

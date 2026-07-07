@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2 } from 'lucide-react';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,6 +58,7 @@ export default function AdminSidebar({ email }: { email?: string }) {
 
       <div className="border-t border-[var(--border-color)] p-3">
         <p className="mb-1.5 truncate px-1 text-xs text-[var(--text-tertiary)]">{email}</p>
+        <ThemeToggle />
         <button
           type="button"
           onClick={handleSignOut}
