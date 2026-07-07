@@ -158,7 +158,7 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
       const [itemsRes, dashRes, allItemsRes] = await Promise.all([
         fetch(`/api/finance/${propertyId}/direct-bookings?month=${month}`),
         fetch(`/api/finance/${propertyId}/summary?month=${month}`),
-        fetch('/api/finance/${propertyId}/direct-bookings?all=1'),
+        fetch(`/api/finance/${propertyId}/direct-bookings?all=1`),
       ]);
       const [itemsJson, dashJson, allJson] = await Promise.all([
         itemsRes.json(),
@@ -166,7 +166,13 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
         allItemsRes.json(),
       ]);
       setItems(itemsJson.items ?? []);
-      setDashData({ revBySource: dashJson.revBySource ?? {}, annualRevenue: dashJson.annualRevenue ?? 0 });
+      const agg = dashJson.aggregates ?? {};
+      const revBySource: Record<string, number> = {};
+      if ((agg.bankPayouts ?? 0) > 0) revBySource['airbnb'] = agg.bankPayouts;
+      if ((agg.directTotal ?? 0) > 0) revBySource['direct'] = agg.directTotal;
+      const annualRevenue = ((dashJson.trend ?? []) as { airbnbBank: number; direct: number }[])
+        .reduce((s, t) => s + (t.airbnbBank ?? 0) + (t.direct ?? 0), 0);
+      setDashData({ revBySource, annualRevenue });
 
       const currentYear = month.slice(0, 4);
       const aBySource: Record<string, number> = {};
@@ -186,7 +192,7 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
   async function saveItem(data: Record<string, unknown>) {
     setSaving(true);
     try {
-      const url = editItem ? `/api/finance/${propertyId}/direct-bookings/${editItem.id}` : '/api/finance/${propertyId}/direct-bookings';
+      const url = editItem ? `/api/finance/${propertyId}/direct-bookings/${editItem.id}` : `/api/finance/${propertyId}/direct-bookings`;
       const method = editItem ? 'PATCH' : 'POST';
       await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       setDialogOpen(false);
