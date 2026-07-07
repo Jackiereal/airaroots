@@ -104,7 +104,7 @@ export default async function ChannelLogsPage({ params }: Params) {
                     </span>
                   </div>
                   <span className="text-xs text-[var(--text-tertiary)]">
-                    {new Date(log.startedAt).toLocaleString('en-IN')}
+                    {new Date(log.startedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
                   </span>
                 </div>
 

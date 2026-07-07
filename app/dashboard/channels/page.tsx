@@ -91,7 +91,7 @@ export default async function ChannelsPage() {
                         </div>
                         {conn.lastSyncAt && (
                           <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
-                            Last sync: {new Date(conn.lastSyncAt).toLocaleString('en-IN')}
+                            Last sync: {new Date(conn.lastSyncAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
                           </p>
                         )}
                         {conn.lastError && (
