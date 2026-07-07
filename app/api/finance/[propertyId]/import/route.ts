@@ -81,18 +81,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     r => r.row_type === 'Reservation' && r.confirmation_code && r.start_date && r.end_date,
   );
 
+  const reservationErrors: string[] = [];
   let reservationsUpserted = 0;
+
   if (reservationRows.length > 0) {
     const looseDb = createServiceRoleClientLoose();
 
-    const { data: property } = await looseDb
+    const { data: property, error: propErr } = await looseDb
       .from('properties')
       .select('organization_id')
       .eq('id', propertyId)
       .single();
-    const organizationId = property?.organization_id as string | null;
 
-    if (organizationId) {
+    if (propErr || !property?.organization_id) {
+      reservationErrors.push(`property lookup failed: ${propErr?.message ?? 'no organization_id'}`);
+    } else {
+      const organizationId = property.organization_id as string;
       const codes = reservationRows.map(r => r.confirmation_code!);
       const { data: existing } = await looseDb
         .from('reservations')
@@ -118,7 +122,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
 
         const existingId = existingMap.get(r.confirmation_code!);
         if (existingId) {
-          await looseDb
+          const { error: updErr } = await looseDb
             .from('reservations')
             .update({
               check_in: r.start_date,
@@ -130,8 +134,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
               guest_name: r.guest ?? null,
             })
             .eq('id', existingId);
+          if (updErr) reservationErrors.push(`update ${r.confirmation_code}: ${updErr.message}`);
+          else reservationsUpserted++;
         } else {
-          await looseDb.from('reservations').insert({
+          const { error: insErr } = await looseDb.from('reservations').insert({
             organization_id: organizationId,
             property_id: propertyId,
             channel: 'airbnb',
@@ -149,8 +155,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
             guest_name: r.guest ?? null,
             status: 'confirmed',
           });
+          if (insErr) reservationErrors.push(`insert ${r.confirmation_code}: ${insErr.message}`);
+          else reservationsUpserted++;
         }
-        reservationsUpserted++;
       }
     }
   }
@@ -161,5 +168,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     afterState: { period_month: periodMonth, rows_imported: inserted, headers_ok: headersOk, reservations_upserted: reservationsUpserted },
   });
 
-  return NextResponse.json({ imported: inserted, headersOk, periodMonth, reservationsUpserted });
+  const rowTypes = [...new Set(rows.map(r => r.row_type))];
+  return NextResponse.json({
+    imported: inserted,
+    headersOk,
+    periodMonth,
+    reservationsUpserted,
+    reservationRowsFound: reservationRows.length,
+    reservationErrors: reservationErrors.length > 0 ? reservationErrors : undefined,
+    rowTypes,
+  });
 }
