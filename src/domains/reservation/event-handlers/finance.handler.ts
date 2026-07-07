@@ -13,6 +13,9 @@ function toFirstOfMonth(dateStr: string): string {
 export const financeHandler = {
   onReservationCreated: async (event: DomainEvent): Promise<void> => {
     const reservation = event.payload['reservation'] as Reservation;
+    // Only create direct booking entries for direct channel reservations.
+    // Airbnb/Booking.com revenue comes from CSV import into property_finance_airbnb_rows.
+    if (reservation.channel !== 'direct') return;
     const db = createServiceRoleClientLoose();
 
     const { error } = await db.from('property_finance_direct_bookings').insert({
@@ -35,6 +38,7 @@ export const financeHandler = {
 
   onReservationCancelled: async (event: DomainEvent): Promise<void> => {
     const reservation = event.payload['reservation'] as Reservation;
+    if (reservation.channel !== 'direct') return;
     const db = createServiceRoleClientLoose();
 
     const { error } = await db
@@ -48,6 +52,7 @@ export const financeHandler = {
 
   onReservationModified: async (event: DomainEvent): Promise<void> => {
     const updated = event.payload['new'] as Reservation;
+    if (updated.channel !== 'direct') return;
     const db = createServiceRoleClientLoose();
 
     const { error } = await db

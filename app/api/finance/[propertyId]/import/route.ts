@@ -2,6 +2,7 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { requireAdmin } from '@/lib/auth';
 import { parseAirbnbCsv, toPeriodMonth } from '@/lib/property-finance/parse-airbnb-csv';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClientLoose } from '@/src/infrastructure/supabase/server';
 import type { Json } from '@/types/database.types';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -75,11 +76,90 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     inserted += chunk.length;
   }
 
+  // Upsert Reservation rows into the reservations table
+  const reservationRows = rows.filter(
+    r => r.row_type === 'Reservation' && r.confirmation_code && r.start_date && r.end_date,
+  );
+
+  let reservationsUpserted = 0;
+  if (reservationRows.length > 0) {
+    const looseDb = createServiceRoleClientLoose();
+
+    const { data: property } = await looseDb
+      .from('properties')
+      .select('organization_id')
+      .eq('id', propertyId)
+      .single();
+    const organizationId = property?.organization_id as string | null;
+
+    if (organizationId) {
+      const codes = reservationRows.map(r => r.confirmation_code!);
+      const { data: existing } = await looseDb
+        .from('reservations')
+        .select('id, platform_booking_id')
+        .eq('organization_id', organizationId)
+        .in('platform_booking_id', codes)
+        .is('deleted_at', null);
+
+      const existingMap = new Map(
+        (existing ?? []).map((r: { id: string; platform_booking_id: string }) => [
+          r.platform_booking_id,
+          r.id,
+        ]),
+      );
+
+      for (const r of reservationRows) {
+        const nights = r.nights ?? 1;
+        const cleaningFee = r.cleaning_fee ?? 0;
+        const grossEarnings = r.gross_earnings ?? 0;
+        const nightlyRate = nights > 0 ? Math.round((grossEarnings - cleaningFee) / nights) : 0;
+        const platformCommission = r.service_fee != null ? Math.abs(r.service_fee) : 0;
+        const taxes = r.airbnb_remitted_tax ?? 0;
+
+        const existingId = existingMap.get(r.confirmation_code!);
+        if (existingId) {
+          await looseDb
+            .from('reservations')
+            .update({
+              check_in: r.start_date,
+              check_out: r.end_date,
+              nightly_rate: nightlyRate,
+              cleaning_fee: cleaningFee,
+              platform_commission: platformCommission,
+              taxes,
+              guest_name: r.guest ?? null,
+            })
+            .eq('id', existingId);
+        } else {
+          await looseDb.from('reservations').insert({
+            organization_id: organizationId,
+            property_id: propertyId,
+            channel: 'airbnb',
+            platform_booking_id: r.confirmation_code,
+            check_in: r.start_date,
+            check_out: r.end_date,
+            adults: 1,
+            children: 0,
+            pets: 0,
+            nightly_rate: nightlyRate,
+            cleaning_fee: cleaningFee,
+            taxes,
+            other_fees: 0,
+            platform_commission: platformCommission,
+            guest_name: r.guest ?? null,
+            status: 'confirmed',
+          });
+        }
+        reservationsUpserted++;
+      }
+    }
+  }
+
   void writeAuditLog({
     userId: profile!.id, propertyId, action: 'import',
     resourceType: 'property_finance_import',
-    afterState: { period_month: periodMonth, rows_imported: inserted, headers_ok: headersOk },
+    afterState: { period_month: periodMonth, rows_imported: inserted, headers_ok: headersOk, reservations_upserted: reservationsUpserted },
   });
 
-  return NextResponse.json({ imported: inserted, headersOk, periodMonth });
+  return NextResponse.json({ imported: inserted, headersOk, periodMonth, reservationsUpserted });
 }
