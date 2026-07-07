@@ -1201,17 +1201,6 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
             onChange={onCsvImport}
           />
           <div className="flex flex-wrap items-center justify-end gap-2">
-            {!isReadOnly && (
-              <button
-                type="button"
-                disabled={importing}
-                onClick={() => csvImportRef.current?.click()}
-                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
-              >
-                {importing ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
-                <span className="truncate">{importing ? 'Importing…' : 'Import Airbnb CSV'}</span>
-              </button>
-            )}
             <button
               type="button"
               disabled={loading || !data}
@@ -1230,28 +1219,6 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
               <FileDown className="h-4 w-4 shrink-0" />
               <span>PDF report</span>
             </button>
-            {!isReadOnly && (
-              <>
-                <button
-                  type="button"
-                  disabled={loading || !data}
-                  onClick={() => setAddExpenseOpen(true)}
-                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-                >
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span>Add expense</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={loading || !data}
-                  onClick={() => setAddDirectOpen(true)}
-                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-                >
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span>Add direct booking</span>
-                </button>
-              </>
-            )}
           </div>
           {importMsg && (
             <p className="text-xs text-emerald-400">{importMsg}</p>
@@ -1261,6 +1228,43 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
       </div>
 
       <FinanceTabBar active={activeTab} onChange={setActiveTab} isReadOnly={isReadOnly} />
+
+      {!isReadOnly && activeTab === 'expenses' && (
+        <div className="flex justify-end pt-3">
+          <button
+            type="button"
+            disabled={loading || !data}
+            onClick={() => setAddExpenseOpen(true)}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            <span>Add expense</span>
+          </button>
+        </div>
+      )}
+
+      {!isReadOnly && activeTab === 'bookings' && (
+        <div className="flex flex-wrap justify-end gap-2 pt-3">
+          <button
+            type="button"
+            disabled={importing}
+            onClick={() => csvImportRef.current?.click()}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
+          >
+            {importing ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
+            <span className="truncate">{importing ? 'Importing…' : 'Import Airbnb CSV'}</span>
+          </button>
+          <button
+            type="button"
+            disabled={loading || !data}
+            onClick={() => setAddDirectOpen(true)}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            <span>Add direct booking</span>
+          </button>
+        </div>
+      )}
 
       {activeTab === 'revenue' && <RevenueEngine month={month} propertyId={propertyId} isReadOnly={isReadOnly} />}
       {activeTab === 'expenses' && <ExpenseEngine month={month} propertyId={propertyId} />}
