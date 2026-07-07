@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Building2, LayoutDashboard, Users, LogOut, ChevronRight } from 'lucide-react';
+import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen } from 'lucide-react';
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard/calendar', label: 'Calendar', icon: Calendar },
+  { href: '/dashboard/reservations', label: 'Reservations', icon: BookOpen },
   { href: '/properties', label: 'Properties', icon: Building2 },
   { href: '/admin/users', label: 'Users', icon: Users },
 ];
