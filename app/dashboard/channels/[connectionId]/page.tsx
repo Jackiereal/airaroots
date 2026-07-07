@@ -7,6 +7,7 @@ import { channelConnectionService } from '@/src/domains/channel/services/channel
 import { channelRepository } from '@/src/domains/channel/repositories/channel.repository';
 import { ChannelStatusBadge } from '@/components/channel/ChannelStatusBadge';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
+import { ChannelConnectionActions } from '@/components/channel/ChannelConnectionActions';
 import type { ChannelSyncLog } from '@/src/domains/channel/types';
 
 type Params = { params: Promise<{ connectionId: string }> };
@@ -52,11 +53,19 @@ export default async function ChannelLogsPage({ params }: Params) {
         Channel Manager
       </Link>
 
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
-          {CHANNEL_LABELS[connection.channel] ?? connection.channel}
-        </h1>
-        <ChannelStatusBadge status={connection.status} />
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+            {CHANNEL_LABELS[connection.channel] ?? connection.channel}
+          </h1>
+          <ChannelStatusBadge status={connection.status} />
+        </div>
+        <ChannelConnectionActions
+          propertyId={connection.propertyId}
+          connectionId={connection.id}
+          status={connection.status}
+          icalUrl={connection.icalUrl}
+        />
       </div>
 
       {connection.icalUrl && (

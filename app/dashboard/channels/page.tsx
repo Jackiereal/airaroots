@@ -7,6 +7,7 @@ import { channelConnectionService } from '@/src/domains/channel/services/channel
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
 import { ChannelStatusBadge } from '@/components/channel/ChannelStatusBadge';
 import { ConnectChannelButton } from '@/components/channel/ConnectChannelButton';
+import { ChannelConnectionActions } from '@/components/channel/ChannelConnectionActions';
 
 async function getProperties(organizationId: string) {
   const db = createServiceRoleClientLoose();
@@ -111,6 +112,12 @@ export default async function ChannelsPage() {
                         >
                           Logs
                         </Link>
+                        <ChannelConnectionActions
+                          propertyId={conn.propertyId}
+                          connectionId={conn.id}
+                          status={conn.status}
+                          icalUrl={conn.icalUrl}
+                        />
                       </div>
                     </div>
                   ))}
