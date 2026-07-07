@@ -1025,8 +1025,8 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
     try {
       const fd = new FormData();
       fd.append('file', file);
-      fd.append('periodMonth', month);
-      const res = await fetch('/api/finance/${propertyId}/import', {
+      fd.append('month', month);
+      const res = await fetch(`/api/finance/${propertyId}/import`, {
         method: 'POST',
         body: fd,
       });
