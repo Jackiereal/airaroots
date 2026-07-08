@@ -432,14 +432,14 @@ export function HousekeepingBoard() {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/dashboard/housekeeping/staff"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
           >
             Manage Staff
           </Link>
           {propertyId && (
             <Link
               href={`/dashboard/housekeeping/checklist/${propertyId}`}
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
             >
               Checklist
             </Link>
