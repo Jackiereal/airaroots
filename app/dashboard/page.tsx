@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getUserProfile } from '@/lib/auth';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { Plus } from 'lucide-react';
 
@@ -9,7 +11,13 @@ async function getProperties() {
 }
 
 export default async function AdminDashboardPage() {
+  const profile = await getUserProfile();
+  if (!profile) redirect('/auth/signin');
+
   const properties = await getProperties();
+
+  // New user with no properties — send to onboarding
+  if (properties.length === 0) redirect('/onboarding');
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">

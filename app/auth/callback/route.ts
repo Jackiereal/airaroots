@@ -54,12 +54,22 @@ export async function GET(request: Request) {
           .eq('id', data.user.id)
           .maybeSingle();
 
+        let isNewUser = false;
         if (!existing) {
           await serviceClient.from('user_profiles').insert({
             id: data.user.id,
             full_name: String(fullName),
-            role: 'client',
+            role: 'admin',
           });
+          isNewUser = true;
+        }
+        // New users go to onboarding; returning users respect the `next` param
+        if (isNewUser) {
+          const response = NextResponse.redirect(new URL('/onboarding', origin));
+          newCookies.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+          return response;
         }
       } catch {
         // Trigger may have already created profile — non-fatal
