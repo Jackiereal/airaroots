@@ -23,7 +23,7 @@ export class VendorService {
     return this.repo.findByOrg(organizationId, opts);
   }
 
-  async create(organizationId: string, input: CreateVendorInput): Promise<Vendor> {
+  async create(organizationId: string, input: Omit<CreateVendorInput, 'organizationId'>): Promise<Vendor> {
     return this.repo.create({ ...input, organizationId });
   }
 

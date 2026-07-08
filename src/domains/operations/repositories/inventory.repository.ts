@@ -155,10 +155,15 @@ export class InventoryRepository {
   ): Promise<void> {
     const delta = type === 'used' || type === 'damaged' ? -Math.abs(quantity) : Math.abs(quantity);
 
-    const { error } = await this.supabase.rpc('increment_inventory_quantity', {
-      p_item_id: itemId,
-      p_delta: delta,
-    }).then(() => ({ error: null })).catch((e: Error) => ({ error: e }));
+    let error: Error | null = null;
+    try {
+      await this.supabase.rpc('increment_inventory_quantity', {
+        p_item_id: itemId,
+        p_delta: delta,
+      });
+    } catch (e) {
+      error = e as Error;
+    }
 
     // Fallback if RPC not available: manual read+write
     if (error) {

@@ -82,9 +82,8 @@ export type UpdateHousekeepingTaskInput = Partial<
     | 'priceType'
     | 'checklist'
     | 'notes'
-    | 'assignedTo'
   >
-> & { status?: HousekeepingTaskStatus };
+> & { assignedTo?: string | null; status?: HousekeepingTaskStatus };
 
 export type CreateHousekeepingStaffInput = {
   organizationId: string;
@@ -166,8 +165,8 @@ export type UpdateMaintenanceRequestInput = Partial<{
   category: MaintenanceCategory;
   priority: MaintenancePriority;
   status: MaintenanceStatus;
-  assignedTo: string;
-  vendorId: string;
+  assignedTo: string | null;
+  vendorId: string | null;
   estimatedCost: number;
   actualCost: number;
 }>;

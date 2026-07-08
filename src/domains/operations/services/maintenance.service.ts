@@ -44,7 +44,7 @@ export class MaintenanceService {
 
   async create(
     organizationId: string,
-    input: CreateMaintenanceRequestInput,
+    input: Omit<CreateMaintenanceRequestInput, 'organizationId'>,
     reportedBy?: string
   ): Promise<MaintenanceRequest> {
     return this.repo.create({ ...input, organizationId }, reportedBy);

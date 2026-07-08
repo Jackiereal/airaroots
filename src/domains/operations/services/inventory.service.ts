@@ -31,7 +31,7 @@ export class InventoryService {
     return this.repo.findLowStockByOrg(organizationId);
   }
 
-  async create(organizationId: string, input: CreateInventoryItemInput): Promise<InventoryItem> {
+  async create(organizationId: string, input: Omit<CreateInventoryItemInput, 'organizationId'>): Promise<InventoryItem> {
     return this.repo.create({ ...input, organizationId });
   }
 
