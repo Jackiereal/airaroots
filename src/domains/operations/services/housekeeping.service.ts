@@ -165,7 +165,7 @@ export class HousekeepingService {
 
   async createStaff(
     organizationId: string,
-    input: CreateHousekeepingStaffInput
+    input: Omit<CreateHousekeepingStaffInput, 'organizationId'>
   ): Promise<HousekeepingStaff> {
     return this.repo.createStaff({ ...input, organizationId });
   }
