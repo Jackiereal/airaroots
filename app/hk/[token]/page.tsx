@@ -1,11 +1,20 @@
 import { notFound } from 'next/navigation';
+import { createServiceRoleClientLoose } from '@/src/infrastructure/supabase/server';
+import { HousekeepingService } from '@/src/domains/operations/services/housekeeping.service';
+import { InventoryService } from '@/src/domains/operations/services/inventory.service';
 import { HousekeepingTaskClient } from './HousekeepingTaskClient';
 
 async function getTask(token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/hk/${token}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const supabase = createServiceRoleClientLoose();
+    const service = new HousekeepingService(supabase);
+    const task = await service.getTaskByToken(token);
+    const inventoryService = new InventoryService(supabase);
+    const inventory = await inventoryService.listByProperty(task.propertyId);
+    return { task, inventory };
+  } catch {
+    return null;
+  }
 }
 
 export default async function HkTokenPage({
