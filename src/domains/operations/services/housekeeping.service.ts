@@ -102,11 +102,37 @@ export class HousekeepingService {
   ): Promise<HousekeepingTask> {
     const task = await this.repo.findTaskByToken(accessToken);
     if (!task) throw new NotFoundError('HousekeepingTask', accessToken);
-    return this.repo.updateTask(task.id, {
+
+    const completed = await this.repo.updateTask(task.id, {
       checklist: completedChecklist,
       notes: notes ?? task.notes,
       status: 'completed',
     });
+
+    // Auto-log expense if task has a price (skip if already logged)
+    if (task.customPrice != null && task.customPrice > 0) {
+      const { data: existing } = await this.supabase
+        .from('property_finance_expenses')
+        .select('id')
+        .eq('housekeeping_task_id', task.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const periodMonth = task.scheduledDate.substring(0, 7) + '-01';
+        await this.supabase.from('property_finance_expenses').insert({
+          property_id: task.propertyId,
+          period_month: periodMonth,
+          expense_type: 'housekeeping',
+          amount: task.customPrice,
+          expense_date: task.scheduledDate,
+          notes: `Housekeeping – ${task.taskType.replace(/_/g, ' ')}${task.staff ? ` (${task.staff.name})` : ''}`,
+          housekeeping_task_id: task.id,
+          created_by: task.createdBy ?? task.organizationId,
+        });
+      }
+    }
+
+    return completed;
   }
 
   async deleteTask(id: string): Promise<void> {
