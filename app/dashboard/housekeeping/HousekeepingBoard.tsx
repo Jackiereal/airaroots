@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Loader2, Phone, RefreshCw, User } from 'lucide-react';
+import { Plus, Loader2, Phone, RefreshCw, User, Trash2 } from 'lucide-react';
 import type {
   HousekeepingTask,
   HousekeepingStaff,
@@ -54,10 +54,12 @@ function TaskCard({
   task,
   propertyName,
   onAssign,
+  onDelete,
 }: {
   task: HousekeepingTask;
   propertyName: string;
   onAssign: (task: HousekeepingTask) => void;
+  onDelete: (id: string) => void;
 }) {
   const waUrl =
     task.staff?.phone
@@ -104,11 +106,20 @@ function TaskCard({
         )}
       </div>
 
-      {task.customPrice != null && (
-        <div className="text-xs text-[var(--text-tertiary)]">
-          ₹{task.customPrice.toLocaleString('en-IN')}
-        </div>
-      )}
+      <div className="flex items-center justify-between pt-1">
+        {task.customPrice != null ? (
+          <span className="text-xs text-[var(--text-tertiary)]">₹{task.customPrice.toLocaleString('en-IN')}</span>
+        ) : <span />}
+        <button
+          onClick={() => {
+            if (confirm('Delete this task?')) onDelete(task.id);
+          }}
+          className="p-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          title="Delete task"
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -383,6 +394,11 @@ export function HousekeepingBoard() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  async function handleDeleteTask(id: string) {
+    await fetch(`/api/housekeeping/tasks/${id}`, { method: 'DELETE' });
+    fetchData();
+  }
+
   const tasksByStatus = COLUMNS.reduce<Record<string, HousekeepingTask[]>>((acc, col) => {
     acc[col.status] = tasks.filter(t => t.status === col.status);
     return acc;
@@ -459,6 +475,7 @@ export function HousekeepingBoard() {
                       task={task}
                       propertyName={propertyMap[task.propertyId] ?? task.propertyId}
                       onAssign={setAssignTask}
+                      onDelete={handleDeleteTask}
                     />
                   ))
                 )}

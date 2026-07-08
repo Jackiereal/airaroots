@@ -170,6 +170,14 @@ export class MaintenanceRepository {
     return this.toEntity(data as RequestRow & { vendor: VendorRow | null });
   }
 
+  async delete(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('maintenance_requests')
+      .delete()
+      .eq('id', id);
+    if (error) throw new Error(`DB error: ${error.message}`);
+  }
+
   async addPhoto(requestId: string, url: string, caption?: string, takenBy?: string): Promise<MaintenancePhoto> {
     const { data, error } = await this.supabase
       .from('maintenance_photos')

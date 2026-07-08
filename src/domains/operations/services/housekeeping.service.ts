@@ -47,7 +47,10 @@ export class HousekeepingService {
       ? input.checklist
       : DEFAULT_CHECKLIST;
 
-    return this.repo.createTask({ ...input, checklist });
+    // Auto-set status to 'assigned' when staff is provided at creation time
+    const status = input.assignedTo ? 'assigned' : 'pending';
+
+    return this.repo.createTask({ ...input, checklist, status });
   }
 
   async updateTask(id: string, input: UpdateHousekeepingTaskInput): Promise<HousekeepingTask> {
@@ -87,6 +90,12 @@ export class HousekeepingService {
       notes: notes ?? task.notes,
       status: 'completed',
     });
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    const existing = await this.repo.findTaskById(id);
+    if (!existing) throw new NotFoundError('HousekeepingTask', id);
+    await this.repo.deleteTask(id);
   }
 
   async cancelTask(id: string): Promise<HousekeepingTask> {

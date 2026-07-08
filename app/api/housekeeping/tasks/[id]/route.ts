@@ -24,6 +24,25 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  try {
+    const { error } = await requireOrgAuth();
+    if (error) return error;
+
+    const { id } = await params;
+    const supabase = await createClient();
+    const service = new HousekeepingService(supabase);
+    await service.deleteTask(id);
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    return handleApiError(error, 'DELETE /api/housekeeping/tasks/[id]');
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

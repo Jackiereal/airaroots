@@ -161,6 +161,7 @@ export class HousekeepingRepository {
         notes: input.notes ?? null,
         assigned_to: input.assignedTo ?? null,
         created_by: input.createdBy ?? null,
+        ...(input.status ? { status: input.status } : {}),
       })
       .select()
       .single();
@@ -193,6 +194,14 @@ export class HousekeepingRepository {
 
     if (error) throw new Error(`DB error: ${error.message}`);
     return this.toTaskEntity(data as TaskRow & { staff: null });
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('housekeeping_tasks')
+      .delete()
+      .eq('id', id);
+    if (error) throw new Error(`DB error: ${error.message}`);
   }
 
   async markReminderSent(id: string): Promise<void> {

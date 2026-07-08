@@ -81,6 +81,12 @@ export class MaintenanceService {
     });
   }
 
+  async delete(id: string): Promise<void> {
+    const existing = await this.repo.findById(id);
+    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    await this.repo.delete(id);
+  }
+
   async close(id: string): Promise<MaintenanceRequest> {
     const existing = await this.repo.findById(id);
     if (!existing) throw new NotFoundError('MaintenanceRequest', id);

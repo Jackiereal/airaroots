@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Loader2, Phone, RefreshCw, Copy } from 'lucide-react';
+import { Plus, Loader2, Phone, RefreshCw, Copy, Trash2 } from 'lucide-react';
 import type {
   MaintenanceRequest,
   MaintenanceCategory,
@@ -232,6 +232,7 @@ export function MaintenanceList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
 
@@ -254,6 +255,14 @@ export function MaintenanceList() {
   }, [statusFilter, priorityFilter]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this maintenance request?')) return;
+    setDeleting(id);
+    await fetch(`/api/maintenance/${id}`, { method: 'DELETE' });
+    setDeleting(null);
+    fetchData();
+  }
 
   function copyVendorLink(token: string) {
     const url = `${window.location.origin}/maintenance/${token}`;
@@ -380,14 +389,24 @@ export function MaintenanceList() {
                         : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => copyVendorLink(r.accessToken)}
-                        className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                        title="Copy vendor link"
-                      >
-                        <Copy size={10} />
-                        {copied === r.accessToken ? 'Copied!' : 'Link'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyVendorLink(r.accessToken)}
+                          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                          title="Copy vendor link"
+                        >
+                          <Copy size={10} />
+                          {copied === r.accessToken ? 'Copied!' : 'Link'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(r.id)}
+                          disabled={deleting === r.id}
+                          className="p-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                          title="Delete request"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

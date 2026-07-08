@@ -71,6 +71,7 @@ export type CreateHousekeepingTaskInput = {
   notes?: string;
   assignedTo?: string;
   createdBy?: string;
+  status?: HousekeepingTaskStatus;
 };
 
 export type UpdateHousekeepingTaskInput = Partial<
