@@ -160,6 +160,45 @@ export class ReservationService {
     return this.repository.findEvents(reservationId);
   }
 
+  async findConflicting(reservationId: string): Promise<Reservation[]> {
+    const reservation = await this.repository.findById(reservationId);
+    if (!reservation) throw new NotFoundError('Reservation', reservationId);
+
+    return this.repository.findConflicts(
+      reservation.propertyId,
+      new Date(reservation.checkIn),
+      new Date(reservation.checkOut),
+      reservationId
+    );
+  }
+
+  async resolveConflict(
+    id: string,
+    action: 'cancel_this' | 'cancel_conflicting' | 'mark_resolved',
+    actorId: string,
+    conflictingId?: string
+  ): Promise<Reservation> {
+    const reservation = await this.repository.findById(id);
+    if (!reservation) throw new NotFoundError('Reservation', id);
+
+    if (reservation.status !== 'conflict') {
+      throw new Error('Reservation is not in conflict status');
+    }
+
+    if (action === 'cancel_this') {
+      return this.transitionStatus(id, 'cancelled', actorId, 'Conflict resolved: this reservation cancelled');
+    }
+
+    if (action === 'cancel_conflicting') {
+      if (!conflictingId) throw new Error('conflictingId required for cancel_conflicting action');
+      await this.cancel(conflictingId, 'Conflict resolved: cancelled in favour of another reservation', actorId);
+      return this.transitionStatus(id, 'confirmed', actorId, 'Conflict resolved: conflicting reservation cancelled');
+    }
+
+    // mark_resolved — user handled it externally
+    return this.transitionStatus(id, 'confirmed', actorId, 'Conflict resolved manually');
+  }
+
   private async transitionStatus(
     id: string,
     toStatus: ReservationStatus,

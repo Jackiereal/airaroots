@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, AlertTriangle } from 'lucide-react';
 import type { Reservation } from '@/src/domains/reservation/types';
 import { ReservationStatusBadge } from '@/components/reservation/ReservationStatusBadge';
 import { ReservationForm } from '@/components/reservation/ReservationForm';
@@ -53,8 +53,26 @@ export function ReservationListClient() {
     );
   }
 
+  const conflictCount = reservations.filter(r => r.status === 'conflict').length;
+
   return (
     <>
+      {conflictCount > 0 && (
+        <div className="flex items-center gap-3 rounded-xl border border-[var(--color-amber)] bg-[var(--color-amber-muted)] px-4 py-3 mb-4">
+          <AlertTriangle size={16} className="text-[var(--color-amber)] shrink-0" />
+          <p className="text-sm text-[var(--text-primary)]">
+            <span className="font-semibold">{conflictCount} booking conflict{conflictCount > 1 ? 's' : ''}</span>
+            {' '}need{conflictCount === 1 ? 's' : ''} attention.
+          </p>
+          <a
+            href="?status=conflict"
+            className="ml-auto text-xs font-medium text-[var(--color-amber)] hover:underline underline-offset-2 shrink-0"
+          >
+            View conflicts →
+          </a>
+        </div>
+      )}
+
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowForm(true)}

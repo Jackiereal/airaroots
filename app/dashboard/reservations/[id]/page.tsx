@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import { getUserProfile } from '@/lib/auth';
 import { createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { ReservationStatusBadge } from '@/components/reservation/ReservationStatusBadge';
+import { ConflictAlertWrapper } from '@/components/reservation/ConflictAlertWrapper';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
 import type { Reservation } from '@/src/domains/reservation/types';
 
@@ -99,6 +100,10 @@ export default async function ReservationDetailPage({ params }: Params) {
         </h1>
         <ReservationStatusBadge status={reservation.status} />
       </div>
+
+      {reservation.status === 'conflict' && (
+        <ConflictAlertWrapper reservationId={reservation.id} />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Dates */}
