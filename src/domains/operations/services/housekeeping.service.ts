@@ -42,15 +42,32 @@ export class HousekeepingService {
   }
 
   async createTask(input: CreateHousekeepingTaskInput): Promise<HousekeepingTask> {
-    // Auto-populate default checklist if not provided
-    const checklist = input.checklist && input.checklist.length > 0
-      ? input.checklist
-      : DEFAULT_CHECKLIST;
+    // Use property template if exists, else global default
+    let checklist = input.checklist && input.checklist.length > 0 ? input.checklist : null;
+    if (!checklist) {
+      const template = await this.repo.findTemplate(input.propertyId);
+      checklist = template ?? DEFAULT_CHECKLIST;
+    }
 
     // Auto-set status to 'assigned' when staff is provided at creation time
     const status = input.assignedTo ? 'assigned' : 'pending';
 
     return this.repo.createTask({ ...input, checklist, status });
+  }
+
+  // ─── Checklist Templates ────────────────────────────────────────────────────
+
+  async getTemplate(propertyId: string): Promise<ChecklistItem[]> {
+    const template = await this.repo.findTemplate(propertyId);
+    return template ?? DEFAULT_CHECKLIST;
+  }
+
+  async upsertTemplate(propertyId: string, organizationId: string, items: ChecklistItem[]): Promise<void> {
+    await this.repo.upsertTemplate(propertyId, organizationId, items);
+  }
+
+  async resetTemplate(propertyId: string): Promise<void> {
+    await this.repo.deleteTemplate(propertyId);
   }
 
   async updateTask(id: string, input: UpdateHousekeepingTaskInput): Promise<HousekeepingTask> {

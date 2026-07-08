@@ -436,6 +436,14 @@ export function HousekeepingBoard() {
           >
             Manage Staff
           </Link>
+          {propertyId && (
+            <Link
+              href={`/dashboard/housekeeping/checklist/${propertyId}`}
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Checklist
+            </Link>
+          )}
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"

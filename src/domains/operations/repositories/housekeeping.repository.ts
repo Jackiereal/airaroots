@@ -213,6 +213,36 @@ export class HousekeepingRepository {
     if (error) throw new Error(`DB error: ${error.message}`);
   }
 
+  // ─── Checklist Templates ──────────────────────────────────────────────────
+
+  async findTemplate(propertyId: string): Promise<ChecklistItem[] | null> {
+    const { data, error } = await this.supabase
+      .from('housekeeping_checklist_templates')
+      .select('items')
+      .eq('property_id', propertyId)
+      .maybeSingle();
+    if (error) throw new Error(`DB error: ${error.message}`);
+    return data ? (data.items as ChecklistItem[]) : null;
+  }
+
+  async upsertTemplate(propertyId: string, organizationId: string, items: ChecklistItem[]): Promise<void> {
+    const { error } = await this.supabase
+      .from('housekeeping_checklist_templates')
+      .upsert(
+        { property_id: propertyId, organization_id: organizationId, items, updated_at: new Date().toISOString() },
+        { onConflict: 'property_id' }
+      );
+    if (error) throw new Error(`DB error: ${error.message}`);
+  }
+
+  async deleteTemplate(propertyId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('housekeeping_checklist_templates')
+      .delete()
+      .eq('property_id', propertyId);
+    if (error) throw new Error(`DB error: ${error.message}`);
+  }
+
   async addPhoto(taskId: string, url: string, caption?: string, uploadedBy?: string): Promise<HousekeepingPhoto> {
     const { data, error } = await this.supabase
       .from('housekeeping_photos')
