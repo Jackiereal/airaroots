@@ -5,6 +5,7 @@ import { getUserProfile } from '@/lib/auth';
 import { createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { ReservationStatusBadge } from '@/components/reservation/ReservationStatusBadge';
 import { ConflictAlertWrapper } from '@/components/reservation/ConflictAlertWrapper';
+import { GuestCard } from '@/components/guest/GuestCard';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
 import type { Reservation } from '@/src/domains/reservation/types';
 
@@ -133,26 +134,10 @@ export default async function ReservationDetailPage({ params }: Params) {
           </div>
         </div>
 
-        {/* Guest */}
+        {/* Booking info */}
         <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)] mb-4">Guest</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)] mb-4">Booking</h2>
           <div className="space-y-3">
-            <div>
-              <p className="text-xs text-[var(--text-tertiary)]">Name</p>
-              <p className="font-medium text-[var(--text-primary)]">{reservation.guestName ?? '—'}</p>
-            </div>
-            {reservation.guestEmail && (
-              <div>
-                <p className="text-xs text-[var(--text-tertiary)]">Email</p>
-                <p className="font-medium text-[var(--text-primary)]">{reservation.guestEmail}</p>
-              </div>
-            )}
-            {reservation.guestPhone && (
-              <div>
-                <p className="text-xs text-[var(--text-tertiary)]">Phone</p>
-                <p className="font-medium text-[var(--text-primary)]">{reservation.guestPhone}</p>
-              </div>
-            )}
             <div>
               <p className="text-xs text-[var(--text-tertiary)]">Channel</p>
               <p className="font-medium text-[var(--text-primary)]">{CHANNEL_LABELS[reservation.channel] ?? reservation.channel}</p>
@@ -165,6 +150,9 @@ export default async function ReservationDetailPage({ params }: Params) {
             )}
           </div>
         </div>
+
+        {/* Guest profile */}
+        <GuestCard reservationId={reservation.id} guestId={reservation.guestId} />
 
         {/* Revenue */}
         <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 sm:col-span-2">

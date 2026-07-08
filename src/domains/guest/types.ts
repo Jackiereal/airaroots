@@ -20,3 +20,14 @@ export type CreateGuestInput = {
   notes?: string;
   tags?: string[];
 };
+
+export type UpdateGuestInput = {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  nationality?: string;
+  notes?: string;
+  tags?: string[];
+};
+
+export type GuestWithStays = Guest & { stayCount: number };

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ReservationRepository } from '../repositories/reservation.repository';
 import { ConflictDetectionService } from './conflict-detection.service';
+import { GuestService } from '../../guest/services/guest.service';
 import { eventBus } from '../../../infrastructure/events/event-bus';
 import { ConflictError, NotFoundError, InvalidStatusTransitionError } from '../../../shared/errors/domain-errors';
 import { VALID_STATUS_TRANSITIONS } from '../constants';
@@ -15,10 +16,12 @@ import type {
 export class ReservationService {
   private repository: ReservationRepository;
   private conflictDetection: ConflictDetectionService;
+  private guestService: GuestService;
 
   constructor(private supabase: SupabaseClient) {
     this.repository = new ReservationRepository(supabase);
     this.conflictDetection = new ConflictDetectionService(supabase);
+    this.guestService = new GuestService(supabase);
   }
 
   async create(input: CreateReservationInput, actorId: string): Promise<Reservation> {
@@ -43,6 +46,22 @@ export class ReservationService {
     }
 
     const reservation = await this.repository.create({ ...input, createdBy: actorId });
+
+    // Auto-link guest profile (best-effort, don't fail reservation creation)
+    if (input.guestName || input.guestEmail || input.guestPhone) {
+      try {
+        const guest = await this.guestService.findOrCreate({
+          organizationId: input.organizationId,
+          fullName: input.guestName ?? 'Guest',
+          email: input.guestEmail,
+          phone: input.guestPhone,
+        });
+        await this.repository.setGuestId(reservation.id, guest.id);
+        reservation.guestId = guest.id;
+      } catch {
+        // Non-fatal: guest linking failure doesn't block reservation
+      }
+    }
 
     await this.repository.appendEvent({
       reservationId: reservation.id,
@@ -158,6 +177,21 @@ export class ReservationService {
 
   async findEvents(reservationId: string): Promise<ReservationEvent[]> {
     return this.repository.findEvents(reservationId);
+  }
+
+  async linkGuest(reservationId: string, orgId: string): Promise<string> {
+    const reservation = await this.repository.findById(reservationId);
+    if (!reservation) throw new NotFoundError('Reservation', reservationId);
+
+    const guest = await this.guestService.findOrCreate({
+      organizationId: orgId,
+      fullName: reservation.guestName ?? 'Guest',
+      email: reservation.guestEmail,
+      phone: reservation.guestPhone,
+    });
+
+    await this.repository.setGuestId(reservationId, guest.id);
+    return guest.id;
   }
 
   async findConflicting(reservationId: string): Promise<Reservation[]> {

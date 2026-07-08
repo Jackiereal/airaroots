@@ -224,6 +224,16 @@ export class ReservationRepository {
     return this.toEntity(data as ReservationRow);
   }
 
+  async setGuestId(id: string, guestId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('reservations')
+      .update({ guest_id: guestId })
+      .eq('id', id)
+      .is('deleted_at', null);
+
+    if (error) throw new Error(`DB error: ${error.message}`);
+  }
+
   async updateStatus(id: string, status: ReservationStatus): Promise<Reservation> {
     const updateData: Record<string, unknown> = { status };
     if (status === 'cancelled') {
