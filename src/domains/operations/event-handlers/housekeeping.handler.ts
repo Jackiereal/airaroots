@@ -26,7 +26,7 @@ async function onCheckedIn(event: DomainEvent): Promise<void> {
   });
 }
 
-// ─── checked_out → move task to in_progress (countdown starts) ───────────────
+// ─── checked_out → move task to in_progress (room vacant, staff already assigned) ──
 async function onCheckedOut(event: DomainEvent): Promise<void> {
   const reservation = event.payload['reservation'] as Reservation;
 
@@ -36,8 +36,9 @@ async function onCheckedOut(event: DomainEvent): Promise<void> {
   const task = await service['repo'].findTaskByReservation(reservation.id);
   if (!task) return;
 
-  // Only advance if still pending/assigned — don't override completed/cancelled
-  if (task.status === 'pending' || task.status === 'assigned') {
+  // Only advance to in_progress if staff is assigned — otherwise it falsely
+  // implies someone is actively cleaning. Unassigned tasks stay pending.
+  if (task.status === 'assigned') {
     await service['repo'].updateTask(task.id, { status: 'in_progress' });
   }
 }

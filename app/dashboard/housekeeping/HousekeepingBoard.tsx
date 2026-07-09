@@ -363,6 +363,7 @@ export function HousekeepingBoard() {
   const [staffList, setStaffList] = useState<HousekeepingStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState(today);
+  const [showAllUpcoming, setShowAllUpcoming] = useState(true);
   const [propertyId, setPropertyId] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [assignTask, setAssignTask] = useState<HousekeepingTask | null>(null);
@@ -372,7 +373,7 @@ export function HousekeepingBoard() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (date) params.set('date', date);
+    if (date && !showAllUpcoming) params.set('date', date);
     if (propertyId) params.set('propertyId', propertyId);
 
     const [tasksRes, propsRes, staffRes] = await Promise.all([
@@ -394,7 +395,7 @@ export function HousekeepingBoard() {
       setStaffList(d.staff ?? []);
     }
     setLoading(false);
-  }, [date, propertyId]);
+  }, [date, showAllUpcoming, propertyId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -416,8 +417,17 @@ export function HousekeepingBoard() {
           type="date"
           value={date}
           onChange={e => setDate(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
+          disabled={showAllUpcoming}
+          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)] disabled:opacity-50"
         />
+        <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+          <input
+            type="checkbox"
+            checked={showAllUpcoming}
+            onChange={e => setShowAllUpcoming(e.target.checked)}
+          />
+          All upcoming
+        </label>
         <select
           value={propertyId}
           onChange={e => setPropertyId(e.target.value)}
