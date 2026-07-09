@@ -5,11 +5,14 @@
 - Supabase (PostgreSQL + RLS + Realtime), zod v4
 - No tailwind.config.js — uses CSS custom properties via globals.css
 
-## Project State (2026-07-08)
+## Project State (2026-07-09)
 - Phase 1 COMPLETE: Reservation Engine + Universal Calendar
 - Phase 2 COMPLETE: Channel Manager (all features live, pushed to Railway)
 - Phase 3 IN PROGRESS: Housekeeping & Operations (core built, live on Railway)
+  - Vendor directory UI added 2026-07-09 (`/dashboard/vendors`) — last major gap closed
+  - Remaining: push notifications to housekeeping staff on task creation/checkout (not built — no push/notification code anywhere; decided against for now, WhatsApp auto-notify or true web push both deferred)
 - Phase 4 (Guest CRM) DEFERRED post-MVP — swapped after Operations in roadmap; not needed for MVP launch
+- `docs/09 Dev/Roadmap.md` and `docs/09 Dev/Milestones.md` updated 2026-07-09 to reflect Phase 3/4 swap
 
 ### Phase 2 — Built
 - iCal sync: Airbnb + Booking.com + VRBO via `src/domains/channel/`
@@ -73,7 +76,8 @@
 - Owner Hold: #6b7280, Maintenance: #f59e0b
 
 ## Sidebar Nav
-- AdminSidebar: Dashboard, Calendar, Reservations, Channels, Properties, Users
+- AdminSidebar main: Dashboard, Calendar, Reservations, Channels, Properties, Users
+- AdminSidebar ops: Housekeeping, Maintenance, Vendors, Inventory
 - Footer: ThemeToggle + Sign out
 
 ## iCal Sync
@@ -96,6 +100,10 @@
 - Delete: housekeeping tasks + maintenance requests both have DELETE API + trash UI
 - Maintenance list: `/dashboard/maintenance` — table view with vendor WhatsApp link + delete
 - WhatsApp links built in service (buildWhatsAppUrl / buildVendorWhatsAppUrl)
+- Vendor directory: `/dashboard/vendors` (added 2026-07-09) — list/add/edit/deactivate, category filter, show-inactive toggle
+  - `VendorManager.tsx` follows same pattern as `StaffManager.tsx` (housekeeping staff page)
+  - Backend (`VendorService`, `VendorRepository`, `/api/vendors`, `/api/vendors/[id]`) pre-existed; only the UI was missing
+  - Deactivate = soft delete via `isActive: false` PATCH, not a real delete
 - No middleware.ts at root — all routes currently unprotected by middleware (only API routes use requireOrgAuth)
 
 ## Finance Data Architecture (critical — no double-counting)
