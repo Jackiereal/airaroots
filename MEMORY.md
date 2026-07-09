@@ -53,6 +53,7 @@
 - 008: org bridge (organization_id on user_profiles, organization_members stub, auto-provision)
 - 009: housekeeping_checklist_templates (property_id UNIQUE, organization_id, items JSONB)
 - 010: property_finance_expenses.housekeeping_task_id (FK to housekeeping_tasks, partial unique index)
+- 011: property_id on housekeeping_staff (NOT NULL, deleted 1 pre-existing row) + vendors (nullable = org-wide)
 
 ## Zod v4 Notes
 - `z.record(z.string(), z.unknown())` — v4 requires 2 args
@@ -104,6 +105,12 @@
   - `VendorManager.tsx` follows same pattern as `StaffManager.tsx` (housekeeping staff page)
   - Backend (`VendorService`, `VendorRepository`, `/api/vendors`, `/api/vendors/[id]`) pre-existed; only the UI was missing
   - Deactivate = soft delete via `isActive: false` PATCH, not a real delete
+- Property scoping (added 2026-07-09, migration 011):
+  - `housekeeping_staff.property_id` — required. Staff work at one physical property; StaffForm requires selecting it, StaffManager has a property filter
+  - `vendors.property_id` — nullable. `undefined`/`null` = org-wide (serves all properties). VendorForm defaults to "All properties (org-wide)"
+  - `HousekeepingBoard.tsx` assign/create staff dropdowns filter `staffList` to the task's `propertyId` client-side
+  - `MaintenanceList.tsx` vendor dropdown shows vendors where `!v.propertyId || v.propertyId === form.propertyId` (org-wide ∪ property match)
+  - `VendorRepository.findByOrg` uses `.or('property_id.eq.X,property_id.is.null')` when filtering by property — always includes org-wide vendors alongside property-specific ones
 - No middleware.ts at root — all routes currently unprotected by middleware (only API routes use requireOrgAuth)
 
 ## Finance Data Architecture (critical — no double-counting)
