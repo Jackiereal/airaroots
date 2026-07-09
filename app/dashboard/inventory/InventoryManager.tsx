@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Loader2, AlertTriangle, RefreshCw, Pencil, PackagePlus } from 'lucide-react';
 import type { InventoryItem, InventoryCategory, InventoryTransactionType } from '@/src/domains/operations/types';
 import Picker from '@/components/ui/Picker';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 
 type Property = { id: string; name: string };
 
@@ -389,62 +390,103 @@ export function InventoryManager() {
               return (
                 <div key={p.id}>
                   <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-2">{propertyMap[p.id]}</h2>
-                  <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
-                    <table className="w-full min-w-[40rem] text-sm">
-                      <thead>
-                        <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
-                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Item</th>
-                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Category</th>
-                          <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Stock</th>
-                          <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Reorder At</th>
-                          <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Cost/Unit</th>
-                          <th className="px-4 py-2.5"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  <ResponsiveTable
+                    table={
+                      <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+                        <table className="w-full min-w-[40rem] text-sm">
+                          <thead>
+                            <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
+                              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Item</th>
+                              <th className="text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Category</th>
+                              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Stock</th>
+                              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Reorder At</th>
+                              <th className="text-right px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Cost/Unit</th>
+                              <th className="px-4 py-2.5"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {propItems.map(item => (
+                              <tr
+                                key={item.id}
+                                className={`border-b border-[var(--border-subtle)] transition-colors ${
+                                  item.isLowStock ? 'bg-amber-500/5' : 'hover:bg-[var(--bg-surface)]/60'
+                                }`}
+                              >
+                                <td className="px-4 py-2.5">
+                                  <div className="flex items-center gap-2">
+                                    {item.isLowStock && (
+                                      <AlertTriangle size={12} className="text-amber-400 shrink-0" />
+                                    )}
+                                    <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-2.5 text-xs text-[var(--text-tertiary)]">
+                                  {item.category ? CATEGORY_LABELS[item.category] : '—'}
+                                </td>
+                                <td className="px-4 py-2.5 text-right">
+                                  <span className={`font-medium text-sm ${item.isLowStock ? 'text-amber-400' : 'text-[var(--text-primary)]'}`}>
+                                    {item.quantity}
+                                  </span>
+                                  <span className="text-xs text-[var(--text-tertiary)] ml-1">{item.unit}</span>
+                                </td>
+                                <td className="px-4 py-2.5 text-right text-xs text-[var(--text-tertiary)]">
+                                  {item.reorderLevel} {item.unit}
+                                </td>
+                                <td className="px-4 py-2.5 text-right text-xs text-[var(--text-secondary)]">
+                                  {item.costPerUnit != null ? `₹${item.costPerUnit}` : '—'}
+                                </td>
+                                <td className="px-4 py-2.5">
+                                  <button
+                                    onClick={() => setRestockItem(item)}
+                                    className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                  >
+                                    <PackagePlus size={10} /> Update
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                    cards={
+                      <div className="space-y-3">
                         {propItems.map(item => (
-                          <tr
+                          <TableCard
                             key={item.id}
-                            className={`border-b border-[var(--border-subtle)] transition-colors ${
-                              item.isLowStock ? 'bg-amber-500/5' : 'hover:bg-[var(--bg-surface)]/60'
-                            }`}
-                          >
-                            <td className="px-4 py-2.5">
-                              <div className="flex items-center gap-2">
-                                {item.isLowStock && (
-                                  <AlertTriangle size={12} className="text-amber-400 shrink-0" />
-                                )}
-                                <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-2.5 text-xs text-[var(--text-tertiary)]">
-                              {item.category ? CATEGORY_LABELS[item.category] : '—'}
-                            </td>
-                            <td className="px-4 py-2.5 text-right">
-                              <span className={`font-medium text-sm ${item.isLowStock ? 'text-amber-400' : 'text-[var(--text-primary)]'}`}>
-                                {item.quantity}
+                            tone={item.isLowStock ? 'amber' : 'default'}
+                            title={
+                              <span className="flex items-center gap-1.5 font-medium text-sm text-[var(--text-primary)]">
+                                {item.isLowStock && <AlertTriangle size={12} className="text-amber-400 shrink-0" />}
+                                {item.name}
                               </span>
-                              <span className="text-xs text-[var(--text-tertiary)] ml-1">{item.unit}</span>
-                            </td>
-                            <td className="px-4 py-2.5 text-right text-xs text-[var(--text-tertiary)]">
-                              {item.reorderLevel} {item.unit}
-                            </td>
-                            <td className="px-4 py-2.5 text-right text-xs text-[var(--text-secondary)]">
-                              {item.costPerUnit != null ? `₹${item.costPerUnit}` : '—'}
-                            </td>
-                            <td className="px-4 py-2.5">
+                            }
+                            fields={[
+                              { label: 'Category', value: item.category ? CATEGORY_LABELS[item.category] : '—' },
+                              {
+                                label: 'Stock',
+                                value: (
+                                  <span className={item.isLowStock ? 'text-amber-400 font-medium' : ''}>
+                                    {item.quantity} {item.unit}
+                                  </span>
+                                ),
+                              },
+                              { label: 'Reorder At', value: `${item.reorderLevel} ${item.unit}` },
+                              { label: 'Cost/Unit', value: item.costPerUnit != null ? `₹${item.costPerUnit}` : '—' },
+                            ]}
+                            actions={
                               <button
                                 onClick={() => setRestockItem(item)}
-                                className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                               >
-                                <PackagePlus size={10} /> Update
+                                <PackagePlus size={11} /> Update
                               </button>
-                            </td>
-                          </tr>
+                            }
+                          />
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      </div>
+                    }
+                  />
                 </div>
               );
             })}

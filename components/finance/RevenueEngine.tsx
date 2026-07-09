@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Loader2, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import Picker from '@/components/ui/Picker';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 
 type RevItem = {
   id: string;
@@ -275,54 +276,116 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-[var(--border-color)]">
-            <table className="w-full text-sm text-[var(--text-primary)]">
-              <thead>
-                <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
-                  <th className="px-4 py-3 text-left font-medium text-[var(--text-secondary)]">Source</th>
-                  <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">This Month</th>
-                  <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">Annual (YTD)</th>
-                  <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">Contribution</th>
-                  <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">No revenue data for {month}.</td>
-                  </tr>
-                )}
-                {rows.map((row) => (
-                  <tr key={row.source} className="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-elevated)]/30">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span>{row.label}</span>
-                        {!row.isManual && (
-                          <span className="rounded px-1.5 py-0.5 text-[10px] bg-[var(--bg-elevated)] text-[var(--text-secondary)]">auto</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-[var(--accent)] font-medium">
-                      {row.monthlyAmount > 0 ? fmt(row.monthlyAmount) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {row.annualAmount > 0 ? fmt(row.annualAmount) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-[var(--text-secondary)]">
-                      {row.contributionPct > 0 ? `${row.contributionPct.toFixed(1)}%` : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {row.isManual && !isReadOnly && (
-                        <div className="flex items-center gap-1 justify-end">
+          {rows.length === 0 ? (
+            <div className="rounded-xl border border-[var(--border-color)] px-4 py-8 text-center text-sm text-[var(--text-secondary)]">
+              No revenue data for {month}.
+            </div>
+          ) : (
+            <ResponsiveTable
+              table={
+                <div className="overflow-x-auto rounded-xl border border-[var(--border-color)]">
+                  <table className="w-full text-sm text-[var(--text-primary)]">
+                    <thead>
+                      <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                        <th className="px-4 py-3 text-left font-medium text-[var(--text-secondary)]">Source</th>
+                        <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">This Month</th>
+                        <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">Annual (YTD)</th>
+                        <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">Contribution</th>
+                        <th className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row) => (
+                        <tr key={row.source} className="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-elevated)]/30">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <span>{row.label}</span>
+                              {!row.isManual && (
+                                <span className="rounded px-1.5 py-0.5 text-[10px] bg-[var(--bg-elevated)] text-[var(--text-secondary)]">auto</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-right tabular-nums text-[var(--accent)] font-medium">
+                            {row.monthlyAmount > 0 ? fmt(row.monthlyAmount) : '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right tabular-nums">
+                            {row.annualAmount > 0 ? fmt(row.annualAmount) : '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right tabular-nums text-[var(--text-secondary)]">
+                            {row.contributionPct > 0 ? `${row.contributionPct.toFixed(1)}%` : '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            {row.isManual && !isReadOnly && (
+                              <div className="flex items-center gap-1 justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const item = items.find((i) => i.source === row.source);
+                                    if (item) { setEditItem(item); setDialogOpen(true); }
+                                  }}
+                                  className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const item = items.find((i) => i.source === row.source);
+                                    if (item) deleteItem(item.id);
+                                  }}
+                                  className="rounded p-1 text-[var(--text-secondary)] hover:text-rose-300 transition-colors"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-[var(--bg-elevated)]/50 font-semibold">
+                        <td className="px-4 py-3">Total</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-[var(--accent)]">{fmt(totalMonthly)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{fmt(dashData?.annualRevenue ?? 0)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">100%</td>
+                        <td />
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              }
+              cards={
+                <div className="space-y-3">
+                  {rows.map((row) => (
+                    <TableCard
+                      key={row.source}
+                      title={
+                        <span className="flex items-center gap-2 font-medium text-sm text-[var(--text-primary)]">
+                          {row.label}
+                          {!row.isManual && (
+                            <span className="rounded px-1.5 py-0.5 text-[10px] bg-[var(--bg-elevated)] text-[var(--text-secondary)] font-normal">auto</span>
+                          )}
+                        </span>
+                      }
+                      titleExtra={
+                        <span className="font-medium text-sm text-[var(--accent)]">
+                          {row.monthlyAmount > 0 ? fmt(row.monthlyAmount) : '—'}
+                        </span>
+                      }
+                      fields={[
+                        { label: 'Annual (YTD)', value: row.annualAmount > 0 ? fmt(row.annualAmount) : '—' },
+                        { label: 'Contribution', value: row.contributionPct > 0 ? `${row.contributionPct.toFixed(1)}%` : '—' },
+                      ]}
+                      actions={row.isManual && !isReadOnly ? (
+                        <>
                           <button
                             type="button"
                             onClick={() => {
                               const item = items.find((i) => i.source === row.source);
                               if (item) { setEditItem(item); setDialogOpen(true); }
                             }}
-                            className="rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                            className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3 w-3" /> Edit
                           </button>
                           <button
                             type="button"
@@ -330,27 +393,22 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
                               const item = items.find((i) => i.source === row.source);
                               if (item) deleteItem(item.id);
                             }}
-                            className="rounded p-1 text-[var(--text-secondary)] hover:text-rose-300 transition-colors"
+                            className="flex items-center gap-1 text-xs px-2 py-1 rounded text-[var(--text-secondary)] hover:text-rose-300 ml-auto"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3 w-3" /> Delete
                           </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {rows.length > 0 && (
-                  <tr className="bg-[var(--bg-elevated)]/50 font-semibold">
-                    <td className="px-4 py-3">Total</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-[var(--accent)]">{fmt(totalMonthly)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{fmt(dashData?.annualRevenue ?? 0)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">100%</td>
-                    <td />
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                        </>
+                      ) : undefined}
+                    />
+                  ))}
+                  <div className="rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-elevated)]/50 p-4 flex items-center justify-between">
+                    <span className="font-semibold text-sm text-[var(--text-primary)]">Total</span>
+                    <span className="font-semibold text-sm text-[var(--accent)]">{fmt(totalMonthly)}</span>
+                  </div>
+                </div>
+              }
+            />
+          )}
 
           {items.length > 0 && (
             <div>

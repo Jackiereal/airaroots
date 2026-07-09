@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import {
   Bar,
   BarChart,
@@ -189,29 +190,52 @@ export default function ExpenseEngine({ month, propertyId }: { month: string; pr
           {/* Category table */}
           <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 overflow-auto">
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">By Category</p>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border-color)] text-left text-xs text-[var(--text-secondary)]">
-                  <th className="pb-2 font-medium">Category</th>
-                  <th className="pb-2 font-medium text-right">Amount</th>
-                  <th className="pb-2 font-medium text-right">%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pieData.map((row, i) => (
-                  <tr key={row.name} className="border-b border-[var(--border-color)]/40">
-                    <td className="py-1.5 flex items-center gap-2">
-                      <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                      <span className="capitalize">{row.name.replace(/_/g, ' ')}</span>
-                    </td>
-                    <td className="py-1.5 text-right tabular-nums">{fmt(row.value)}</td>
-                    <td className="py-1.5 text-right text-[var(--text-secondary)] tabular-nums">
-                      {totalShown > 0 ? ((row.value / totalShown) * 100).toFixed(1) : '0'}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ResponsiveTable
+              table={
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--border-color)] text-left text-xs text-[var(--text-secondary)]">
+                      <th className="pb-2 font-medium">Category</th>
+                      <th className="pb-2 font-medium text-right">Amount</th>
+                      <th className="pb-2 font-medium text-right">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pieData.map((row, i) => (
+                      <tr key={row.name} className="border-b border-[var(--border-color)]/40">
+                        <td className="py-1.5 flex items-center gap-2">
+                          <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          <span className="capitalize">{row.name.replace(/_/g, ' ')}</span>
+                        </td>
+                        <td className="py-1.5 text-right tabular-nums">{fmt(row.value)}</td>
+                        <td className="py-1.5 text-right text-[var(--text-secondary)] tabular-nums">
+                          {totalShown > 0 ? ((row.value / totalShown) * 100).toFixed(1) : '0'}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              }
+              cards={
+                <div className="space-y-3">
+                  {pieData.map((row, i) => (
+                    <TableCard
+                      key={row.name}
+                      title={
+                        <span className="flex items-center gap-2 font-medium text-sm text-[var(--text-primary)] capitalize">
+                          <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          {row.name.replace(/_/g, ' ')}
+                        </span>
+                      }
+                      titleExtra={<span className="text-sm text-[var(--text-primary)]">{fmt(row.value)}</span>}
+                      fields={[
+                        { label: '%', value: totalShown > 0 ? `${((row.value / totalShown) * 100).toFixed(1)}%` : '0%' },
+                      ]}
+                    />
+                  ))}
+                </div>
+              }
+            />
           </div>
         </div>
       )}
@@ -264,35 +288,61 @@ export default function ExpenseEngine({ month, propertyId }: { month: string; pr
           {monthlyExpenses.length === 0 ? (
             <p className="p-4 text-sm text-[var(--text-secondary)]">No expenses for {month}.</p>
           ) : (
-            <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-              <table className="w-full min-w-[36rem] text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
-                    <th className="px-4 py-2 text-left font-medium">Category</th>
-                    <th className="px-4 py-2 text-left font-medium">Date</th>
-                    <th className="px-4 py-2 text-left font-medium">Notes</th>
-                    <th className="px-4 py-2 text-right font-medium">Amount</th>
-                    <th className="px-4 py-2 text-left font-medium">Paid From</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <ResponsiveTable
+              table={
+                <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+                  <table className="w-full min-w-[36rem] text-sm">
+                    <thead>
+                      <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
+                        <th className="px-4 py-2 text-left font-medium">Category</th>
+                        <th className="px-4 py-2 text-left font-medium">Date</th>
+                        <th className="px-4 py-2 text-left font-medium">Notes</th>
+                        <th className="px-4 py-2 text-right font-medium">Amount</th>
+                        <th className="px-4 py-2 text-left font-medium">Paid From</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlyExpenses.map((e) => (
+                        <tr key={e.id} className="border-b border-[var(--border-color)]/40 hover:bg-[var(--bg-elevated)]/50">
+                          <td className="px-4 py-2 capitalize">{e.expense_type.replace(/_/g, ' ')}</td>
+                          <td className="px-4 py-2 text-[var(--text-secondary)]">{e.expense_date ?? '—'}</td>
+                          <td className="px-4 py-2 text-[var(--text-secondary)] max-w-[200px] truncate">{e.notes ?? '—'}</td>
+                          <td className="px-4 py-2 text-right tabular-nums font-medium">{fmt(Number(e.amount))}</td>
+                          <td className="px-4 py-2 text-[var(--text-secondary)] capitalize">{e.paid_from?.replace(/_/g, ' ') ?? '—'}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-[var(--bg-elevated)]/40">
+                        <td colSpan={3} className="px-4 py-2 text-sm font-medium">Total</td>
+                        <td className="px-4 py-2 text-right font-bold tabular-nums">{fmt(monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0))}</td>
+                        <td />
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              }
+              cards={
+                <div className="p-4 space-y-3">
                   {monthlyExpenses.map((e) => (
-                    <tr key={e.id} className="border-b border-[var(--border-color)]/40 hover:bg-[var(--bg-elevated)]/50">
-                      <td className="px-4 py-2 capitalize">{e.expense_type.replace(/_/g, ' ')}</td>
-                      <td className="px-4 py-2 text-[var(--text-secondary)]">{e.expense_date ?? '—'}</td>
-                      <td className="px-4 py-2 text-[var(--text-secondary)] max-w-[200px] truncate">{e.notes ?? '—'}</td>
-                      <td className="px-4 py-2 text-right tabular-nums font-medium">{fmt(Number(e.amount))}</td>
-                      <td className="px-4 py-2 text-[var(--text-secondary)] capitalize">{e.paid_from?.replace(/_/g, ' ') ?? '—'}</td>
-                    </tr>
+                    <TableCard
+                      key={e.id}
+                      title={<span className="font-medium text-sm text-[var(--text-primary)] capitalize">{e.expense_type.replace(/_/g, ' ')}</span>}
+                      titleExtra={<span className="font-medium text-sm text-[var(--text-primary)]">{fmt(Number(e.amount))}</span>}
+                      fields={[
+                        { label: 'Date', value: e.expense_date ?? '—' },
+                        { label: 'Paid From', value: <span className="capitalize">{e.paid_from?.replace(/_/g, ' ') ?? '—'}</span> },
+                        { label: 'Notes', value: e.notes ?? '—' },
+                      ]}
+                    />
                   ))}
-                  <tr className="bg-[var(--bg-elevated)]/40">
-                    <td colSpan={3} className="px-4 py-2 text-sm font-medium">Total</td>
-                    <td className="px-4 py-2 text-right font-bold tabular-nums">{fmt(monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0))}</td>
-                    <td />
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  <div className="rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-elevated)]/40 p-4 flex items-center justify-between">
+                    <span className="font-medium text-sm text-[var(--text-primary)]">Total</span>
+                    <span className="font-bold text-sm text-[var(--text-primary)]">
+                      {fmt(monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0))}
+                    </span>
+                  </div>
+                </div>
+              }
+            />
           )}
         </div>
       )}

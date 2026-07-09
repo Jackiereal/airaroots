@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import type { HistoricalAverages } from '@/app/api/finance/[propertyId]/historical-averages/route';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -236,57 +237,108 @@ export default function PricingSimulator({ propertyId }: { propertyId: string })
       {/* Per-month config table */}
       <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)]">
         <p className="text-sm font-medium text-[var(--text-secondary)] px-4 py-3 border-b border-[var(--border-color)]">Seasonal Configuration</p>
-        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-        <table className="w-full min-w-[36rem] text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
-              <th className="px-4 py-2 text-left font-medium">Month</th>
-              <th className="px-4 py-2 text-center font-medium">Rate Multiplier</th>
-              <th className="px-4 py-2 text-center font-medium">Occupancy %</th>
-              <th className="px-4 py-2 text-right font-medium">Effective Rate</th>
-              <th className="px-4 py-2 text-right font-medium">Projected</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MONTHS.map((label, i) => {
-              const mc = config.months[i] ?? { multiplier: 1, occupancyPct: 65 };
-              return (
-                <tr key={label} className="border-b border-[var(--border-color)]/40">
-                  <td className="px-4 py-1.5 font-medium">{label}</td>
-                  <td className="px-4 py-1.5">
-                    <input
-                      type="number"
-                      value={mc.multiplier}
-                      min={0.1}
-                      max={5}
-                      step={0.1}
-                      onChange={(e) => updateMonth(i, 'multiplier', Number(e.target.value))}
-                      className="w-20 mx-auto block rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                    />
-                  </td>
-                  <td className="px-4 py-1.5">
-                    <input
-                      type="number"
-                      value={mc.occupancyPct}
-                      min={0}
-                      max={100}
-                      step={5}
-                      onChange={(e) => updateMonth(i, 'occupancyPct', Number(e.target.value))}
-                      className="w-20 mx-auto block rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
-                    />
-                  </td>
-                  <td className="px-4 py-1.5 text-right tabular-nums text-[var(--text-secondary)]">
-                    {fmt(Math.round(config.baseRate * mc.multiplier))}
-                  </td>
-                  <td className="px-4 py-1.5 text-right tabular-nums font-medium text-[var(--accent)]">
-                    {fmt(projected[i]?.revenue ?? 0)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        </div>
+        <ResponsiveTable
+          table={
+            <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+              <table className="w-full min-w-[36rem] text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
+                    <th className="px-4 py-2 text-left font-medium">Month</th>
+                    <th className="px-4 py-2 text-center font-medium">Rate Multiplier</th>
+                    <th className="px-4 py-2 text-center font-medium">Occupancy %</th>
+                    <th className="px-4 py-2 text-right font-medium">Effective Rate</th>
+                    <th className="px-4 py-2 text-right font-medium">Projected</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MONTHS.map((label, i) => {
+                    const mc = config.months[i] ?? { multiplier: 1, occupancyPct: 65 };
+                    return (
+                      <tr key={label} className="border-b border-[var(--border-color)]/40">
+                        <td className="px-4 py-1.5 font-medium">{label}</td>
+                        <td className="px-4 py-1.5">
+                          <input
+                            type="number"
+                            value={mc.multiplier}
+                            min={0.1}
+                            max={5}
+                            step={0.1}
+                            onChange={(e) => updateMonth(i, 'multiplier', Number(e.target.value))}
+                            className="w-20 mx-auto block rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                          />
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <input
+                            type="number"
+                            value={mc.occupancyPct}
+                            min={0}
+                            max={100}
+                            step={5}
+                            onChange={(e) => updateMonth(i, 'occupancyPct', Number(e.target.value))}
+                            className="w-20 mx-auto block rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                          />
+                        </td>
+                        <td className="px-4 py-1.5 text-right tabular-nums text-[var(--text-secondary)]">
+                          {fmt(Math.round(config.baseRate * mc.multiplier))}
+                        </td>
+                        <td className="px-4 py-1.5 text-right tabular-nums font-medium text-[var(--accent)]">
+                          {fmt(projected[i]?.revenue ?? 0)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          }
+          cards={
+            <div className="p-3 space-y-3">
+              {MONTHS.map((label, i) => {
+                const mc = config.months[i] ?? { multiplier: 1, occupancyPct: 65 };
+                return (
+                  <TableCard
+                    key={label}
+                    title={<span className="font-medium text-sm text-[var(--text-primary)]">{label}</span>}
+                    titleExtra={
+                      <span className="font-medium text-sm text-[var(--accent)]">{fmt(projected[i]?.revenue ?? 0)}</span>
+                    }
+                    fields={[
+                      {
+                        label: 'Rate Multiplier',
+                        value: (
+                          <input
+                            type="number"
+                            value={mc.multiplier}
+                            min={0.1}
+                            max={5}
+                            step={0.1}
+                            onChange={(e) => updateMonth(i, 'multiplier', Number(e.target.value))}
+                            className="w-20 rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-1 text-sm text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                          />
+                        ),
+                      },
+                      {
+                        label: 'Occupancy %',
+                        value: (
+                          <input
+                            type="number"
+                            value={mc.occupancyPct}
+                            min={0}
+                            max={100}
+                            step={5}
+                            onChange={(e) => updateMonth(i, 'occupancyPct', Number(e.target.value))}
+                            className="w-20 rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-1 text-sm text-center text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                          />
+                        ),
+                      },
+                      { label: 'Effective Rate', value: fmt(Math.round(config.baseRate * mc.multiplier)) },
+                    ]}
+                  />
+                );
+              })}
+            </div>
+          }
+        />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Loader2, Phone, RefreshCw, Copy, Trash2 } from 'lucide-react';
 import Picker from '@/components/ui/Picker';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import type {
   MaintenanceRequest,
   MaintenanceCategory,
@@ -328,95 +329,172 @@ export function MaintenanceList() {
           </button>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
-          <table className="w-full min-w-[48rem] text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Issue</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Property</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Priority</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Vendor</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Cost</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
+        <ResponsiveTable
+          table={
+            <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+              <table className="w-full min-w-[48rem] text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Issue</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Property</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Priority</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Status</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Vendor</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Cost</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map(r => {
+                    const vendor = vendors.find(v => v.id === r.vendorId);
+                    const waUrl = vendor?.phone
+                      ? buildVendorWhatsAppUrl(r, vendor, window.location.origin)
+                      : null;
+                    return (
+                      <tr key={r.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/60 transition-colors">
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-[var(--text-primary)]">{r.title}</p>
+                          {r.category && (
+                            <p className="text-xs text-[var(--text-tertiary)]">{CATEGORY_LABELS[r.category]}</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-[var(--text-secondary)]">
+                          {propertyMap[r.propertyId] ?? '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <PriorityBadge priority={r.priority} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={r.status} />
+                        </td>
+                        <td className="px-4 py-3">
+                          {vendor ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs text-[var(--text-secondary)]">{vendor.name}</span>
+                              {waUrl && (
+                                <a
+                                  href={waUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="shrink-0 p-1 rounded text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+                                  title="Send WhatsApp"
+                                >
+                                  <Phone size={12} />
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-[var(--text-tertiary)]">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-[var(--text-secondary)]">
+                          {r.actualCost != null
+                            ? `₹${r.actualCost.toLocaleString('en-IN')}`
+                            : r.estimatedCost != null
+                            ? `~₹${r.estimatedCost.toLocaleString('en-IN')}`
+                            : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => copyVendorLink(r.accessToken)}
+                              className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                              title="Copy vendor link"
+                            >
+                              <Copy size={10} />
+                              {copied === r.accessToken ? 'Copied!' : 'Link'}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(r.id)}
+                              disabled={deleting === r.id}
+                              className="p-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                              title="Delete request"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          }
+          cards={
+            <div className="space-y-3">
               {requests.map(r => {
                 const vendor = vendors.find(v => v.id === r.vendorId);
                 const waUrl = vendor?.phone
                   ? buildVendorWhatsAppUrl(r, vendor, window.location.origin)
                   : null;
                 return (
-                  <tr key={r.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/60 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-[var(--text-primary)]">{r.title}</p>
-                      {r.category && (
-                        <p className="text-xs text-[var(--text-tertiary)]">{CATEGORY_LABELS[r.category]}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)]">
-                      {propertyMap[r.propertyId] ?? '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <PriorityBadge priority={r.priority} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      {vendor ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-[var(--text-secondary)]">{vendor.name}</span>
-                          {waUrl && (
-                            <a
-                              href={waUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="shrink-0 p-1 rounded text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
-                              title="Send WhatsApp"
-                            >
-                              <Phone size={12} />
-                            </a>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-[var(--text-tertiary)]">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-xs text-[var(--text-secondary)]">
-                      {r.actualCost != null
-                        ? `₹${r.actualCost.toLocaleString('en-IN')}`
-                        : r.estimatedCost != null
-                        ? `~₹${r.estimatedCost.toLocaleString('en-IN')}`
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                  <TableCard
+                    key={r.id}
+                    title={
+                      <span>
+                        <span className="block font-medium text-sm text-[var(--text-primary)]">{r.title}</span>
+                        {r.category && (
+                          <span className="block text-xs text-[var(--text-tertiary)]">{CATEGORY_LABELS[r.category]}</span>
+                        )}
+                      </span>
+                    }
+                    titleExtra={<StatusBadge status={r.status} />}
+                    fields={[
+                      { label: 'Property', value: propertyMap[r.propertyId] ?? '—' },
+                      { label: 'Priority', value: <PriorityBadge priority={r.priority} /> },
+                      {
+                        label: 'Vendor',
+                        value: vendor ? (
+                          <span className="flex items-center gap-1.5">
+                            {vendor.name}
+                            {waUrl && (
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="shrink-0 text-[#25D366]"
+                                title="Send WhatsApp"
+                              >
+                                <Phone size={12} />
+                              </a>
+                            )}
+                          </span>
+                        ) : '—',
+                      },
+                      {
+                        label: 'Cost',
+                        value: r.actualCost != null
+                          ? `₹${r.actualCost.toLocaleString('en-IN')}`
+                          : r.estimatedCost != null
+                          ? `~₹${r.estimatedCost.toLocaleString('en-IN')}`
+                          : '—',
+                      },
+                    ]}
+                    actions={
+                      <>
                         <button
                           onClick={() => copyVendorLink(r.accessToken)}
-                          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                          title="Copy vendor link"
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                         >
-                          <Copy size={10} />
-                          {copied === r.accessToken ? 'Copied!' : 'Link'}
+                          <Copy size={11} />
+                          {copied === r.accessToken ? 'Copied!' : 'Copy link'}
                         </button>
                         <button
                           onClick={() => handleDelete(r.id)}
                           disabled={deleting === r.id}
-                          className="p-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
-                          title="Delete request"
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50 ml-auto"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={12} /> Delete
                         </button>
-                      </div>
-                    </td>
-                  </tr>
+                      </>
+                    }
+                  />
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          }
+        />
       )}
 
       <CreateModal

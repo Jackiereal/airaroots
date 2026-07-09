@@ -7,6 +7,7 @@ import type { Reservation } from '@/src/domains/reservation/types';
 import { ReservationStatusBadge } from '@/components/reservation/ReservationStatusBadge';
 import { ReservationForm } from '@/components/reservation/ReservationForm';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 
 type Property = { id: string; name: string };
 
@@ -95,55 +96,84 @@ export function ReservationListClient() {
           </button>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
-          <table className="w-full min-w-[42rem] text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Guest</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Property</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Dates</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Channel</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Status</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Net Payout</th>
-              </tr>
-            </thead>
-            <tbody>
+        <ResponsiveTable
+          table={
+            <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+              <table className="w-full min-w-[42rem] text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Guest</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Property</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Dates</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Channel</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Status</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Net Payout</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reservations.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/60 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/dashboard/reservations/${r.id}`}
+                          className="font-medium text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                        >
+                          {r.guestName ?? '—'}
+                        </Link>
+                        <p className="text-xs text-[var(--text-tertiary)]">{r.nights} nights</p>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">
+                        {propertyMap[r.propertyId] ?? '—'}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">
+                        <span>{fmtDate(r.checkIn)}</span>
+                        <span className="mx-1 text-[var(--text-tertiary)]">→</span>
+                        <span>{fmtDate(r.checkOut)}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">
+                        {CHANNEL_LABELS[r.channel] ?? r.channel}
+                      </td>
+                      <td className="px-4 py-3">
+                        <ReservationStatusBadge status={r.status} size="sm" />
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium text-[var(--text-primary)]">
+                        {fmt(r.netPayout)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          }
+          cards={
+            <div className="space-y-3">
               {reservations.map((r) => (
-                <tr
+                <TableCard
                   key={r.id}
-                  className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/60 transition-colors"
-                >
-                  <td className="px-4 py-3">
+                  title={
                     <Link
                       href={`/dashboard/reservations/${r.id}`}
-                      className="font-medium text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+                      className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
                     >
                       {r.guestName ?? '—'}
+                      <span className="block text-xs text-[var(--text-tertiary)] font-normal">{r.nights} nights</span>
                     </Link>
-                    <p className="text-xs text-[var(--text-tertiary)]">{r.nights} nights</p>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    {propertyMap[r.propertyId] ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    <span>{fmtDate(r.checkIn)}</span>
-                    <span className="mx-1 text-[var(--text-tertiary)]">→</span>
-                    <span>{fmtDate(r.checkOut)}</span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    {CHANNEL_LABELS[r.channel] ?? r.channel}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ReservationStatusBadge status={r.status} size="sm" />
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-[var(--text-primary)]">
-                    {fmt(r.netPayout)}
-                  </td>
-                </tr>
+                  }
+                  titleExtra={<ReservationStatusBadge status={r.status} size="sm" />}
+                  fields={[
+                    { label: 'Property', value: propertyMap[r.propertyId] ?? '—' },
+                    { label: 'Channel', value: CHANNEL_LABELS[r.channel] ?? r.channel },
+                    { label: 'Dates', value: `${fmtDate(r.checkIn)} → ${fmtDate(r.checkOut)}` },
+                    { label: 'Net Payout', value: <span className="font-medium text-[var(--text-primary)]">{fmt(r.netPayout)}</span> },
+                  ]}
+                />
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          }
+        />
       )}
 
       <ReservationForm

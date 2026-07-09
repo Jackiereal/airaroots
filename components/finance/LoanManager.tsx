@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Plus, Pencil, Trash2, Loader2, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import Picker from '@/components/ui/Picker';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 
 type Loan = {
   id: string;
@@ -221,31 +222,58 @@ function AmortizationTable({ data }: { data: LoanScheduleData }) {
         {show ? 'Hide' : 'Show'} amortization schedule ({schedule.rows.length} months)
       </button>
       {show && (
-        <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-xl border border-[var(--border-color)]">
-          <table className="w-full min-w-[44rem] text-xs text-[var(--text-primary)]">
-            <thead>
-              <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
-                {['#', 'Date', 'Opening', 'EMI', 'Principal', 'Interest', 'Extra', 'Closing'].map((h) => (
-                  <th key={h} className="px-3 py-2 text-left font-medium text-[var(--text-secondary)]">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
+        <ResponsiveTable
+          table={
+            <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-xl border border-[var(--border-color)]">
+              <table className="w-full min-w-[44rem] text-xs text-[var(--text-primary)]">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                    {['#', 'Date', 'Opening', 'EMI', 'Principal', 'Interest', 'Extra', 'Closing'].map((h) => (
+                      <th key={h} className="px-3 py-2 text-left font-medium text-[var(--text-secondary)]">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedule.rows.map((row) => (
+                    <tr key={row.month} className="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-elevated)]/50">
+                      <td className="px-3 py-1.5 tabular-nums text-[var(--text-secondary)]">{row.month}</td>
+                      <td className="px-3 py-1.5 tabular-nums">{fmtD(row.date)}</td>
+                      <td className="px-3 py-1.5 tabular-nums">{fmt(row.openingBalance)}</td>
+                      <td className="px-3 py-1.5 tabular-nums">{fmt(row.emi)}</td>
+                      <td className="px-3 py-1.5 tabular-nums text-teal-200">{fmt(row.principal)}</td>
+                      <td className="px-3 py-1.5 tabular-nums text-amber-200">{fmt(row.interest)}</td>
+                      <td className="px-3 py-1.5 tabular-nums text-[var(--accent)]">{row.extraPayment > 0 ? fmt(row.extraPayment) : '—'}</td>
+                      <td className="px-3 py-1.5 tabular-nums font-medium">{fmt(row.closingBalance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          }
+          cards={
+            <div className="space-y-3">
               {schedule.rows.map((row) => (
-                <tr key={row.month} className="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-elevated)]/50">
-                  <td className="px-3 py-1.5 tabular-nums text-[var(--text-secondary)]">{row.month}</td>
-                  <td className="px-3 py-1.5 tabular-nums">{fmtD(row.date)}</td>
-                  <td className="px-3 py-1.5 tabular-nums">{fmt(row.openingBalance)}</td>
-                  <td className="px-3 py-1.5 tabular-nums">{fmt(row.emi)}</td>
-                  <td className="px-3 py-1.5 tabular-nums text-teal-200">{fmt(row.principal)}</td>
-                  <td className="px-3 py-1.5 tabular-nums text-amber-200">{fmt(row.interest)}</td>
-                  <td className="px-3 py-1.5 tabular-nums text-[var(--accent)]">{row.extraPayment > 0 ? fmt(row.extraPayment) : '—'}</td>
-                  <td className="px-3 py-1.5 tabular-nums font-medium">{fmt(row.closingBalance)}</td>
-                </tr>
+                <TableCard
+                  key={row.month}
+                  title={
+                    <span className="font-medium text-sm text-[var(--text-primary)]">
+                      Month {row.month}
+                      <span className="block text-xs text-[var(--text-tertiary)] font-normal">{fmtD(row.date)}</span>
+                    </span>
+                  }
+                  titleExtra={<span className="font-medium text-sm text-[var(--text-primary)]">{fmt(row.closingBalance)}</span>}
+                  fields={[
+                    { label: 'Opening', value: fmt(row.openingBalance) },
+                    { label: 'EMI', value: fmt(row.emi) },
+                    { label: 'Principal', value: <span className="text-teal-400">{fmt(row.principal)}</span> },
+                    { label: 'Interest', value: <span className="text-amber-400">{fmt(row.interest)}</span> },
+                    { label: 'Extra', value: row.extraPayment > 0 ? <span className="text-[var(--accent)]">{fmt(row.extraPayment)}</span> : '—' },
+                  ]}
+                />
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          }
+        />
       )}
     </div>
   );

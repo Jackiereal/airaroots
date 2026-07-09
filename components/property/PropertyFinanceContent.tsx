@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 import * as Dialog from '@radix-ui/react-dialog';
 import Picker from '@/components/ui/Picker';
+import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import { formatExpensePaidLabel } from '@/lib/property-finance/expense-paid-source';
 import { stripFinancialTrackerBackfillFromNote } from '@/lib/property-finance/strip-tracker-backfill-note';
 import {
@@ -415,64 +416,103 @@ function BookingsTab({
             {directBookings.length}
           </span>
         </div>
-        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-          <table className="w-full min-w-[40rem] text-xs sm:text-sm">
-            <thead>
-              <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
-                <th className="px-4 py-2.5 font-medium">Guest</th>
-                <th className="px-4 py-2.5 font-medium">Phone</th>
-                <th className="px-4 py-2.5 font-medium">Guests</th>
-                <th className="px-4 py-2.5 font-medium">Amount</th>
-                <th className="px-4 py-2.5 font-medium">Stay</th>
-                <th className="px-4 py-2.5 font-medium">Notes</th>
-                {!isReadOnly && <th className="px-4 py-2.5 w-20 text-right font-medium">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {directBookings.length === 0 ? (
-                <tr>
-                  <td colSpan={isReadOnly ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-tertiary)]">
-                    No direct bookings this month.
-                  </td>
-                </tr>
-              ) : (
-                directBookings.map((r) => (
-                  <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
-                    <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest_name}</td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
-                      {r.guest_phone ? (
-                        <a href={`tel:${r.guest_phone.replace(/\s/g, '')}`} className="text-[var(--accent)] hover:underline">
-                          {r.guest_phone}
-                        </a>
-                      ) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">{r.guest_count ?? '—'}</td>
-                    <td className="px-4 py-2.5 font-medium text-[var(--accent)]">{formatInr(Number(r.amount))}</td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
-                      {r.check_in && r.check_out ? `${r.check_in} → ${r.check_out}` : '—'}
-                      {r.nights != null ? ` (${r.nights}n)` : ''}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)] max-w-[10rem] truncate">{r.notes ?? '—'}</td>
-                    {!isReadOnly && (
-                      <td className="px-4 py-2.5">
-                        <div className="flex justify-end gap-1">
-                          <button type="button" onClick={() => onEditDirect(r)}
-                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button type="button" onClick={() => onDeleteDirect(r.id)}
-                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-400">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {directBookings.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-[var(--text-tertiary)]">No direct bookings this month.</p>
+        ) : (
+          <ResponsiveTable
+            table={
+              <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+                <table className="w-full min-w-[40rem] text-xs sm:text-sm">
+                  <thead>
+                    <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                      <th className="px-4 py-2.5 font-medium">Guest</th>
+                      <th className="px-4 py-2.5 font-medium">Phone</th>
+                      <th className="px-4 py-2.5 font-medium">Guests</th>
+                      <th className="px-4 py-2.5 font-medium">Amount</th>
+                      <th className="px-4 py-2.5 font-medium">Stay</th>
+                      <th className="px-4 py-2.5 font-medium">Notes</th>
+                      {!isReadOnly && <th className="px-4 py-2.5 w-20 text-right font-medium">Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {directBookings.map((r) => (
+                      <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
+                        <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest_name}</td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                          {r.guest_phone ? (
+                            <a href={`tel:${r.guest_phone.replace(/\s/g, '')}`} className="text-[var(--accent)] hover:underline">
+                              {r.guest_phone}
+                            </a>
+                          ) : '—'}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)]">{r.guest_count ?? '—'}</td>
+                        <td className="px-4 py-2.5 font-medium text-[var(--accent)]">{formatInr(Number(r.amount))}</td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
+                          {r.check_in && r.check_out ? `${r.check_in} → ${r.check_out}` : '—'}
+                          {r.nights != null ? ` (${r.nights}n)` : ''}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)] max-w-[10rem] truncate">{r.notes ?? '—'}</td>
+                        {!isReadOnly && (
+                          <td className="px-4 py-2.5">
+                            <div className="flex justify-end gap-1">
+                              <button type="button" onClick={() => onEditDirect(r)}
+                                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button type="button" onClick={() => onDeleteDirect(r.id)}
+                                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-400">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            }
+            cards={
+              <div className="p-3 space-y-3">
+                {directBookings.map((r) => (
+                  <TableCard
+                    key={r.id}
+                    title={<span className="font-medium text-sm text-[var(--text-primary)]">{r.guest_name}</span>}
+                    titleExtra={<span className="font-medium text-sm text-[var(--accent)]">{formatInr(Number(r.amount))}</span>}
+                    fields={[
+                      {
+                        label: 'Phone',
+                        value: r.guest_phone ? (
+                          <a href={`tel:${r.guest_phone.replace(/\s/g, '')}`} className="text-[var(--accent)]">{r.guest_phone}</a>
+                        ) : '—',
+                      },
+                      { label: 'Guests', value: r.guest_count ?? '—' },
+                      {
+                        label: 'Stay',
+                        value: r.check_in && r.check_out
+                          ? `${r.check_in} → ${r.check_out}${r.nights != null ? ` (${r.nights}n)` : ''}`
+                          : '—',
+                      },
+                      { label: 'Notes', value: r.notes ?? '—' },
+                    ]}
+                    actions={!isReadOnly ? (
+                      <>
+                        <button type="button" onClick={() => onEditDirect(r)}
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--accent)]">
+                          <Pencil className="w-3 h-3" /> Edit
+                        </button>
+                        <button type="button" onClick={() => onDeleteDirect(r.id)}
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-500/10 ml-auto">
+                          <Trash2 className="w-3 h-3" /> Delete
+                        </button>
+                      </>
+                    ) : undefined}
+                  />
+                ))}
+              </div>
+            }
+          />
+        )}
       </section>
 
       {/* Airbnb Reservations */}
@@ -483,66 +523,107 @@ function BookingsTab({
             {reservations.length}
           </span>
         </div>
-        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
-          <table className="w-full min-w-[40rem] text-xs sm:text-sm">
-            <thead>
-              <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
-                <th className="px-4 py-2.5 font-medium">Guest</th>
-                <th className="px-4 py-2.5 font-medium">Stay</th>
-                <th className="px-4 py-2.5 font-medium">Guests</th>
-                <th className="px-4 py-2.5 font-medium">Gross</th>
-                <th className="px-4 py-2.5 font-medium">Payout</th>
-                <th className="px-4 py-2.5 font-medium">Fee</th>
-                {!isReadOnly && <th className="px-4 py-2.5 w-16 text-right font-medium">Edit</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {reservations.length === 0 ? (
-                <tr>
-                  <td colSpan={isReadOnly ? 6 : 7} className="px-4 py-8 text-center text-[var(--text-tertiary)]">
-                    No Airbnb reservations this month.
-                  </td>
-                </tr>
-              ) : (
-                reservations.map((r) => (
-                  <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
-                    <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest ?? '—'}</td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
-                      {r.start_date ?? '—'} → {r.end_date ?? '—'}
-                      {r.nights != null ? ` (${r.nights}n)` : ''}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
-                      {r.guests_effective}
-                      {r.guest_count != null && (
-                        <span className="ml-1 text-[10px] uppercase tracking-wide text-[var(--accent)]">saved</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
-                      {r.gross_earnings != null ? formatInr(Number(r.gross_earnings)) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 font-medium text-[var(--accent)]">
-                      {r.amount != null ? formatInr(Number(r.amount)) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--text-secondary)]">
-                      {r.service_fee != null ? formatInr(Number(r.service_fee)) : '—'}
-                    </td>
-                    {!isReadOnly && (
-                      <td className="px-4 py-2.5">
-                        <div className="flex justify-end">
-                          <button type="button" onClick={() => onEditAirbnbGuest(r)}
-                            className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]"
-                            aria-label="Edit guest count">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {reservations.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-[var(--text-tertiary)]">No Airbnb reservations this month.</p>
+        ) : (
+          <ResponsiveTable
+            table={
+              <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+                <table className="w-full min-w-[40rem] text-xs sm:text-sm">
+                  <thead>
+                    <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                      <th className="px-4 py-2.5 font-medium">Guest</th>
+                      <th className="px-4 py-2.5 font-medium">Stay</th>
+                      <th className="px-4 py-2.5 font-medium">Guests</th>
+                      <th className="px-4 py-2.5 font-medium">Gross</th>
+                      <th className="px-4 py-2.5 font-medium">Payout</th>
+                      <th className="px-4 py-2.5 font-medium">Fee</th>
+                      {!isReadOnly && <th className="px-4 py-2.5 w-16 text-right font-medium">Edit</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reservations.map((r) => (
+                      <tr key={r.id} className="border-b border-[var(--border-color)]/60 hover:bg-[var(--bg-elevated)]/30">
+                        <td className="px-4 py-2.5 font-medium text-[var(--text-primary)]">{r.guest ?? '—'}</td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)] whitespace-nowrap">
+                          {r.start_date ?? '—'} → {r.end_date ?? '—'}
+                          {r.nights != null ? ` (${r.nights}n)` : ''}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                          {r.guests_effective}
+                          {r.guest_count != null && (
+                            <span className="ml-1 text-[10px] uppercase tracking-wide text-[var(--accent)]">saved</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                          {r.gross_earnings != null ? formatInr(Number(r.gross_earnings)) : '—'}
+                        </td>
+                        <td className="px-4 py-2.5 font-medium text-[var(--accent)]">
+                          {r.amount != null ? formatInr(Number(r.amount)) : '—'}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)]">
+                          {r.service_fee != null ? formatInr(Number(r.service_fee)) : '—'}
+                        </td>
+                        {!isReadOnly && (
+                          <td className="px-4 py-2.5">
+                            <div className="flex justify-end">
+                              <button type="button" onClick={() => onEditAirbnbGuest(r)}
+                                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-raised)] hover:text-[var(--accent)]"
+                                aria-label="Edit guest count">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            }
+            cards={
+              <div className="p-3 space-y-3">
+                {reservations.map((r) => (
+                  <TableCard
+                    key={r.id}
+                    title={<span className="font-medium text-sm text-[var(--text-primary)]">{r.guest ?? '—'}</span>}
+                    titleExtra={
+                      <span className="font-medium text-sm text-[var(--accent)]">
+                        {r.amount != null ? formatInr(Number(r.amount)) : '—'}
+                      </span>
+                    }
+                    fields={[
+                      {
+                        label: 'Stay',
+                        value: `${r.start_date ?? '—'} → ${r.end_date ?? '—'}${r.nights != null ? ` (${r.nights}n)` : ''}`,
+                      },
+                      {
+                        label: 'Guests',
+                        value: (
+                          <>
+                            {r.guests_effective}
+                            {r.guest_count != null && (
+                              <span className="ml-1 text-[10px] uppercase tracking-wide text-[var(--accent)]">saved</span>
+                            )}
+                          </>
+                        ),
+                      },
+                      { label: 'Gross', value: r.gross_earnings != null ? formatInr(Number(r.gross_earnings)) : '—' },
+                      { label: 'Fee', value: r.service_fee != null ? formatInr(Number(r.service_fee)) : '—' },
+                    ]}
+                    actions={!isReadOnly ? (
+                      <button type="button" onClick={() => onEditAirbnbGuest(r)}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                        aria-label="Edit guest count">
+                        <Pencil className="w-3 h-3" /> Edit guests
+                      </button>
+                    ) : undefined}
+                  />
+                ))}
+              </div>
+            }
+          />
+        )}
       </section>
     </div>
   );
@@ -2078,38 +2159,58 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   No out-of-pocket expenses for this payer yet.
                 </p>
               ) : (
-                <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-lg border border-[var(--border-color)]">
-                  <table className="w-full min-w-[28rem] text-xs sm:text-sm">
-                    <thead>
-                      <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)] text-left text-[var(--text-tertiary)]">
-                        <th className="px-3 py-2 font-medium">Month</th>
-                        <th className="px-3 py-2 font-medium">Type</th>
-                        <th className="px-3 py-2 font-medium">Amount</th>
-                        <th className="px-3 py-2 font-medium">Date</th>
-                        <th className="px-3 py-2 font-medium">Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                <ResponsiveTable
+                  table={
+                    <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-lg border border-[var(--border-color)]">
+                      <table className="w-full min-w-[28rem] text-xs sm:text-sm">
+                        <thead>
+                          <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)] text-left text-[var(--text-tertiary)]">
+                            <th className="px-3 py-2 font-medium">Month</th>
+                            <th className="px-3 py-2 font-medium">Type</th>
+                            <th className="px-3 py-2 font-medium">Amount</th>
+                            <th className="px-3 py-2 font-medium">Date</th>
+                            <th className="px-3 py-2 font-medium">Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {oopListRows.map((r) => (
+                            <tr key={r.id} className="border-b border-[var(--border-color)]/60">
+                              <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
+                                {ymFromPeriodMonth(r.period_month)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">{r.expense_type}</td>
+                              <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
+                                {formatInr(Number(r.amount))}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
+                                {r.expense_date ?? '—'}
+                              </td>
+                              <td className="max-w-[10rem] truncate px-3 py-2 text-[var(--text-secondary)] sm:max-w-none sm:whitespace-normal">
+                                {stripFinancialTrackerBackfillFromNote(r.notes) ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                  cards={
+                    <div className="space-y-3">
                       {oopListRows.map((r) => (
-                        <tr key={r.id} className="border-b border-[var(--border-color)]/60">
-                          <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
-                            {ymFromPeriodMonth(r.period_month)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">{r.expense_type}</td>
-                          <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
-                            {formatInr(Number(r.amount))}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-2 text-[var(--text-secondary)]">
-                            {r.expense_date ?? '—'}
-                          </td>
-                          <td className="max-w-[10rem] truncate px-3 py-2 text-[var(--text-secondary)] sm:max-w-none sm:whitespace-normal">
-                            {stripFinancialTrackerBackfillFromNote(r.notes) ?? '—'}
-                          </td>
-                        </tr>
+                        <TableCard
+                          key={r.id}
+                          title={<span className="font-medium text-sm text-[var(--text-primary)]">{ymFromPeriodMonth(r.period_month)}</span>}
+                          titleExtra={<span className="text-sm text-[var(--text-secondary)]">{formatInr(Number(r.amount))}</span>}
+                          fields={[
+                            { label: 'Type', value: r.expense_type },
+                            { label: 'Date', value: r.expense_date ?? '—' },
+                            { label: 'Notes', value: stripFinancialTrackerBackfillFromNote(r.notes) ?? '—' },
+                          ]}
+                        />
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  }
+                />
               )}
             </div>
           </Dialog.Content>
@@ -2264,58 +2365,100 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                     {allMonthsData.monthCount} month{allMonthsData.monthCount === 1 ? '' : 's'} with expenses, direct bookings,
                     or Airbnb imports. Out-of-pocket columns include only expenses tagged Teja or Indu (not self / operating).
                   </p>
-                  <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-lg border border-[var(--border-color)]">
-                    <table className="w-full min-w-[52rem] text-xs sm:text-sm">
-                      <thead>
-                        <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Month</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Expenses</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">OOP Teja</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">OOP Indu</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Direct</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Airbnb payouts</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Cash in (est.)</th>
-                          <th className="px-3 py-2 font-medium whitespace-nowrap">Net</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  <ResponsiveTable
+                    table={
+                      <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-lg border border-[var(--border-color)]">
+                        <table className="w-full min-w-[52rem] text-xs sm:text-sm">
+                          <thead>
+                            <tr className="text-left text-[var(--text-tertiary)] border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Month</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Expenses</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">OOP Teja</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">OOP Indu</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Direct</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Airbnb payouts</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Cash in (est.)</th>
+                              <th className="px-3 py-2 font-medium whitespace-nowrap">Net</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allMonthsData.months.map((m) => (
+                              <tr key={m.periodMonth} className="border-b border-[var(--border-color)]/60">
+                                <td className="px-3 py-2 font-medium text-[var(--text-primary)] whitespace-nowrap">{m.month}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.expenseTotal)}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.outOfPocketTeja ?? 0)}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.outOfPocketIndu ?? 0)}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.directTotal)}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.bankPayouts)}</td>
+                                <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.cashInboundEstimate)}</td>
+                                <td className="px-3 py-2 font-medium text-[var(--text-primary)]">{formatInr(m.netCash)}</td>
+                              </tr>
+                            ))}
+                            <tr className="bg-[var(--accent)]/10 font-semibold border-t-2 border-[var(--accent)]/40">
+                              <td className="px-3 py-2 text-[var(--text-primary)]">Total</td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.expenseTotal)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.teja ?? 0)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.indu ?? 0)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.directTotal)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.bankPayouts)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--text-primary)]">
+                                {formatInr(allMonthsData.grandTotals.cashInboundEstimate)}
+                              </td>
+                              <td className="px-3 py-2 text-[var(--accent)]">{formatInr(allMonthsData.grandTotals.netCash)}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                    cards={
+                      <div className="space-y-3">
                         {allMonthsData.months.map((m) => (
-                          <tr key={m.periodMonth} className="border-b border-[var(--border-color)]/60">
-                            <td className="px-3 py-2 font-medium text-[var(--text-primary)] whitespace-nowrap">{m.month}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.expenseTotal)}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.outOfPocketTeja ?? 0)}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.outOfPocketIndu ?? 0)}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.directTotal)}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.bankPayouts)}</td>
-                            <td className="px-3 py-2 text-[var(--text-secondary)]">{formatInr(m.cashInboundEstimate)}</td>
-                            <td className="px-3 py-2 font-medium text-[var(--text-primary)]">{formatInr(m.netCash)}</td>
-                          </tr>
+                          <TableCard
+                            key={m.periodMonth}
+                            title={<span className="font-medium text-sm text-[var(--text-primary)]">{m.month}</span>}
+                            titleExtra={<span className="font-medium text-sm text-[var(--text-primary)]">{formatInr(m.netCash)}</span>}
+                            fields={[
+                              { label: 'Expenses', value: formatInr(m.expenseTotal) },
+                              { label: 'OOP Teja', value: formatInr(m.outOfPocketTeja ?? 0) },
+                              { label: 'OOP Indu', value: formatInr(m.outOfPocketIndu ?? 0) },
+                              { label: 'Direct', value: formatInr(m.directTotal) },
+                              { label: 'Airbnb payouts', value: formatInr(m.bankPayouts) },
+                              { label: 'Cash in (est.)', value: formatInr(m.cashInboundEstimate) },
+                            ]}
+                          />
                         ))}
-                        <tr className="bg-[var(--accent)]/10 font-semibold border-t-2 border-[var(--accent)]/40">
-                          <td className="px-3 py-2 text-[var(--text-primary)]">Total</td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.expenseTotal)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.teja ?? 0)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.indu ?? 0)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.directTotal)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.bankPayouts)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
-                            {formatInr(allMonthsData.grandTotals.cashInboundEstimate)}
-                          </td>
-                          <td className="px-3 py-2 text-[var(--accent)]">{formatInr(allMonthsData.grandTotals.netCash)}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                        <div className="rounded-xl border-2 border-[var(--accent)]/40 bg-[var(--accent)]/10 p-4 space-y-2.5">
+                          <span className="font-semibold text-sm text-[var(--text-primary)]">Total</span>
+                          <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
+                            {[
+                              { label: 'Expenses', value: formatInr(allMonthsData.grandTotals.expenseTotal) },
+                              { label: 'OOP Teja', value: formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.teja ?? 0) },
+                              { label: 'OOP Indu', value: formatInr(allMonthsData.grandTotals.outOfPocketByPayer?.indu ?? 0) },
+                              { label: 'Direct', value: formatInr(allMonthsData.grandTotals.directTotal) },
+                              { label: 'Airbnb payouts', value: formatInr(allMonthsData.grandTotals.bankPayouts) },
+                              { label: 'Cash in (est.)', value: formatInr(allMonthsData.grandTotals.cashInboundEstimate) },
+                              { label: 'Net', value: formatInr(allMonthsData.grandTotals.netCash), accent: true },
+                            ].map((f, i) => (
+                              <div key={i} className="min-w-0">
+                                <dt className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">{f.label}</dt>
+                                <dd className={`text-sm font-semibold ${f.accent ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>{f.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </div>
+                      </div>
+                    }
+                  />
                 </div>
               ) : (
                 <p className="py-12 text-center text-sm text-[var(--text-tertiary)]">
