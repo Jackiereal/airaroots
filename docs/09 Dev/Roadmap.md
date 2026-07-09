@@ -1,7 +1,7 @@
 # Product Roadmap
 
-> Current date: 2026-07-07
-> Current status: Finance module built. Phase 1 not started.
+> Current date: 2026-07-09
+> Current status: Phase 1 & 2 complete, Phase 3 (Operations) in progress. Phase 4 (Guest CRM) deferred — not needed for MVP, reordered after Operations.
 
 ---
 
@@ -11,8 +11,8 @@
 |-------|------|--------|-------------------|
 | 1 | Reservation Engine + Universal Calendar | Not Started | 4–6 weeks |
 | 2 | Channel Manager (Airbnb + Booking.com) | Not Started | 4–6 weeks |
-| 3 | Guest CRM + Reviews | Not Started | 2–3 weeks |
-| 4 | Operations (Housekeeping, Maintenance, Inventory) | Not Started | 4–5 weeks |
+| 3 | Operations (Housekeeping, Maintenance, Inventory) | In Progress | 4–5 weeks |
+| 4 | Guest CRM + Reviews | Deferred (post-MVP) | 2–3 weeks |
 | 5 | Automation + Communication | Not Started | 3–4 weeks |
 | 6 | Revenue Intelligence + AI | Not Started | 4–5 weeks |
 | 7 | Owner Portal 2.0 + Reporting | Not Started | 2–3 weeks |
@@ -68,25 +68,7 @@
 
 ---
 
-## Phase 3: Guest CRM
-
-**Goal:** Know your guests across all properties and channels.
-
-**Deliverables:**
-- [ ] Extend `guests` table (ID fields, full profile)
-- [ ] GuestService with match logic
-- [ ] Guest list + search page
-- [ ] Guest profile page with stay history
-- [ ] Guest tags (VIP, repeat, problematic)
-- [ ] Blacklist functionality
-- [ ] Link guests to reservations automatically on sync
-- [ ] Guest notes
-
-**Done criteria:** After 3 months of usage, can identify repeat guests and their stay history.
-
----
-
-## Phase 4: Operations
+## Phase 3: Operations
 
 **Goal:** Automate housekeeping and track maintenance.
 
@@ -105,6 +87,24 @@
 - [ ] Push notifications to housekeeping staff
 
 **Done criteria:** Housekeeper gets notified on phone when guest checks out. Marks task complete with photos. Manager sees status in real time.
+
+---
+
+## Phase 4: Guest CRM (Deferred — not needed for MVP)
+
+**Goal:** Know your guests across all properties and channels.
+
+**Deliverables:**
+- [ ] Extend `guests` table (ID fields, full profile)
+- [ ] GuestService with match logic
+- [ ] Guest list + search page
+- [ ] Guest profile page with stay history
+- [ ] Guest tags (VIP, repeat, problematic)
+- [ ] Blacklist functionality
+- [ ] Link guests to reservations automatically on sync
+- [ ] Guest notes
+
+**Done criteria:** After 3 months of usage, can identify repeat guests and their stay history.
 
 ---
 

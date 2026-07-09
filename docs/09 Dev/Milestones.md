@@ -92,9 +92,9 @@ User can:
 
 ---
 
-## M7: Guest CRM Live (Phase 3)
+## M7: Guest CRM Live (Phase 4 — Deferred, not needed for MVP)
 
-**Target:** End of week 11
+**Target:** TBD (post-MVP)
 
 - Guest profiles auto-created from reservations
 - Guest list with search
@@ -103,7 +103,7 @@ User can:
 
 ---
 
-## M8: Housekeeping Live (Phase 4)
+## M8: Housekeeping Live (Phase 3)
 
 **Target:** End of week 15
 

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2, ClipboardCheck, Wrench, Package } from 'lucide-react';
+import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2, ClipboardCheck, Wrench, Package, HardHat } from 'lucide-react';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV = [
@@ -18,6 +18,7 @@ const NAV = [
 const OPS_NAV = [
   { href: '/dashboard/housekeeping', label: 'Housekeeping', icon: ClipboardCheck },
   { href: '/dashboard/maintenance', label: 'Maintenance', icon: Wrench },
+  { href: '/dashboard/vendors', label: 'Vendors', icon: HardHat },
   { href: '/dashboard/inventory', label: 'Inventory', icon: Package },
 ];
 
