@@ -54,6 +54,7 @@ export function ReservationListClient() {
   }
 
   const conflictCount = reservations.filter(r => r.status === 'conflict').length;
+  const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
 
   return (
     <>
@@ -99,6 +100,7 @@ export function ReservationListClient() {
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Guest</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Property</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Dates</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Channel</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Status</th>
@@ -119,6 +121,9 @@ export function ReservationListClient() {
                       {r.guestName ?? '—'}
                     </Link>
                     <p className="text-xs text-[var(--text-tertiary)]">{r.nights} nights</p>
+                  </td>
+                  <td className="px-4 py-3 text-[var(--text-secondary)]">
+                    {propertyMap[r.propertyId] ?? '—'}
                   </td>
                   <td className="px-4 py-3 text-[var(--text-secondary)]">
                     <span>{fmtDate(r.checkIn)}</span>

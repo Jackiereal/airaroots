@@ -13,6 +13,7 @@
   - Remaining: push notifications to housekeeping staff on task creation/checkout (not built — no push/notification code anywhere; decided against for now, WhatsApp auto-notify or true web push both deferred)
 - Phase 4 (Guest CRM) DEFERRED post-MVP — swapped after Operations in roadmap; not needed for MVP launch
 - `docs/09 Dev/Roadmap.md` and `docs/09 Dev/Milestones.md` updated 2026-07-09 to reflect Phase 3/4 swap
+- 2026-07-09 fixes (uncommitted as of writing): reservation detail page missing action buttons, housekeeping board default view, checkout status bug — see "Reservation → Housekeeping Automation" section below
 
 ### Phase 2 — Built
 - iCal sync: Airbnb + Booking.com + VRBO via `src/domains/channel/`
@@ -112,6 +113,17 @@
   - `MaintenanceList.tsx` vendor dropdown shows vendors where `!v.propertyId || v.propertyId === form.propertyId` (org-wide ∪ property match)
   - `VendorRepository.findByOrg` uses `.or('property_id.eq.X,property_id.is.null')` when filtering by property — always includes org-wide vendors alongside property-specific ones
 - No middleware.ts at root — all routes currently unprotected by middleware (only API routes use requireOrgAuth)
+
+## Reservation → Housekeeping Automation (verified 2026-07-09)
+- Full chain confirmed working end-to-end via live server logs: check-in click → `POST /api/reservations/[id]/check-in` → `ReservationService.checkIn()` → `transitionStatus()` publishes `reservation.checked_in` → `housekeepingHandler.onCheckedIn` creates a `checkout_clean` task scheduled for the reservation's checkout date (idempotent via `findTaskByReservation`)
+- All handlers registered in `src/infrastructure/events/register-handlers.ts`, gated by `ensureHandlers()` (module-level `initialized` flag) — called at the top of check-in/check-out/task-creation API routes
+- Full event map: `reservation.created/modified/cancelled` → `calendar.handler` (calendar_blocks CRUD) + `finance.handler` (direct_bookings CRUD, `channel === 'direct'` only); `reservation.checked_in/checked_out/cancelled/modified` → `housekeepingHandler`
+- **Bug fixed 2026-07-09**: `onCheckedOut` used to force any pending/assigned task straight to `in_progress` on guest checkout, even with zero staff assigned — misleading, since "In Progress" implies someone's actively cleaning. Fixed: only advances to `in_progress` if `status === 'assigned'`; unassigned tasks correctly stay `pending`
+- **UI bug fixed 2026-07-09**: `/dashboard/reservations/[id]` (the full-page detail view) had zero action buttons — Check In/Out/Cancel only existed in the calendar's slide-over (`ReservationDetail.tsx`). Added `components/reservation/ReservationActions.tsx` (client component) and wired into the page
+- **UX bug fixed 2026-07-09**: `/dashboard/housekeeping` board defaulted to showing only *today's* tasks with no indicator that tasks exist on other dates — a task created at check-in for a future checkout date was invisible. Added `showAllUpcoming` toggle, **now defaults to `true`** (shows all non-completed/cancelled tasks sorted by date); unchecking narrows to the date picker
+- **Known dead code**: `HousekeepingService.getTasksNeedingReminder()` + `markReminderSent()` + `buildReminderWhatsAppUrl()` + `reminder_sent_at` column all exist but nothing calls them — scaffolded "morning-of reminder to staff" feature, never wired to a cron/trigger
+- **Known redundancy**: two separate 15-min sync triggers exist in parallel — `instrumentation.ts` in-process `setInterval` (prod only) AND `/api/cron/sync-channels` (external Railway cron, `CRON_SECRET`-protected). Both call `channelSyncService.syncAll('cron')`. Not harmful (idempotent via `platform_booking_id`) but doubles sync frequency/API calls to Airbnb/Booking.com — not yet deduplicated
+- Push notifications to staff on task creation/assignment: still not built (see Phase 3 remaining gap above)
 
 ## Finance Data Architecture (critical — no double-counting)
 - `property_finance_airbnb_rows` = CSV import source for P&L (Airbnb payouts, fees, gross earnings)
