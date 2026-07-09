@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { channelSyncService } from '@/src/domains/channel/services/channel-sync.service';
 
-// Called by Railway cron every 15 minutes.
+// Manual/on-demand channel sync trigger. NOT currently wired to a scheduler —
+// the live 15-minute sync is instrumentation.ts's in-process setInterval
+// (production only). Use this route to force a sync now, or as the target
+// if a Railway Cron Job / external scheduler is configured later — set
+// CRON_SECRET as an env var and it becomes a real schedule without code changes.
 // Protected by CRON_SECRET header.
 export async function POST(request: Request) {
   const secret = request.headers.get('x-cron-secret');

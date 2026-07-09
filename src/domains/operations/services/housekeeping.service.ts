@@ -178,8 +178,8 @@ export class HousekeepingService {
     return this.repo.findPhotos(taskId);
   }
 
-  async getTasksNeedingReminder(date: string): Promise<HousekeepingTask[]> {
-    return this.repo.findTasksNeedingReminder(date);
+  async getTasksNeedingReminder(organizationId: string, date: string): Promise<HousekeepingTask[]> {
+    return this.repo.findTasksNeedingReminder(organizationId, date);
   }
 
   async markReminderSent(taskId: string): Promise<void> {

@@ -133,17 +133,22 @@ export class HousekeepingRepository {
     return this.toTaskEntity(data as TaskRow & { staff: null });
   }
 
-  // Tasks scheduled today that haven't had reminder sent yet
-  async findTasksNeedingReminder(date: string): Promise<HousekeepingTask[]> {
+  // Tasks scheduled today, assigned to staff, not yet reminded — a manager
+  // needs to manually send the WhatsApp link (no server-side auto-send available).
+  async findTasksNeedingReminder(organizationId: string, date: string): Promise<HousekeepingTask[]> {
     const { data, error } = await this.supabase
       .from('housekeeping_tasks')
       .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status)')
+      .eq('organization_id', organizationId)
       .eq('scheduled_date', date)
       .not('status', 'in', '("completed","cancelled")')
+      .not('assigned_to', 'is', null)
       .is('reminder_sent_at', null);
 
     if (error) throw new Error(`DB error: ${error.message}`);
-    return (data ?? []).map((r) => this.toTaskEntity(r as TaskRow & { staff: StaffRow | null }));
+    return (data ?? [])
+      .map((r) => this.toTaskEntity(r as TaskRow & { staff: StaffRow | null }))
+      .filter((t) => t.staff?.phone);
   }
 
   async createTask(input: CreateHousekeepingTaskInput): Promise<HousekeepingTask> {

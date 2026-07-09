@@ -48,6 +48,13 @@ function buildWhatsAppUrl(task: HousekeepingTask, staff: HousekeepingStaff, base
   return `https://wa.me/${staff.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
 }
 
+function buildReminderUrl(task: HousekeepingTask, staff: HousekeepingStaff, baseUrl: string) {
+  const time = task.scheduledTime ?? '14:00';
+  const taskUrl = `${baseUrl}/hk/${task.accessToken}`;
+  const msg = `Reminder: Property cleaning today by ${time}. Checklist: ${taskUrl}`;
+  return `https://wa.me/${staff.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+}
+
 // ── Task Card ─────────────────────────────────────────────────────────────────
 
 function TaskCard({
@@ -354,6 +361,57 @@ function AssignModal({
   );
 }
 
+// ── Reminders Banner ────────────────────────────────────────────────────────────
+// No server-side auto-send is possible without WhatsApp Business API access, so
+// this surfaces today's un-reminded, staff-assigned tasks for a manager to click
+// through manually. Each click opens wa.me and marks the reminder sent.
+
+function RemindersBanner({ onDismissOne }: { onDismissOne: () => void }) {
+  const [reminders, setReminders] = useState<HousekeepingTask[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/housekeeping/tasks/reminders')
+      .then(res => (res.ok ? res.json() : { tasks: [] }))
+      .then(d => { setReminders(d.tasks ?? []); setLoaded(true); });
+  }, []);
+
+  async function handleSent(task: HousekeepingTask) {
+    await fetch(`/api/housekeeping/tasks/${task.id}/remind`, { method: 'POST' });
+    setReminders(prev => prev.filter(t => t.id !== task.id));
+    onDismissOne();
+  }
+
+  if (!loaded || reminders.length === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 mb-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-2">
+        {reminders.length} task{reminders.length > 1 ? 's' : ''} today need a reminder sent
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {reminders.map(task => {
+          if (!task.staff?.phone) return null;
+          const url = buildReminderUrl(task, task.staff, window.location.origin);
+          return (
+            <a
+              key={task.id}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => handleSent(task)}
+              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-amber-500/30 bg-[var(--bg-surface)] text-[var(--text-primary)] hover:bg-amber-500/10 transition-colors"
+            >
+              <Phone size={11} className="text-[#25D366]" />
+              Remind {task.staff.name}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Board ────────────────────────────────────────────────────────────────
 
 export function HousekeepingBoard() {
@@ -411,6 +469,8 @@ export function HousekeepingBoard() {
 
   return (
     <>
+      <RemindersBanner onDismissOne={fetchData} />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
         <input
