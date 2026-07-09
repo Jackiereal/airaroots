@@ -189,7 +189,9 @@ function CreateModal({
               className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
             >
               <option value="">No vendor</option>
-              {vendors.map(v => <option key={v.id} value={v.id}>{v.name}{v.category ? ` (${v.category})` : ''}</option>)}
+              {vendors
+                .filter(v => !v.propertyId || v.propertyId === form.propertyId)
+                .map(v => <option key={v.id} value={v.id}>{v.name}{v.category ? ` (${v.category})` : ''}</option>)}
             </select>
           </div>
           <div>

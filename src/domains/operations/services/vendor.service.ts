@@ -18,7 +18,7 @@ export class VendorService {
 
   async list(
     organizationId: string,
-    opts: { activeOnly?: boolean; category?: VendorCategory } = {}
+    opts: { activeOnly?: boolean; category?: VendorCategory; propertyId?: string } = {}
   ): Promise<Vendor[]> {
     return this.repo.findByOrg(organizationId, opts);
   }

@@ -4,6 +4,7 @@ import type { Vendor, VendorCategory, CreateVendorInput, UpdateVendorInput } fro
 type VendorRow = {
   id: string;
   organization_id: string;
+  property_id: string | null;
   name: string;
   category: string | null;
   phone: string | null;
@@ -33,7 +34,7 @@ export class VendorRepository {
 
   async findByOrg(
     organizationId: string,
-    opts: { activeOnly?: boolean; category?: VendorCategory } = {}
+    opts: { activeOnly?: boolean; category?: VendorCategory; propertyId?: string } = {}
   ): Promise<Vendor[]> {
     let query = this.supabase
       .from('vendors')
@@ -43,6 +44,8 @@ export class VendorRepository {
 
     if (opts.activeOnly !== false) query = query.eq('is_active', true);
     if (opts.category) query = query.eq('category', opts.category);
+    // Org-wide vendors (property_id null) always included alongside property-specific ones
+    if (opts.propertyId) query = query.or(`property_id.eq.${opts.propertyId},property_id.is.null`);
 
     const { data, error } = await query;
     if (error) throw new Error(`DB error: ${error.message}`);
@@ -54,6 +57,7 @@ export class VendorRepository {
       .from('vendors')
       .insert({
         organization_id: input.organizationId,
+        property_id: input.propertyId ?? null,
         name: input.name,
         category: input.category ?? null,
         phone: input.phone ?? null,
@@ -71,6 +75,7 @@ export class VendorRepository {
 
   async update(id: string, input: UpdateVendorInput): Promise<Vendor> {
     const patch: Record<string, unknown> = {};
+    if (input.propertyId !== undefined) patch['property_id'] = input.propertyId;
     if (input.name !== undefined) patch['name'] = input.name;
     if (input.category !== undefined) patch['category'] = input.category;
     if (input.phone !== undefined) patch['phone'] = input.phone;
@@ -95,6 +100,7 @@ export class VendorRepository {
     return {
       id: row.id,
       organizationId: row.organization_id,
+      propertyId: row.property_id ?? undefined,
       name: row.name,
       category: row.category as VendorCategory | undefined,
       phone: row.phone ?? undefined,

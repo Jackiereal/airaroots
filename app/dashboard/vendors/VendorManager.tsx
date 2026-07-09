@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Plus, Loader2, Phone, Mail, MapPin, Pencil, Ban, RotateCcw } from 'lucide-react';
 import type { Vendor, VendorCategory } from '@/src/domains/operations/types';
 
+type Property = { id: string; name: string };
+
 const CATEGORY_LABELS: Record<VendorCategory, string> = {
   plumbing: 'Plumbing',
   electrical: 'Electrical',
@@ -30,14 +32,17 @@ function StatusBadge({ isActive }: { isActive: boolean }) {
 
 function VendorForm({
   initial,
+  properties,
   onClose,
   onSuccess,
 }: {
   initial?: Vendor;
+  properties: Property[];
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const [form, setForm] = useState({
+    propertyId: initial?.propertyId ?? '',
     name: initial?.name ?? '',
     category: initial?.category ?? ('' as VendorCategory | ''),
     phone: initial?.phone ?? '',
@@ -62,6 +67,7 @@ function VendorForm({
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        propertyId: form.propertyId || null,
         name: form.name.trim(),
         category: form.category || undefined,
         phone: form.phone || undefined,
@@ -97,6 +103,17 @@ function VendorForm({
               placeholder="e.g. Sri Balaji Plumbing Works"
               className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property (optional — leave blank for org-wide)</label>
+            <select
+              value={form.propertyId}
+              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
+              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            >
+              <option value="">All properties (org-wide)</option>
+              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
@@ -178,27 +195,33 @@ function VendorForm({
 
 export function VendorManager() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [propertyFilter, setPropertyFilter] = useState('');
   const [showInactive, setShowInactive] = useState(false);
   const [toggling, setToggling] = useState<string | null>(null);
+
+  const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
 
   async function fetchVendors() {
     setLoading(true);
     const params = new URLSearchParams();
     params.set('activeOnly', showInactive ? 'false' : 'true');
     if (categoryFilter) params.set('category', categoryFilter);
-    const res = await fetch(`/api/vendors?${params}`);
-    if (res.ok) {
-      const d = await res.json();
-      setVendors(d.vendors ?? []);
-    }
+    if (propertyFilter) params.set('propertyId', propertyFilter);
+    const [vendorRes, propsRes] = await Promise.all([
+      fetch(`/api/vendors?${params}`),
+      properties.length === 0 ? fetch('/api/properties') : Promise.resolve(null),
+    ]);
+    if (vendorRes.ok) { const d = await vendorRes.json(); setVendors(d.vendors ?? []); }
+    if (propsRes?.ok) { const d = await propsRes.json(); setProperties(d.properties ?? []); }
     setLoading(false);
   }
 
-  useEffect(() => { fetchVendors(); }, [categoryFilter, showInactive]);
+  useEffect(() => { fetchVendors(); }, [categoryFilter, propertyFilter, showInactive]);
 
   async function handleToggleActive(v: Vendor) {
     setToggling(v.id);
@@ -223,6 +246,14 @@ export function VendorManager() {
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
+        </select>
+        <select
+          value={propertyFilter}
+          onChange={e => setPropertyFilter(e.target.value)}
+          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
+        >
+          <option value="">All properties</option>
+          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
           <input
@@ -265,6 +296,9 @@ export function VendorManager() {
                       {CATEGORY_LABELS[v.category]}
                     </span>
                   )}
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-tertiary)] font-medium">
+                    {v.propertyId ? (propertyMap[v.propertyId] ?? '—') : 'All properties'}
+                  </span>
                   <StatusBadge isActive={v.isActive} />
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 flex-wrap">
@@ -312,6 +346,7 @@ export function VendorManager() {
 
       {showAdd && (
         <VendorForm
+          properties={properties}
           onClose={() => setShowAdd(false)}
           onSuccess={() => { setShowAdd(false); fetchVendors(); }}
         />
@@ -319,6 +354,7 @@ export function VendorManager() {
       {editing && (
         <VendorForm
           initial={editing}
+          properties={properties}
           onClose={() => setEditing(null)}
           onSuccess={() => { setEditing(null); fetchVendors(); }}
         />

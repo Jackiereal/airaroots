@@ -13,12 +13,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const url = new URL(request.url);
     const activeOnly = url.searchParams.get('activeOnly') !== 'false';
     const category = url.searchParams.get('category') ?? undefined;
+    const propertyId = url.searchParams.get('propertyId') ?? undefined;
 
     const supabase = await createClient();
     const service = new VendorService(supabase);
     const vendors = await service.list(ctx!.organizationId, {
       activeOnly,
       category: category as Parameters<typeof service.list>[1] extends { category?: infer C } ? C : never,
+      propertyId,
     });
 
     return NextResponse.json({ vendors });

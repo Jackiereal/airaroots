@@ -12,10 +12,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const url = new URL(request.url);
     const activeOnly = url.searchParams.get('activeOnly') !== 'false';
+    const propertyId = url.searchParams.get('propertyId') ?? undefined;
 
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
-    const staff = await service.listStaff(ctx!.organizationId, activeOnly);
+    const staff = await service.listStaff(ctx!.organizationId, activeOnly, propertyId);
 
     return NextResponse.json({ staff });
   } catch (error) {

@@ -34,6 +34,7 @@ type RequestRow = {
 type VendorRow = {
   id: string;
   organization_id: string;
+  property_id: string | null;
   name: string;
   category: string | null;
   phone: string | null;
@@ -252,6 +253,7 @@ export class MaintenanceRepository {
     return {
       id: row.id,
       organizationId: row.organization_id,
+      propertyId: row.property_id ?? undefined,
       name: row.name,
       category: row.category as Vendor['category'],
       phone: row.phone ?? undefined,

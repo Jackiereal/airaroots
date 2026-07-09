@@ -38,6 +38,7 @@ export const UpdateHousekeepingTaskSchema = z.object({
 });
 
 export const CreateHousekeepingStaffSchema = z.object({
+  propertyId: z.string().uuid(),
   name: z.string().min(1).max(100),
   phone: z.string().max(20).optional(),
   email: z.string().email().optional(),
@@ -45,6 +46,7 @@ export const CreateHousekeepingStaffSchema = z.object({
 });
 
 export const UpdateHousekeepingStaffSchema = z.object({
+  propertyId: z.string().uuid().optional(),
   name: z.string().min(1).max(100).optional(),
   phone: z.string().max(20).optional(),
   email: z.string().email().optional(),
@@ -105,6 +107,7 @@ const vendorCategoryEnum = z.enum([
 ]);
 
 export const CreateVendorSchema = z.object({
+  propertyId: z.string().uuid().optional(),
   name: z.string().min(1).max(100),
   category: vendorCategoryEnum.optional(),
   phone: z.string().max(20).optional(),
@@ -115,6 +118,7 @@ export const CreateVendorSchema = z.object({
 });
 
 export const UpdateVendorSchema = z.object({
+  propertyId: z.string().uuid().nullable().optional(),
   name: z.string().min(1).max(100).optional(),
   category: vendorCategoryEnum.optional(),
   phone: z.string().max(20).optional(),

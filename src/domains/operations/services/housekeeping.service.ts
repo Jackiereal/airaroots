@@ -211,8 +211,8 @@ export class HousekeepingService {
     return staff;
   }
 
-  async listStaff(organizationId: string, activeOnly = true): Promise<HousekeepingStaff[]> {
-    return this.repo.findStaffByOrg(organizationId, activeOnly);
+  async listStaff(organizationId: string, activeOnly = true, propertyId?: string): Promise<HousekeepingStaff[]> {
+    return this.repo.findStaffByOrg(organizationId, activeOnly, propertyId);
   }
 
   async createStaff(

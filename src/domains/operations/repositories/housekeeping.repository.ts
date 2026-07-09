@@ -37,6 +37,7 @@ type TaskRow = {
 type StaffRow = {
   id: string;
   organization_id: string;
+  property_id: string;
   name: string;
   phone: string | null;
   email: string | null;
@@ -64,7 +65,7 @@ export class HousekeepingRepository {
   async findTaskById(id: string): Promise<HousekeepingTask | null> {
     const { data, error } = await this.supabase
       .from('housekeeping_tasks')
-      .select('*, staff:housekeeping_staff(id,name,phone,email,status)')
+      .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status)')
       .eq('id', id)
       .single();
 
@@ -76,7 +77,7 @@ export class HousekeepingRepository {
   async findTaskByToken(accessToken: string): Promise<HousekeepingTask | null> {
     const { data, error } = await this.supabase
       .from('housekeeping_tasks')
-      .select('*, staff:housekeeping_staff(id,name,phone,email,status), property:properties(id,name,address)')
+      .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status), property:properties(id,name,address)')
       .eq('access_token', accessToken)
       .single();
 
@@ -91,7 +92,7 @@ export class HousekeepingRepository {
   ): Promise<HousekeepingTask[]> {
     let query = this.supabase
       .from('housekeeping_tasks')
-      .select('*, staff:housekeeping_staff(id,name,phone,email,status)')
+      .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status)')
       .eq('organization_id', organizationId)
       .order('scheduled_date', { ascending: true })
       .order('scheduled_time', { ascending: true });
@@ -108,7 +109,7 @@ export class HousekeepingRepository {
   async findTasksByProperty(propertyId: string, date?: string): Promise<HousekeepingTask[]> {
     let query = this.supabase
       .from('housekeeping_tasks')
-      .select('*, staff:housekeeping_staff(id,name,phone,email,status)')
+      .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status)')
       .eq('property_id', propertyId)
       .order('scheduled_date', { ascending: false });
 
@@ -136,7 +137,7 @@ export class HousekeepingRepository {
   async findTasksNeedingReminder(date: string): Promise<HousekeepingTask[]> {
     const { data, error } = await this.supabase
       .from('housekeeping_tasks')
-      .select('*, staff:housekeeping_staff(id,name,phone,email,status)')
+      .select('*, staff:housekeeping_staff(id,property_id,name,phone,email,status)')
       .eq('scheduled_date', date)
       .not('status', 'in', '("completed","cancelled")')
       .is('reminder_sent_at', null);
@@ -302,7 +303,11 @@ export class HousekeepingRepository {
     return this.toStaffEntity(data as StaffRow);
   }
 
-  async findStaffByOrg(organizationId: string, activeOnly = true): Promise<HousekeepingStaff[]> {
+  async findStaffByOrg(
+    organizationId: string,
+    activeOnly = true,
+    propertyId?: string
+  ): Promise<HousekeepingStaff[]> {
     let query = this.supabase
       .from('housekeeping_staff')
       .select('*')
@@ -310,6 +315,7 @@ export class HousekeepingRepository {
       .order('name', { ascending: true });
 
     if (activeOnly) query = query.eq('status', 'active');
+    if (propertyId) query = query.eq('property_id', propertyId);
 
     const { data, error } = await query;
     if (error) throw new Error(`DB error: ${error.message}`);
@@ -321,6 +327,7 @@ export class HousekeepingRepository {
       .from('housekeeping_staff')
       .insert({
         organization_id: input.organizationId,
+        property_id: input.propertyId,
         name: input.name,
         phone: input.phone ?? null,
         email: input.email ?? null,
@@ -335,6 +342,7 @@ export class HousekeepingRepository {
 
   async updateStaff(id: string, input: UpdateHousekeepingStaffInput): Promise<HousekeepingStaff> {
     const patch: Record<string, unknown> = {};
+    if (input.propertyId !== undefined) patch['property_id'] = input.propertyId;
     if (input.name !== undefined) patch['name'] = input.name;
     if (input.phone !== undefined) patch['phone'] = input.phone;
     if (input.email !== undefined) patch['email'] = input.email;
@@ -384,6 +392,7 @@ export class HousekeepingRepository {
     return {
       id: row.id,
       organizationId: row.organization_id,
+      propertyId: row.property_id,
       name: row.name,
       phone: row.phone ?? undefined,
       email: row.email ?? undefined,

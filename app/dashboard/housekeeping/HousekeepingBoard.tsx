@@ -243,7 +243,9 @@ function CreateTaskModal({
               className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
             >
               <option value="">Unassigned</option>
-              {staffList.map(s => <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>)}
+              {staffList.filter(s => s.propertyId === form.propertyId).map(s => (
+                <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>
+              ))}
             </select>
           </div>
 
@@ -331,7 +333,9 @@ function AssignModal({
           className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
         >
           <option value="">Unassigned</option>
-          {staffList.map(s => <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>)}
+          {staffList.filter(s => s.propertyId === task.propertyId).map(s => (
+            <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>
+          ))}
         </select>
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">

@@ -14,6 +14,7 @@ export type ChecklistItem = {
 export type HousekeepingStaff = {
   id: string;
   organizationId: string;
+  propertyId: string;
   name: string;
   phone: string | undefined;
   email: string | undefined;
@@ -88,6 +89,7 @@ export type UpdateHousekeepingTaskInput = Partial<
 
 export type CreateHousekeepingStaffInput = {
   organizationId: string;
+  propertyId: string;
   name: string;
   phone?: string;
   email?: string;
@@ -95,7 +97,7 @@ export type CreateHousekeepingStaffInput = {
 };
 
 export type UpdateHousekeepingStaffInput = Partial<
-  Pick<CreateHousekeepingStaffInput, 'name' | 'phone' | 'email' | 'notes'> & {
+  Pick<CreateHousekeepingStaffInput, 'propertyId' | 'name' | 'phone' | 'email' | 'notes'> & {
     status: 'active' | 'inactive';
   }
 >;
@@ -188,6 +190,7 @@ export type VendorCategory =
 export type Vendor = {
   id: string;
   organizationId: string;
+  propertyId: string | undefined;   // undefined = org-wide, serves all properties
   name: string;
   category: VendorCategory | undefined;
   phone: string | undefined;
@@ -202,6 +205,7 @@ export type Vendor = {
 
 export type CreateVendorInput = {
   organizationId: string;
+  propertyId?: string;
   name: string;
   category?: VendorCategory;
   phone?: string;
@@ -215,7 +219,7 @@ export type UpdateVendorInput = Partial<
   Pick<CreateVendorInput, 'name' | 'category' | 'phone' | 'email' | 'address' | 'ratePerVisit' | 'notes'> & {
     isActive: boolean;
   }
->;
+> & { propertyId?: string | null };
 
 // ─── Inventory ───────────────────────────────────────────────────────────────
 

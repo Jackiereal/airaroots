@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Plus, Loader2, Phone, Mail, Pencil } from 'lucide-react';
 import type { HousekeepingStaff } from '@/src/domains/operations/types';
 
+type Property = { id: string; name: string };
+
 function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
   return (
     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
@@ -18,14 +20,17 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
 
 function StaffForm({
   initial,
+  properties,
   onClose,
   onSuccess,
 }: {
   initial?: HousekeepingStaff;
+  properties: Property[];
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const [form, setForm] = useState({
+    propertyId: initial?.propertyId ?? '',
     name: initial?.name ?? '',
     phone: initial?.phone ?? '',
     email: initial?.email ?? '',
@@ -38,6 +43,7 @@ function StaffForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) { setError('Name is required'); return; }
+    if (!form.propertyId) { setError('Property is required'); return; }
     setSaving(true);
     setError('');
 
@@ -48,6 +54,7 @@ function StaffForm({
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        propertyId: form.propertyId,
         name: form.name.trim(),
         phone: form.phone || undefined,
         email: form.email || undefined,
@@ -71,6 +78,18 @@ function StaffForm({
           <h2 className="font-semibold text-[var(--text-primary)]">{initial ? 'Edit Staff' : 'Add Staff'}</h2>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
+            <select
+              value={form.propertyId}
+              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
+              required
+              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            >
+              <option value="">Select property…</option>
+              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Name</label>
             <input
@@ -141,21 +160,28 @@ function StaffForm({
 
 export function StaffManager() {
   const [staff, setStaff] = useState<HousekeepingStaff[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<HousekeepingStaff | null>(null);
+  const [propertyFilter, setPropertyFilter] = useState('');
 
-  async function fetchStaff() {
+  const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
+
+  async function fetchData() {
     setLoading(true);
-    const res = await fetch('/api/housekeeping/staff');
-    if (res.ok) {
-      const d = await res.json();
-      setStaff(d.staff ?? []);
-    }
+    const params = new URLSearchParams();
+    if (propertyFilter) params.set('propertyId', propertyFilter);
+    const [staffRes, propsRes] = await Promise.all([
+      fetch(`/api/housekeeping/staff?${params}`),
+      fetch('/api/properties'),
+    ]);
+    if (staffRes.ok) { const d = await staffRes.json(); setStaff(d.staff ?? []); }
+    if (propsRes.ok) { const d = await propsRes.json(); setProperties(d.properties ?? []); }
     setLoading(false);
   }
 
-  useEffect(() => { fetchStaff(); }, []);
+  useEffect(() => { fetchData(); }, [propertyFilter]);
 
   if (loading) {
     return (
@@ -167,13 +193,23 @@ export function StaffManager() {
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+      <div className="flex items-center gap-3 mb-4">
+        <select
+          value={propertyFilter}
+          onChange={e => setPropertyFilter(e.target.value)}
+          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
         >
-          <Plus size={15} /> Add Staff
-        </button>
+          <option value="">All properties</option>
+          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+        <div className="ml-auto">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={15} /> Add Staff
+          </button>
+        </div>
       </div>
 
       {staff.length === 0 ? (
@@ -192,7 +228,10 @@ export function StaffManager() {
                   <span className="font-medium text-sm text-[var(--text-primary)]">{s.name}</span>
                   <StatusBadge status={s.status} />
                 </div>
-                <div className="flex items-center gap-3 mt-0.5">
+                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                  <span className="text-xs text-[var(--text-tertiary)]">
+                    {propertyMap[s.propertyId] ?? '—'}
+                  </span>
                   {s.phone && (
                     <span className="flex items-center gap-1 text-xs text-[var(--text-tertiary)]">
                       <Phone size={10} /> {s.phone}
@@ -219,15 +258,17 @@ export function StaffManager() {
 
       {showAdd && (
         <StaffForm
+          properties={properties}
           onClose={() => setShowAdd(false)}
-          onSuccess={() => { setShowAdd(false); fetchStaff(); }}
+          onSuccess={() => { setShowAdd(false); fetchData(); }}
         />
       )}
       {editing && (
         <StaffForm
           initial={editing}
+          properties={properties}
           onClose={() => setEditing(null)}
-          onSuccess={() => { setEditing(null); fetchStaff(); }}
+          onSuccess={() => { setEditing(null); fetchData(); }}
         />
       )}
     </>
