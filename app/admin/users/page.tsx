@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ShieldCheck, User, Plus, X, ChevronDown, ChevronRight } from 'lucide-react';
+import Picker from '@/components/ui/Picker';
 
 type UserProfile = { id: string; full_name: string | null; role: string; email?: string };
 type Property = { id: string; name: string };
@@ -63,7 +64,7 @@ export default function UsersPage() {
   if (loading) return <div className="p-6 text-sm text-[var(--text-secondary)]">Loading…</div>;
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
         Users
       </h1>
@@ -93,15 +94,17 @@ export default function UsersPage() {
                     <p className="text-xs text-[var(--text-secondary)] truncate">{u.email}</p>
                   )}
                 </div>
-                <select
-                  value={u.role}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                  className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-1 text-xs text-[var(--text-primary)]"
-                >
-                  <option value="admin">Admin</option>
-                  <option value="client">Client</option>
-                </select>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Picker
+                    value={u.role}
+                    onChange={(v) => handleRoleChange(u.id, v)}
+                    options={[
+                      { value: 'admin', label: 'Admin' },
+                      { value: 'client', label: 'Client' },
+                    ]}
+                    size="compact"
+                  />
+                </div>
                 {u.role === 'client' && (
                   isExpanded
                     ? <ChevronDown className="h-4 w-4 text-[var(--text-tertiary)] shrink-0" />
@@ -139,18 +142,16 @@ export default function UsersPage() {
                     </div>
                   )}
                   <div className="flex items-center gap-2 pt-1">
-                    <select
+                    <Picker
                       value={grantPropertyId}
-                      onChange={(e) => setGrantPropertyId(e.target.value)}
-                      className="flex-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-1.5 text-xs text-[var(--text-primary)]"
-                    >
-                      <option value="">— add property access —</option>
-                      {properties
+                      onChange={setGrantPropertyId}
+                      options={properties
                         .filter((p) => !grants.find((g) => g.property_id === p.id))
-                        .map((p) => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
-                    </select>
+                        .map((p) => ({ value: p.id, label: p.name }))}
+                      placeholder="— add property access —"
+                      className="flex-1"
+                      searchable
+                    />
                     <button
                       type="button"
                       onClick={() => handleGrant(u.id)}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Loader2 } from 'lucide-react';
+import Picker from '@/components/ui/Picker';
 
 type Props = {
   open: boolean;
@@ -75,15 +76,12 @@ export function BlockDateModal({ open, propertyId, defaultDate, onClose, onSucce
           <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Block type</label>
-              <select
+              <Picker
                 value={form.blockType}
-                onChange={(e) => set('blockType', e.target.value)}
-                className="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-              >
-                {BLOCK_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
+                onChange={(v) => set('blockType', v)}
+                options={BLOCK_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+                className="w-full"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

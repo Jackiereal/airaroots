@@ -8,9 +8,9 @@ export default async function ClientLayout({ children }: { children: React.React
   if (profile.role === 'admin') redirect('/dashboard');
 
   return (
-    <div className="flex h-dvh bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="flex flex-col md:flex-row h-dvh bg-[var(--bg-base)] text-[var(--text-primary)]">
       <ClientSidebar email={profile.email} />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
     </div>
   );
 }

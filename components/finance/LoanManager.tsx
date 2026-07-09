@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Plus, Pencil, Trash2, Loader2, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
+import Picker from '@/components/ui/Picker';
 
 type Loan = {
   id: string;
@@ -132,16 +133,12 @@ function LoanForm({
         {field('Loan Name', 'name', 'text', true, 'e.g. Gold Loan SBI')}
         <div>
           <label className="block text-xs text-[var(--text-secondary)] mb-1">Loan Type *</label>
-          <select
-            required
+          <Picker
             value={form.loan_type}
-            onChange={(e) => set('loan_type', e.target.value)}
-            className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-          >
-            {Object.entries(LOAN_TYPE_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
-            ))}
-          </select>
+            onChange={(v) => set('loan_type', v)}
+            options={Object.entries(LOAN_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+            className="w-full"
+          />
         </div>
         {field('Principal (₹)', 'principal', 'number', true, '500000')}
         {field('Annual Interest Rate (%)', 'interest_rate', 'number', true, '12.5')}
@@ -224,8 +221,8 @@ function AmortizationTable({ data }: { data: LoanScheduleData }) {
         {show ? 'Hide' : 'Show'} amortization schedule ({schedule.rows.length} months)
       </button>
       {show && (
-        <div className="overflow-x-auto rounded-xl border border-[var(--border-color)]">
-          <table className="w-full text-xs text-[var(--text-primary)]">
+        <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-xl border border-[var(--border-color)]">
+          <table className="w-full min-w-[44rem] text-xs text-[var(--text-primary)]">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-elevated)]">
                 {['#', 'Date', 'Opening', 'EMI', 'Principal', 'Interest', 'Extra', 'Closing'].map((h) => (

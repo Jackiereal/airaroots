@@ -264,33 +264,35 @@ export default function ExpenseEngine({ month, propertyId }: { month: string; pr
           {monthlyExpenses.length === 0 ? (
             <p className="p-4 text-sm text-[var(--text-secondary)]">No expenses for {month}.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
-                  <th className="px-4 py-2 text-left font-medium">Category</th>
-                  <th className="px-4 py-2 text-left font-medium">Date</th>
-                  <th className="px-4 py-2 text-left font-medium">Notes</th>
-                  <th className="px-4 py-2 text-right font-medium">Amount</th>
-                  <th className="px-4 py-2 text-left font-medium">Paid From</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyExpenses.map((e) => (
-                  <tr key={e.id} className="border-b border-[var(--border-color)]/40 hover:bg-[var(--bg-elevated)]/50">
-                    <td className="px-4 py-2 capitalize">{e.expense_type.replace(/_/g, ' ')}</td>
-                    <td className="px-4 py-2 text-[var(--text-secondary)]">{e.expense_date ?? '—'}</td>
-                    <td className="px-4 py-2 text-[var(--text-secondary)] max-w-[200px] truncate">{e.notes ?? '—'}</td>
-                    <td className="px-4 py-2 text-right tabular-nums font-medium">{fmt(Number(e.amount))}</td>
-                    <td className="px-4 py-2 text-[var(--text-secondary)] capitalize">{e.paid_from?.replace(/_/g, ' ') ?? '—'}</td>
+            <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+              <table className="w-full min-w-[36rem] text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
+                    <th className="px-4 py-2 text-left font-medium">Category</th>
+                    <th className="px-4 py-2 text-left font-medium">Date</th>
+                    <th className="px-4 py-2 text-left font-medium">Notes</th>
+                    <th className="px-4 py-2 text-right font-medium">Amount</th>
+                    <th className="px-4 py-2 text-left font-medium">Paid From</th>
                   </tr>
-                ))}
-                <tr className="bg-[var(--bg-elevated)]/40">
-                  <td colSpan={3} className="px-4 py-2 text-sm font-medium">Total</td>
-                  <td className="px-4 py-2 text-right font-bold tabular-nums">{fmt(monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0))}</td>
-                  <td />
-                </tr>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {monthlyExpenses.map((e) => (
+                    <tr key={e.id} className="border-b border-[var(--border-color)]/40 hover:bg-[var(--bg-elevated)]/50">
+                      <td className="px-4 py-2 capitalize">{e.expense_type.replace(/_/g, ' ')}</td>
+                      <td className="px-4 py-2 text-[var(--text-secondary)]">{e.expense_date ?? '—'}</td>
+                      <td className="px-4 py-2 text-[var(--text-secondary)] max-w-[200px] truncate">{e.notes ?? '—'}</td>
+                      <td className="px-4 py-2 text-right tabular-nums font-medium">{fmt(Number(e.amount))}</td>
+                      <td className="px-4 py-2 text-[var(--text-secondary)] capitalize">{e.paid_from?.replace(/_/g, ' ') ?? '—'}</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-[var(--bg-elevated)]/40">
+                    <td colSpan={3} className="px-4 py-2 text-sm font-medium">Total</td>
+                    <td className="px-4 py-2 text-right font-bold tabular-nums">{fmt(monthlyExpenses.reduce((s, e) => s + Number(e.amount), 0))}</td>
+                    <td />
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

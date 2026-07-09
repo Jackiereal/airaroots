@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Loader2, Phone, RefreshCw, Copy, Trash2 } from 'lucide-react';
+import Picker from '@/components/ui/Picker';
 import type {
   MaintenanceRequest,
   MaintenanceCategory,
@@ -124,14 +125,14 @@ function CreateModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
-            <select
+            <Picker
               value={form.propertyId}
-              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Select property…</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+              onChange={v => setForm(f => ({ ...f, propertyId: v }))}
+              options={properties.map(p => ({ value: p.id, label: p.name }))}
+              placeholder="Select property…"
+              className="w-full"
+              searchable
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Title</label>
@@ -156,43 +157,40 @@ function CreateModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-              <select
+              <Picker
                 value={form.category}
-                onChange={e => setForm(f => ({ ...f, category: e.target.value as MaintenanceCategory | '' }))}
-                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-              >
-                <option value="">Select…</option>
-                {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
-                ))}
-              </select>
+                onChange={v => setForm(f => ({ ...f, category: v as MaintenanceCategory | '' }))}
+                options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+                placeholder="Select…"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Priority</label>
-              <select
+              <Picker
                 value={form.priority}
-                onChange={e => setForm(f => ({ ...f, priority: e.target.value as MaintenancePriority }))}
-                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </select>
+                onChange={v => setForm(f => ({ ...f, priority: v as MaintenancePriority }))}
+                options={[
+                  { value: 'low', label: 'Low' },
+                  { value: 'medium', label: 'Medium' },
+                  { value: 'high', label: 'High' },
+                  { value: 'urgent', label: 'Urgent' },
+                ]}
+                className="w-full"
+              />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Assign Vendor (optional)</label>
-            <select
+            <Picker
               value={form.vendorId}
-              onChange={e => setForm(f => ({ ...f, vendorId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">No vendor</option>
-              {vendors
+              onChange={v => setForm(f => ({ ...f, vendorId: v }))}
+              options={vendors
                 .filter(v => !v.propertyId || v.propertyId === form.propertyId)
-                .map(v => <option key={v.id} value={v.id}>{v.name}{v.category ? ` (${v.category})` : ''}</option>)}
-            </select>
+                .map(v => ({ value: v.id, label: v.name, description: v.category }))}
+              placeholder="No vendor"
+              className="w-full"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Estimated Cost ₹ (optional)</label>
@@ -276,39 +274,42 @@ export function MaintenanceList() {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <select
+        <Picker
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All statuses</option>
-          <option value="reported">Reported</option>
-          <option value="assigned">Assigned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
-        </select>
-        <select
+          onChange={setStatusFilter}
+          options={[
+            { value: 'reported', label: 'Reported' },
+            { value: 'assigned', label: 'Assigned' },
+            { value: 'in_progress', label: 'In Progress' },
+            { value: 'resolved', label: 'Resolved' },
+            { value: 'closed', label: 'Closed' },
+          ]}
+          placeholder="All statuses"
+          className="min-w-[8.5rem]"
+        />
+        <Picker
           value={priorityFilter}
-          onChange={e => setPriorityFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
+          onChange={setPriorityFilter}
+          options={[
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' },
+            { value: 'urgent', label: 'Urgent' },
+          ]}
+          placeholder="All priorities"
+          className="min-w-[8rem]"
+        />
+
         <button
           onClick={fetchData}
-          className="rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="min-h-11 min-w-11 flex items-center justify-center rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
         >
           <RefreshCw size={14} />
         </button>
         <div className="ml-auto">
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> New Request
           </button>
@@ -327,8 +328,8 @@ export function MaintenanceList() {
           </button>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border-color)] overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+          <table className="w-full min-w-[48rem] text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Issue</th>

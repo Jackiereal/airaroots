@@ -4,6 +4,7 @@ import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Loader2 } from 'lucide-react';
 import type { CreateReservationInput } from '@/src/domains/reservation/schema';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -106,30 +107,24 @@ export function ReservationForm({ open, onClose, properties, defaultPropertyId, 
             {/* Property */}
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Property</label>
-              <select
+              <Picker
                 value={form.propertyId}
-                onChange={(e) => set('propertyId', e.target.value)}
-                required
-                className="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-              >
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+                onChange={(v) => set('propertyId', v)}
+                options={properties.map((p) => ({ value: p.id, label: p.name }))}
+                className="w-full"
+                searchable
+              />
             </div>
 
             {/* Channel */}
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Channel</label>
-              <select
+              <Picker
                 value={form.channel}
-                onChange={(e) => set('channel', e.target.value as CreateReservationInput['channel'])}
-                className="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-              >
-                {CHANNELS.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
+                onChange={(v) => set('channel', v as CreateReservationInput['channel'])}
+                options={CHANNELS.map((c) => ({ value: c.value, label: c.label }))}
+                className="w-full"
+              />
             </div>
 
             {/* Guest info */}

@@ -20,22 +20,24 @@ export default function FinanceTabBar({
   isReadOnly?: boolean;
 }) {
   return (
-    <div className="flex gap-0.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-1 w-fit">
-      {TABS.filter((tab) => !(isReadOnly && tab.id === 'planning')).map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          onClick={() => onChange(tab.id)}
-          className={[
-            'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            active === tab.id
-              ? 'bg-[var(--bg-raised)] text-[var(--text-primary)] shadow-sm'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
-          ].join(' ')}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="max-w-full overflow-x-auto overscroll-x-contain touch-pan-x">
+      <div className="flex gap-0.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-1 w-fit">
+        {TABS.filter((tab) => !(isReadOnly && tab.id === 'planning')).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onChange(tab.id)}
+            className={[
+              'shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              active === tab.id
+                ? 'bg-[var(--bg-raised)] text-[var(--text-primary)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+            ].join(' ')}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

@@ -8,9 +8,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile.role !== 'admin') redirect('/client/dashboard');
 
   return (
-    <div className="flex h-dvh bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="flex flex-col md:flex-row h-dvh bg-[var(--bg-base)] text-[var(--text-primary)]">
       <AdminSidebar email={profile.email} />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
     </div>
   );
 }

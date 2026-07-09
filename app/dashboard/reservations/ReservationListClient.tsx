@@ -95,8 +95,8 @@ export function ReservationListClient() {
           </button>
         </div>
       ) : (
-        <div className="rounded-xl border border-[var(--border-color)] overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+          <table className="w-full min-w-[42rem] text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Guest</th>

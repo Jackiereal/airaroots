@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Loader2, X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
+import Picker from '@/components/ui/Picker';
 
 type RevItem = {
   id: string;
@@ -77,15 +78,12 @@ function AddItemForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-xs text-[var(--text-secondary)] mb-1">Revenue Source *</label>
-          <select
+          <Picker
             value={source}
-            onChange={(e) => setSource(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-          >
-            {MANUAL_SOURCES.map((s) => (
-              <option key={s} value={s}>{SOURCE_LABELS[s]}</option>
-            ))}
-          </select>
+            onChange={setSource}
+            options={MANUAL_SOURCES.map((s) => ({ value: s, label: SOURCE_LABELS[s] }))}
+            className="w-full"
+          />
         </div>
         <div>
           <label className="block text-xs text-[var(--text-secondary)] mb-1">Amount (₹) *</label>

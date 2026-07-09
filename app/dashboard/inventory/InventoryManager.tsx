@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, Loader2, AlertTriangle, RefreshCw, Pencil, PackagePlus } from 'lucide-react';
 import type { InventoryItem, InventoryCategory, InventoryTransactionType } from '@/src/domains/operations/types';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -75,14 +76,14 @@ function AddItemModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
-            <select
+            <Picker
               value={form.propertyId}
-              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Select property…</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+              onChange={v => setForm(f => ({ ...f, propertyId: v }))}
+              options={properties.map(p => ({ value: p.id, label: p.name }))}
+              placeholder="Select property…"
+              className="w-full"
+              searchable
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Item Name</label>
@@ -98,16 +99,13 @@ function AddItemModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-              <select
+              <Picker
                 value={form.category}
-                onChange={e => setForm(f => ({ ...f, category: e.target.value as InventoryCategory | '' }))}
-                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-              >
-                <option value="">None</option>
-                {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
-                ))}
-              </select>
+                onChange={v => setForm(f => ({ ...f, category: v as InventoryCategory | '' }))}
+                options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+                placeholder="None"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Unit</label>
@@ -221,16 +219,17 @@ function RestockModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Type</label>
-            <select
+            <Picker
               value={form.type}
-              onChange={e => setForm(f => ({ ...f, type: e.target.value as InventoryTransactionType }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="restock">Restock (add)</option>
-              <option value="used">Used (remove)</option>
-              <option value="damaged">Damaged (remove)</option>
-              <option value="audit">Audit (set quantity)</option>
-            </select>
+              onChange={v => setForm(f => ({ ...f, type: v as InventoryTransactionType }))}
+              options={[
+                { value: 'restock', label: 'Restock (add)' },
+                { value: 'used', label: 'Used (remove)' },
+                { value: 'damaged', label: 'Damaged (remove)' },
+                { value: 'audit', label: 'Audit (set quantity)' },
+              ]}
+              className="w-full"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity ({item.unit})</label>
@@ -329,24 +328,25 @@ export function InventoryManager() {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <select
+        <Picker
           value={propertyFilter}
-          onChange={e => setPropertyFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All properties</option>
-          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+          onChange={setPropertyFilter}
+          options={properties.map(p => ({ value: p.id, label: p.name }))}
+          placeholder="All properties"
+          className="min-w-[9rem]"
+          searchable
+        />
+
         <button
           onClick={fetchData}
-          className="rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="min-h-11 min-w-11 flex items-center justify-center rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
         >
           <RefreshCw size={14} />
         </button>
         <div className="ml-auto">
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> Add Item
           </button>
@@ -389,8 +389,8 @@ export function InventoryManager() {
               return (
                 <div key={p.id}>
                   <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-2">{propertyMap[p.id]}</h2>
-                  <div className="rounded-xl border border-[var(--border-color)] overflow-hidden">
-                    <table className="w-full text-sm">
+                  <div className="rounded-xl border border-[var(--border-color)] overflow-x-auto overscroll-x-contain touch-pan-x">
+                    <table className="w-full min-w-[40rem] text-sm">
                       <thead>
                         <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface)]">
                           <th className="text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">Item</th>

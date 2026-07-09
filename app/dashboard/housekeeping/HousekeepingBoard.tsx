@@ -9,6 +9,7 @@ import type {
   HousekeepingTaskType,
   HousekeepingTaskStatus,
 } from '@/src/domains/operations/types';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -197,27 +198,24 @@ function CreateTaskModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
-            <select
+            <Picker
               value={form.propertyId}
-              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Select property…</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+              onChange={v => setForm(f => ({ ...f, propertyId: v }))}
+              options={properties.map(p => ({ value: p.id, label: p.name }))}
+              placeholder="Select property…"
+              className="w-full"
+              searchable
+            />
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Task Type</label>
-            <select
+            <Picker
               value={form.taskType}
-              onChange={e => setForm(f => ({ ...f, taskType: e.target.value as HousekeepingTaskType }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              {Object.entries(TASK_TYPE_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
+              onChange={v => setForm(f => ({ ...f, taskType: v as HousekeepingTaskType }))}
+              options={Object.entries(TASK_TYPE_LABELS).map(([value, label]) => ({ value, label }))}
+              className="w-full"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -244,16 +242,15 @@ function CreateTaskModal({
 
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Assign Staff (optional)</label>
-            <select
+            <Picker
               value={form.assignedTo}
-              onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Unassigned</option>
-              {staffList.filter(s => s.propertyId === form.propertyId).map(s => (
-                <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>
-              ))}
-            </select>
+              onChange={v => setForm(f => ({ ...f, assignedTo: v }))}
+              options={staffList.filter(s => s.propertyId === form.propertyId).map(s => ({
+                value: s.id, label: s.name, description: s.phone,
+              }))}
+              placeholder="Unassigned"
+              className="w-full"
+            />
           </div>
 
           <div>
@@ -334,16 +331,15 @@ function AssignModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl p-5 space-y-4">
         <h2 className="font-semibold text-[var(--text-primary)]">Assign Staff</h2>
-        <select
+        <Picker
           value={staffId}
-          onChange={e => setStaffId(e.target.value)}
-          className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">Unassigned</option>
-          {staffList.filter(s => s.propertyId === task.propertyId).map(s => (
-            <option key={s.id} value={s.id}>{s.name}{s.phone ? ` · ${s.phone}` : ''}</option>
-          ))}
-        </select>
+          onChange={setStaffId}
+          options={staffList.filter(s => s.propertyId === task.propertyId).map(s => ({
+            value: s.id, label: s.name, description: s.phone,
+          }))}
+          placeholder="Unassigned"
+          className="w-full"
+        />
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
             Cancel
@@ -478,7 +474,7 @@ export function HousekeepingBoard() {
           value={date}
           onChange={e => setDate(e.target.value)}
           disabled={showAllUpcoming}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)] disabled:opacity-50"
+          className="min-h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)] disabled:opacity-50"
         />
         <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
           <input
@@ -488,39 +484,40 @@ export function HousekeepingBoard() {
           />
           All upcoming
         </label>
-        <select
+        <Picker
           value={propertyId}
-          onChange={e => setPropertyId(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All properties</option>
-          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+          onChange={setPropertyId}
+          options={properties.map(p => ({ value: p.id, label: p.name }))}
+          placeholder="All properties"
+          className="min-w-[9rem]"
+          searchable
+        />
+
         <button
           onClick={fetchData}
-          className="rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+          className="min-h-11 min-w-11 flex items-center justify-center rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
           title="Refresh"
         >
           <RefreshCw size={14} />
         </button>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <Link
             href="/dashboard/housekeeping/staff"
-            className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+            className="min-h-11 inline-flex items-center px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
           >
             Manage Staff
           </Link>
           {propertyId && (
             <Link
               href={`/dashboard/housekeeping/checklist/${propertyId}`}
-              className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+              className="min-h-11 inline-flex items-center px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
             >
               Checklist
             </Link>
           )}
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> New Task
           </button>
@@ -532,7 +529,7 @@ export function HousekeepingBoard() {
           <Loader2 size={24} className="animate-spin text-[var(--text-tertiary)]" />
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4 min-h-[60vh]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[60vh]">
           {COLUMNS.map(col => {
             const colTasks = tasksByStatus[col.status] ?? [];
             return (

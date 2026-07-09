@@ -10,6 +10,7 @@ import { MonthView } from './MonthView';
 import { ReservationDetail } from '../reservation/ReservationDetail';
 import { ReservationForm } from '../reservation/ReservationForm';
 import { BlockDateModal } from './BlockDateModal';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -121,7 +122,7 @@ export function ReservationCalendar({ properties, defaultPropertyId }: Props) {
   return (
     <div className="bg-[var(--bg-base)]">
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+      <div className="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Month navigation */}
         <div className="flex items-center gap-2">
           <button
@@ -130,7 +131,7 @@ export function ReservationCalendar({ properties, defaultPropertyId }: Props) {
           >
             <ChevronLeft size={18} />
           </button>
-          <h2 className="text-base font-semibold text-[var(--text-primary)] min-w-[140px] text-center">
+          <h2 className="text-base font-semibold text-[var(--text-primary)] min-w-[120px] text-center">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
           <button
@@ -147,9 +148,9 @@ export function ReservationCalendar({ properties, defaultPropertyId }: Props) {
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* View toggle */}
-          <div className="flex rounded-lg border border-[var(--border-color)] overflow-hidden">
+          <div className="flex rounded-lg border border-[var(--border-color)] overflow-hidden shrink-0">
             <button
               onClick={() => setViewMode('timeline')}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -176,30 +177,28 @@ export function ReservationCalendar({ properties, defaultPropertyId }: Props) {
 
           {/* Property selector (month view only) */}
           {viewMode === 'month' && properties.length > 1 && (
-            <select
+            <Picker
               value={selectedProperty}
-              onChange={(e) => setSelectedProperty(e.target.value)}
-              className="border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-xs bg-[var(--bg-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
-            >
-              {properties.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              onChange={setSelectedProperty}
+              options={properties.map((p) => ({ value: p.id, label: p.name }))}
+              className="shrink-0"
+              searchable
+            />
           )}
 
           {/* New reservation */}
           <button
             onClick={() => { setClickedDate(undefined); setShowReservationForm(true); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:bg-[var(--accent-hover)] transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:bg-[var(--accent-hover)] transition-colors shrink-0"
           >
             <Plus size={14} />
-            New Reservation
+            <span className="whitespace-nowrap">New Reservation</span>
           </button>
 
           {/* Block dates */}
           <button
             onClick={() => { setClickedDate(undefined); setShowBlockModal(true); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-colors shrink-0"
           >
             Block Dates
           </button>

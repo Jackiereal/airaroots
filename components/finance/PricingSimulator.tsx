@@ -234,9 +234,10 @@ export default function PricingSimulator({ propertyId }: { propertyId: string })
       </div>
 
       {/* Per-month config table */}
-      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-auto">
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)]">
         <p className="text-sm font-medium text-[var(--text-secondary)] px-4 py-3 border-b border-[var(--border-color)]">Seasonal Configuration</p>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto overscroll-x-contain touch-pan-x">
+        <table className="w-full min-w-[36rem] text-sm">
           <thead>
             <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
               <th className="px-4 py-2 text-left font-medium">Month</th>
@@ -285,6 +286,7 @@ export default function PricingSimulator({ propertyId }: { propertyId: string })
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

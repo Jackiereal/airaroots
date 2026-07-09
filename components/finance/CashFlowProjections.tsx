@@ -251,8 +251,8 @@ export default function CashFlowProjections({ propertyId }: { propertyId: string
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-auto">
-        <table className="w-full text-sm">
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-auto overscroll-x-contain touch-pan-x">
+        <table className="w-full min-w-[38rem] text-sm">
           <thead>
             <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
               {['Month', 'Revenue', 'Expenses', 'EMI', 'Net', 'Cumulative'].map((h) => (

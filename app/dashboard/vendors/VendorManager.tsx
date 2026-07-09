@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Loader2, Phone, Mail, MapPin, Pencil, Ban, RotateCcw } from 'lucide-react';
 import type { Vendor, VendorCategory } from '@/src/domains/operations/types';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -106,27 +107,24 @@ function VendorForm({
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property (optional — leave blank for org-wide)</label>
-            <select
+            <Picker
               value={form.propertyId}
-              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">All properties (org-wide)</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+              onChange={v => setForm(f => ({ ...f, propertyId: v }))}
+              options={properties.map(p => ({ value: p.id, label: p.name }))}
+              placeholder="All properties (org-wide)"
+              className="w-full"
+              searchable
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-            <select
+            <Picker
               value={form.category}
-              onChange={e => setForm(f => ({ ...f, category: e.target.value as VendorCategory | '' }))}
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Select…</option>
-              {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
+              onChange={v => setForm(f => ({ ...f, category: v as VendorCategory | '' }))}
+              options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+              placeholder="Select…"
+              className="w-full"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -237,24 +235,21 @@ export function VendorManager() {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <select
+        <Picker
           value={categoryFilter}
-          onChange={e => setCategoryFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All categories</option>
-          {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
-        <select
+          onChange={setCategoryFilter}
+          options={Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
+          placeholder="All categories"
+          className="min-w-[9rem]"
+        />
+        <Picker
           value={propertyFilter}
-          onChange={e => setPropertyFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All properties</option>
-          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+          onChange={setPropertyFilter}
+          options={properties.map(p => ({ value: p.id, label: p.name }))}
+          placeholder="All properties"
+          className="min-w-[9rem]"
+          searchable
+        />
         <label className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
           <input
             type="checkbox"
@@ -263,10 +258,11 @@ export function VendorManager() {
           />
           Show inactive
         </label>
+
         <div className="ml-auto">
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> Add Vendor
           </button>

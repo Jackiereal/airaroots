@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Building2, LayoutDashboard, LogOut, ChevronRight } from 'lucide-react';
+import MobileSidebarShell from '@/components/ui/MobileSidebarShell';
 
 const NAV = [
   { href: '/client/dashboard', label: 'My Properties', icon: LayoutDashboard },
@@ -19,6 +20,22 @@ export default function ClientSidebar({ email }: { email?: string }) {
     router.replace('/');
   };
 
+  return (
+    <MobileSidebarShell>
+      <SidebarContent email={email} pathname={pathname} onSignOut={handleSignOut} />
+    </MobileSidebarShell>
+  );
+}
+
+function SidebarContent({
+  email,
+  pathname,
+  onSignOut,
+}: {
+  email?: string;
+  pathname: string;
+  onSignOut: () => void;
+}) {
   return (
     <aside className="flex h-full w-56 flex-col border-r border-[var(--border-color)] bg-[var(--bg-surface)]">
       <div className="flex items-center gap-2 border-b border-[var(--border-color)] px-4 py-4">
@@ -54,7 +71,7 @@ export default function ClientSidebar({ email }: { email?: string }) {
         <p className="mb-1.5 truncate px-1 text-xs text-[var(--text-tertiary)]">{email}</p>
         <button
           type="button"
-          onClick={handleSignOut}
+          onClick={onSignOut}
           className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-rose-400"
         >
           <LogOut className="h-4 w-4" /> Sign out

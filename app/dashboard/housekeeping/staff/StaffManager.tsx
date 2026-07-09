@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Loader2, Phone, Mail, Pencil } from 'lucide-react';
 import type { HousekeepingStaff } from '@/src/domains/operations/types';
+import Picker from '@/components/ui/Picker';
 
 type Property = { id: string; name: string };
 
@@ -80,15 +81,14 @@ function StaffForm({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
-            <select
+            <Picker
               value={form.propertyId}
-              onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
-              required
-              className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-            >
-              <option value="">Select property…</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+              onChange={v => setForm(f => ({ ...f, propertyId: v }))}
+              options={properties.map(p => ({ value: p.id, label: p.name }))}
+              placeholder="Select property…"
+              className="w-full"
+              searchable
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Name</label>
@@ -133,14 +133,12 @@ function StaffForm({
           {initial && (
             <div>
               <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Status</label>
-              <select
+              <Picker
                 value={form.status}
-                onChange={e => setForm(f => ({ ...f, status: e.target.value as 'active' | 'inactive' }))}
-                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+                onChange={v => setForm(f => ({ ...f, status: v as 'active' | 'inactive' }))}
+                options={[{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }]}
+                className="w-full"
+              />
             </div>
           )}
           {error && <p className="text-xs text-rose-400">{error}</p>}
@@ -193,19 +191,20 @@ export function StaffManager() {
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-4">
-        <select
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <Picker
           value={propertyFilter}
-          onChange={e => setPropertyFilter(e.target.value)}
-          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
-        >
-          <option value="">All properties</option>
-          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+          onChange={setPropertyFilter}
+          options={properties.map(p => ({ value: p.id, label: p.name }))}
+          placeholder="All properties"
+          className="min-w-[9rem]"
+          searchable
+        />
+
         <div className="ml-auto">
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={15} /> Add Staff
           </button>

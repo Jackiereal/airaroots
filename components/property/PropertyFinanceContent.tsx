@@ -20,6 +20,7 @@ import {
   YAxis,
 } from 'recharts';
 import * as Dialog from '@radix-ui/react-dialog';
+import Picker from '@/components/ui/Picker';
 import { formatExpensePaidLabel } from '@/lib/property-finance/expense-paid-source';
 import { stripFinancialTrackerBackfillFromNote } from '@/lib/property-finance/strip-tracker-backfill-note';
 import {
@@ -296,11 +297,9 @@ function parseExpenseType(v: string): { cat: string; sub: string; custom: string
 function ExpenseCategoryPicker({
   value,
   onChange,
-  required: isRequired,
 }: {
   value: string;
   onChange: (v: string) => void;
-  required?: boolean;
 }) {
   const init = parseExpenseType(value);
   const [cat, setCat] = useState(init.cat);
@@ -308,8 +307,6 @@ function ExpenseCategoryPicker({
   const [custom, setCustom] = useState(init.custom);
 
   const catDef = EXPENSE_CATEGORIES.find((c) => c.label === cat);
-  const sel =
-    'min-h-11 w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2.5 text-base sm:text-sm text-[var(--text-primary)]';
 
   function emit(c: string, s: string, cu: string) {
     const subVal = s === '__custom__' ? cu.trim() : s;
@@ -338,44 +335,35 @@ function ExpenseCategoryPicker({
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
           Category
-          <select
-            required={isRequired}
+          <Picker
             value={cat}
-            onChange={(e) => onCatChange(e.target.value)}
-            className={sel}
-          >
-            <option value="">Select…</option>
-            {EXPENSE_CATEGORIES.map((c) => (
-              <option key={c.label} value={c.label}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+            onChange={onCatChange}
+            options={EXPENSE_CATEGORIES.map((c) => ({ value: c.label, label: c.label }))}
+            placeholder="Select…"
+            className="w-full"
+            searchable
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
           Subcategory
-          <select
-            required={isRequired}
+          <Picker
             value={sub}
-            onChange={(e) => onSubChange(e.target.value)}
+            onChange={onSubChange}
+            options={[
+              ...(catDef?.items.map((item) => ({ value: item, label: item })) ?? []),
+              { value: '__custom__', label: 'Custom…' },
+            ]}
+            placeholder="Select…"
             disabled={!cat}
-            className={sel + (!cat ? ' opacity-50 cursor-not-allowed' : '')}
-          >
-            <option value="">Select…</option>
-            {catDef?.items.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-            <option value="__custom__">Custom…</option>
-          </select>
+            className="w-full"
+          />
         </label>
       </div>
       {sub === '__custom__' && (
         <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
           Custom type
           <input
-            required={isRequired}
+            required
             value={custom}
             onChange={(e) => onCustomChange(e.target.value)}
             placeholder="e.g. Solar panel maintenance"
@@ -746,6 +734,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
 
   const onAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!expenseType) { setError('Category is required'); return; }
     setExpenseSaving(true);
     try {
       const res = await fetch('/api/finance/${propertyId}/expenses', {
@@ -966,6 +955,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
   const onSaveExpenseEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!expenseEditDraft) return;
+    if (!expenseEditDraft.expense_type) { setError('Category is required'); return; }
     setExpenseEditSaving(true);
     setError(null);
     try {
@@ -1547,33 +1537,29 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                     key={addExpenseOpen ? 'open' : 'closed'}
                     value={expenseType}
                     onChange={setExpenseType}
-                    required
                   />
                 </div>
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
                   Paid from
-                  <select
+                  <Picker
                     value={expensePaidFrom}
-                    onChange={(e) => setExpensePaidFrom(e.target.value as 'self' | 'out_of_pocket')}
-                    className="min-h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2.5 text-base sm:text-sm text-[var(--text-primary)]"
-                  >
-                    <option value="self">Self / operating</option>
-                    <option value="out_of_pocket">Out of pocket</option>
-                  </select>
+                    onChange={(v) => setExpensePaidFrom(v as 'self' | 'out_of_pocket')}
+                    options={[
+                      { value: 'self', label: 'Self / operating' },
+                      { value: 'out_of_pocket', label: 'Out of pocket' },
+                    ]}
+                  />
                 </label>
                 {expensePaidFrom === 'out_of_pocket' && (
                   <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)] sm:col-span-2">
                     Paid by
-                    <select
+                    <Picker
                       value={expensePocketBy ?? ''}
-                      onChange={(e) => setExpensePocketBy(e.target.value || null)}
-                      className="min-h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2.5 text-base sm:text-sm text-[var(--text-primary)] sm:max-w-xs"
-                    >
-                      <option value="">— select owner —</option>
-                      {owners.map((o) => (
-                        <option key={o.id} value={o.id}>{o.name}</option>
-                      ))}
-                    </select>
+                      onChange={(v) => setExpensePocketBy(v || null)}
+                      options={owners.map((o) => ({ value: o.id, label: o.name }))}
+                      placeholder="— select owner —"
+                      className="sm:max-w-xs"
+                    />
                   </label>
                 )}
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
@@ -2158,45 +2144,33 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   key={expenseEditDraft.id}
                   value={expenseEditDraft.expense_type}
                   onChange={(v) => setExpenseEditDraft((d) => (d ? { ...d, expense_type: v } : null))}
-                  required
                 />
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
                   Paid from
-                  <select
+                  <Picker
                     value={expenseEditDraft.paid_from}
-                    onChange={(e) =>
+                    onChange={(v) =>
                       setExpenseEditDraft((d) =>
-                        d
-                          ? {
-                              ...d,
-                              paid_from: e.target.value as 'self' | 'out_of_pocket',
-                            }
-                          : null,
+                        d ? { ...d, paid_from: v as 'self' | 'out_of_pocket' } : null,
                       )
                     }
-                    className="min-h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2.5 text-base sm:text-sm text-[var(--text-primary)]"
-                  >
-                    <option value="self">Self / operating</option>
-                    <option value="out_of_pocket">Out of pocket</option>
-                  </select>
+                    options={[
+                      { value: 'self', label: 'Self / operating' },
+                      { value: 'out_of_pocket', label: 'Out of pocket' },
+                    ]}
+                  />
                 </label>
                 {expenseEditDraft.paid_from === 'out_of_pocket' && (
                   <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
                     Paid by
-                    <select
+                    <Picker
                       value={expenseEditDraft.owner_id ?? ''}
-                      onChange={(e) =>
-                        setExpenseEditDraft((d) =>
-                          d ? { ...d, owner_id: e.target.value || null } : null,
-                        )
+                      onChange={(v) =>
+                        setExpenseEditDraft((d) => (d ? { ...d, owner_id: v || null } : null))
                       }
-                      className="min-h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2.5 text-base sm:text-sm text-[var(--text-primary)]"
-                    >
-                      <option value="">— select owner —</option>
-                      {owners.map((o) => (
-                        <option key={o.id} value={o.id}>{o.name}</option>
-                      ))}
-                    </select>
+                      options={owners.map((o) => ({ value: o.id, label: o.name }))}
+                      placeholder="— select owner —"
+                    />
                   </label>
                 )}
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">

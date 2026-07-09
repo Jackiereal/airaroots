@@ -5,6 +5,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import type { ReservationChannel } from '@/src/domains/reservation/types';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
+import Picker from '@/components/ui/Picker';
 
 const CONNECTABLE_CHANNELS: ReservationChannel[] = ['airbnb', 'booking_com', 'vrbo', 'expedia', 'other'];
 
@@ -84,15 +85,12 @@ export function ConnectChannelButton({ propertyId, existingChannels }: Props) {
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                 Channel
               </label>
-              <select
+              <Picker
                 value={channel}
-                onChange={e => setChannel(e.target.value as ReservationChannel)}
-                className="w-full px-3 py-2 rounded-lg text-sm border border-[var(--border-color)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
-              >
-                {available.map(c => (
-                  <option key={c} value={c}>{CHANNEL_LABELS[c] ?? c}</option>
-                ))}
-              </select>
+                onChange={v => setChannel(v as ReservationChannel)}
+                options={available.map(c => ({ value: c, label: CHANNEL_LABELS[c] ?? c }))}
+                className="w-full"
+              />
             </div>
 
             <div>

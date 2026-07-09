@@ -16,7 +16,7 @@ export default async function CalendarPage() {
   const properties = await getProperties();
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
+    <div className="p-4 sm:p-6 max-w-[1600px] mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
           Calendar

@@ -27,22 +27,24 @@ export default function PlanningHub({ propertyId }: { propertyId: string }) {
   return (
     <div className="space-y-5">
       {/* Sub-tab bar */}
-      <div className="flex gap-0.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] p-0.5 w-fit">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActive(tab.id)}
-            className={[
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-              active === tab.id
-                ? 'bg-[var(--bg-raised)] text-[var(--text-primary)] shadow-sm'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
-            ].join(' ')}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="max-w-full overflow-x-auto overscroll-x-contain touch-pan-x">
+        <div className="flex gap-0.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] p-0.5 w-fit">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActive(tab.id)}
+              className={[
+                'shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                active === tab.id
+                  ? 'bg-[var(--bg-raised)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+              ].join(' ')}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {active === 'cashflow' && <CashFlowProjections propertyId={propertyId} />}

@@ -420,11 +420,11 @@ export default function BreakevenCalculator({ propertyId }: { propertyId: string
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-auto max-h-[480px]">
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-auto overscroll-x-contain touch-pan-x max-h-[480px]">
         <p className="text-sm font-medium text-[var(--text-secondary)] px-4 py-3 border-b border-[var(--border-color)] sticky top-0 bg-[var(--bg-surface)] z-10">
           Month-by-Month Projection
         </p>
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[42rem] text-sm">
           <thead className="sticky top-10 bg-[var(--bg-surface)] z-10">
             <tr className="border-b border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
               {['Month', 'Revenue', 'Expenses', 'EMI', 'Net', 'Loan Balance', 'Cumulative'].map((h) => (

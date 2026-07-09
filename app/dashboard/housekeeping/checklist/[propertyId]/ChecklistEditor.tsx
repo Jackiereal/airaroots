@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Loader2, RotateCcw, GripVertical } from 'lucide-react';
 import type { ChecklistItem } from '@/src/domains/operations/types';
+import Picker from '@/components/ui/Picker';
 
 const CATEGORIES = [
   'general', 'bedroom', 'bathroom', 'kitchen', 'cleaning', 'check', 'security', 'documentation',
@@ -179,13 +180,12 @@ export function ChecklistEditor({
                         onChange={e => updateItemText(globalIdx, e.target.value)}
                         className="flex-1 text-sm text-[var(--text-primary)] bg-transparent outline-none"
                       />
-                      <select
+                      <Picker
                         value={item.category}
-                        onChange={e => updateItemCategory(globalIdx, e.target.value)}
-                        className="text-xs text-[var(--text-secondary)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded px-1.5 py-0.5 shrink-0"
-                      >
-                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                        onChange={v => updateItemCategory(globalIdx, v)}
+                        options={CATEGORIES.map(c => ({ value: c, label: c }))}
+                        size="compact"
+                      />
                       <button
                         onClick={() => removeItem(globalIdx)}
                         className="shrink-0 p-1 rounded text-[var(--text-tertiary)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
@@ -220,13 +220,11 @@ export function ChecklistEditor({
             placeholder="e.g. Check smoke detector batteries"
             className="flex-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
           />
-          <select
+          <Picker
             value={newCategory}
-            onChange={e => setNewCategory(e.target.value)}
-            className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-2 py-2 text-sm text-[var(--text-primary)]"
-          >
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+            onChange={setNewCategory}
+            options={CATEGORIES.map(c => ({ value: c, label: c }))}
+          />
           <button
             onClick={addItem}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
