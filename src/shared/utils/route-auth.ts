@@ -102,3 +102,60 @@ export async function requireOrgRole(minRole: OrgRole): Promise<
 export async function requireOrgWrite() {
   return requireOrgRole('manager');
 }
+
+// ─────────────────────────────────────────────
+// PROPERTY-LEVEL GUARDS
+// requireOrgRole only checks org membership — an org member with no
+// property_access grant still passes it. property_finance_*, properties,
+// and every operational table (housekeeping/maintenance/vendors/inventory/
+// reservations/calendar/channels) are gated per-property via property_access
+// (see migration 015), not by org role. API routes use the service-role
+// client, which bypasses RLS entirely, so this check must happen here in
+// the app layer — RLS alone does not protect these routes.
+// ─────────────────────────────────────────────
+
+export type PropertyAccessRole = 'admin' | 'client';
+
+const PROPERTY_ROLE_RANK = { client: 0, admin: 1 } as const;
+
+export type PropertyAuthContext = AuthContext & { propertyRole: PropertyAccessRole };
+
+/**
+ * requireOrgAuth + a property_access grant check for the given property.
+ * minRole 'client' (default) means any grant (read); 'admin' means the
+ * grant must be role='admin' (write). No grant = 403, regardless of org role.
+ */
+export async function requirePropertyAccess(
+  propertyId: string,
+  minRole: PropertyAccessRole = 'client'
+): Promise<
+  | { error: NextResponse; ctx: null }
+  | { error: null; ctx: PropertyAuthContext }
+> {
+  const { error, ctx } = await requireOrgAuth();
+  if (error) return { error, ctx: null };
+
+  const db = createServiceRoleClient();
+  const { data } = await db
+    .from('property_access')
+    .select('role')
+    .eq('property_id', propertyId)
+    .eq('user_id', ctx.userId)
+    .maybeSingle();
+
+  const role = (data as { role?: PropertyAccessRole } | null)?.role;
+
+  if (!role || PROPERTY_ROLE_RANK[role] < PROPERTY_ROLE_RANK[minRole]) {
+    return {
+      error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      ctx: null,
+    };
+  }
+
+  return { error: null, ctx: { ...ctx, propertyRole: role } };
+}
+
+/** Shorthand: property must belong to caller's org AND caller must have an admin grant on it. */
+export async function requirePropertyWrite(propertyId: string) {
+  return requirePropertyAccess(propertyId, 'admin');
+}

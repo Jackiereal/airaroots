@@ -1,22 +1,22 @@
-import { requireOrgRole, requireOrgWrite } from '@/src/shared/utils/route-auth';
+import { requirePropertyAccess, requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, ctx } = await requireOrgRole('viewer');
+  const { error: authError } = await requirePropertyAccess(propertyId);
   if (authError) return authError;
 
   const db = createServiceRoleClientLoose();
   const { data, error } = await db.from('properties').select('*').eq('id', propertyId).maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data || data.organization_id !== ctx!.organizationId) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ property: data });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, ctx } = await requireOrgWrite();
+  const { error: authError } = await requirePropertyWrite(propertyId);
   if (authError) return authError;
 
   const db = createServiceRoleClientLoose();
@@ -26,7 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
     .eq('id', propertyId)
     .maybeSingle();
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
-  if (!existing || existing.organization_id !== ctx!.organizationId) {
+  if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, ctx } = await requireOrgWrite();
+  const { error: authError } = await requirePropertyWrite(propertyId);
   if (authError) return authError;
 
   const db = createServiceRoleClientLoose();
@@ -60,7 +60,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     .eq('id', propertyId)
     .maybeSingle();
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
-  if (!existing || existing.organization_id !== ctx!.organizationId) {
+  if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 

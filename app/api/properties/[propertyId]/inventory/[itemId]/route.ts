@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { InventoryService } from '@/src/domains/operations/services/inventory.service';
 import { UpdateInventoryItemSchema, LogTransactionSchema } from '@/src/domains/operations/schema';
-import { requireOrgAuth } from '@/src/shared/utils/route-auth';
+import { requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { handleApiError } from '@/src/shared/utils/api-error-handler';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string }> }
+  { params }: { params: Promise<{ propertyId: string; itemId: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { propertyId, itemId } = await params;
+    const { error } = await requirePropertyWrite(propertyId);
     if (error) return error;
 
-    const { itemId } = await params;
     const body = await request.json();
     const input = UpdateInventoryItemSchema.parse(body);
 
@@ -30,13 +30,13 @@ export async function PATCH(
 // POST /transactions sub-resource
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string }> }
+  { params }: { params: Promise<{ propertyId: string; itemId: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error, ctx } = await requireOrgAuth();
+    const { propertyId, itemId } = await params;
+    const { error, ctx } = await requirePropertyWrite(propertyId);
     if (error) return error;
 
-    const { itemId } = await params;
     const body = await request.json();
     const input = LogTransactionSchema.parse(body);
 

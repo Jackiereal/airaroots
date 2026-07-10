@@ -51,5 +51,19 @@ export async function POST(req: NextRequest) {
     if (error.code === '23505') return NextResponse.json({ error: 'Slug already in use' }, { status: 409 });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  // Visibility is gated entirely by property_access (see migration 015) —
+  // without this grant the creator can't see their own new property.
+  const { error: accessError } = await db.from('property_access').insert({
+    property_id: data.id,
+    user_id: ctx!.userId,
+    granted_by: ctx!.userId,
+    role: 'admin',
+  });
+  if (accessError) {
+    await db.from('properties').delete().eq('id', data.id);
+    return NextResponse.json({ error: accessError.message }, { status: 500 });
+  }
+
   return NextResponse.json({ property: data }, { status: 201 });
 }

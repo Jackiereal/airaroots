@@ -1,22 +1,13 @@
 import { writeAuditLog } from '@/lib/admin/audit';
-import { requireOrgWrite } from '@/src/shared/utils/route-auth';
+import { requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { directBookingAuditSnapshot, auditSnapshotsEqual } from '@/lib/property-finance/audit-snapshots';
 import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
-  const db = createServiceRoleClientLoose();
-  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
-  return !!data && data.organization_id === organizationId;
-}
-
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ propertyId: string; id: string }> }) {
   const { propertyId, id } = await params;
-  const { error: authError, ctx } = await requireOrgWrite();
+  const { error: authError, ctx } = await requirePropertyWrite(propertyId);
   if (authError) return authError;
-  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
 
   const db = createServiceRoleClient();
   const { data: existing } = await db
@@ -50,11 +41,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ propertyId: string; id: string }> }) {
   const { propertyId, id } = await params;
-  const { error: authError, ctx } = await requireOrgWrite();
+  const { error: authError, ctx } = await requirePropertyWrite(propertyId);
   if (authError) return authError;
-  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
 
   const db = createServiceRoleClient();
   const { data: existing } = await db

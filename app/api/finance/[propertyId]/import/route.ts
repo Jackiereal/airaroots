@@ -1,26 +1,17 @@
 import { writeAuditLog } from '@/lib/admin/audit';
-import { requireOrgWrite } from '@/src/shared/utils/route-auth';
+import { requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { parseAirbnbCsv, toPeriodMonth } from '@/lib/property-finance/parse-airbnb-csv';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { createServiceRoleClientLoose } from '@/src/infrastructure/supabase/server';
 import type { Json } from '@/types/database.types';
 import { NextRequest, NextResponse } from 'next/server';
 
-async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
-  const db = createServiceRoleClientLoose();
-  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
-  return !!data && data.organization_id === organizationId;
-}
-
 const CHUNK = 200;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, ctx } = await requireOrgWrite();
+  const { error: authError, ctx } = await requirePropertyWrite(propertyId);
   if (authError) return authError;
-  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
 
   const formData = await req.formData();
   const file = formData.get('file') as File | null;

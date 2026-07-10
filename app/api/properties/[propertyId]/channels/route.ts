@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireOrgAuth } from '@/src/shared/utils/route-auth';
+import { requirePropertyAccess, requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { handleApiError } from '@/src/shared/utils/api-error-handler';
 import { channelConnectionService } from '@/src/domains/channel/services/channel-connection.service';
 import { z } from 'zod';
@@ -13,9 +13,9 @@ type Params = { params: Promise<{ propertyId: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   try {
-    const { error, ctx } = await requireOrgAuth();
-    if (error) return error;
     const { propertyId } = await params;
+    const { error, ctx } = await requirePropertyAccess(propertyId);
+    if (error) return error;
     const connections = await channelConnectionService.findByProperty(propertyId);
     const filtered = connections.filter(c => c.organizationId === ctx.organizationId);
     return NextResponse.json(filtered);
@@ -26,9 +26,9 @@ export async function GET(_req: Request, { params }: Params) {
 
 export async function POST(req: Request, { params }: Params) {
   try {
-    const { error, ctx } = await requireOrgAuth();
-    if (error) return error;
     const { propertyId } = await params;
+    const { error, ctx } = await requirePropertyWrite(propertyId);
+    if (error) return error;
     const body = CreateChannelConnectionSchema.parse(await req.json());
     const connection = await channelConnectionService.create(
       ctx.organizationId,
