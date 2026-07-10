@@ -1,15 +1,24 @@
-import { requireAdmin, requirePropertyAccess } from '@/lib/auth';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { requireOrgRole, requireOrgWrite } from '@/src/shared/utils/route-auth';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Stores per-property projections config as JSONB in properties table
 // Using a simple upsert into a projections_config column (added via migration below)
 // Fallback: store as a JSON field in properties.description until migration applied
 
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
+
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError } = await requirePropertyAccess(propertyId);
+  const { error: authError, ctx } = await requireOrgRole('viewer');
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const db = createServiceRoleClient();
   const { data, error } = await db
@@ -24,8 +33,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ pro
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError } = await requireAdmin();
+  const { error: authError, ctx } = await requireOrgWrite();
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const body = await req.json();
   const db = createServiceRoleClient();

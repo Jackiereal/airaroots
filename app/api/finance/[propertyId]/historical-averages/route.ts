@@ -1,4 +1,4 @@
-import { requirePropertyAccess } from '@/lib/auth';
+import { requireOrgRole } from '@/src/shared/utils/route-auth';
 
 export type HistoricalAverages = {
   avgMonthlyRevenue: number;
@@ -22,13 +22,22 @@ export type HistoricalAverages = {
 };
 import { summarizeImportedAirbnbRows } from '@/lib/property-finance/aggregate';
 import { totalBookedNightsAirbnbReservations, totalBookedNightsDirect } from '@/lib/property-finance/booked-nights';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError } = await requirePropertyAccess(propertyId);
+  const { error: authError, ctx } = await requireOrgRole('viewer');
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const db = createServiceRoleClient();
   const [airRes, dirRes] = await Promise.all([

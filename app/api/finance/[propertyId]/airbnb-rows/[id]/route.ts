@@ -1,11 +1,20 @@
-import { requireAdmin } from '@/lib/auth';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { requireOrgWrite } from '@/src/shared/utils/route-auth';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ propertyId: string; id: string }> }) {
   const { propertyId, id } = await params;
-  const { error: authError } = await requireAdmin();
+  const { error: authError, ctx } = await requireOrgWrite();
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const { guest_count } = (await req.json()) as { guest_count?: number | null };
   const db = createServiceRoleClient();

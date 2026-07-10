@@ -40,39 +40,20 @@ export async function GET(request: Request) {
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!exchangeError && data.user) {
-      const fullName =
-        data.user.user_metadata?.full_name ??
-        data.user.user_metadata?.name ??
-        data.user.email?.split('@')[0] ??
-        'User';
+      // Profile + org bootstrap happens entirely in the on_auth_user_created
+      // DB trigger (see migration 014) — the app never inserts user_profiles.
+      const serviceClient = createServiceRoleClient();
+      const { data: isNewUser } = await serviceClient.rpc('is_new_signup', {
+        p_user_id: data.user.id,
+      });
 
-      try {
-        const serviceClient = createServiceRoleClient();
-        const { data: existing } = await serviceClient
-          .from('user_profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .maybeSingle();
-
-        let isNewUser = false;
-        if (!existing) {
-          await serviceClient.from('user_profiles').insert({
-            id: data.user.id,
-            full_name: String(fullName),
-            role: 'admin',
-          });
-          isNewUser = true;
-        }
-        // New users go to onboarding; returning users respect the `next` param
-        if (isNewUser) {
-          const response = NextResponse.redirect(new URL('/onboarding', origin));
-          newCookies.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-          return response;
-        }
-      } catch {
-        // Trigger may have already created profile — non-fatal
+      // New users go to onboarding; returning users respect the `next` param
+      if (isNewUser) {
+        const response = NextResponse.redirect(new URL('/onboarding', origin));
+        newCookies.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+        return response;
       }
 
       const response = NextResponse.redirect(new URL(next, origin));

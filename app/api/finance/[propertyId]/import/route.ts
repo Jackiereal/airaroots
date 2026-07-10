@@ -1,17 +1,26 @@
 import { writeAuditLog } from '@/lib/admin/audit';
-import { requireAdmin } from '@/lib/auth';
+import { requireOrgWrite } from '@/src/shared/utils/route-auth';
 import { parseAirbnbCsv, toPeriodMonth } from '@/lib/property-finance/parse-airbnb-csv';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { createServiceRoleClientLoose } from '@/src/infrastructure/supabase/server';
 import type { Json } from '@/types/database.types';
 import { NextRequest, NextResponse } from 'next/server';
 
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
+
 const CHUNK = 200;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, profile } = await requireAdmin();
+  const { error: authError, ctx } = await requireOrgWrite();
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const formData = await req.formData();
   const file = formData.get('file') as File | null;
@@ -65,7 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
     airbnb_remitted_tax: r.airbnb_remitted_tax ?? null,
     earnings_year: r.earnings_year || null,
     raw: r.raw as unknown as Json,
-    created_by: profile!.id,
+    created_by: ctx!.userId,
   }));
 
   let inserted = 0;
@@ -86,84 +95,73 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
 
   if (reservationRows.length > 0) {
     const looseDb = createServiceRoleClientLoose();
+    const organizationId = ctx!.organizationId;
+    const codes = reservationRows.map(r => r.confirmation_code!);
+    const { data: existing } = await looseDb
+      .from('reservations')
+      .select('id, platform_booking_id')
+      .eq('organization_id', organizationId)
+      .in('platform_booking_id', codes)
+      .is('deleted_at', null);
 
-    const { data: userProfile, error: profileErr } = await looseDb
-      .from('user_profiles')
-      .select('organization_id')
-      .eq('id', profile!.id)
-      .single();
+    const existingMap = new Map(
+      (existing ?? []).map((r: { id: string; platform_booking_id: string }) => [
+        r.platform_booking_id,
+        r.id,
+      ]),
+    );
 
-    if (profileErr || !userProfile?.organization_id) {
-      reservationErrors.push(`org lookup failed: ${profileErr?.message ?? 'no organization_id on user_profiles'}`);
-    } else {
-      const organizationId = userProfile.organization_id as string;
-      const codes = reservationRows.map(r => r.confirmation_code!);
-      const { data: existing } = await looseDb
-        .from('reservations')
-        .select('id, platform_booking_id')
-        .eq('organization_id', organizationId)
-        .in('platform_booking_id', codes)
-        .is('deleted_at', null);
+    for (const r of reservationRows) {
+      const nights = r.nights ?? 1;
+      const cleaningFee = r.cleaning_fee ?? 0;
+      const grossEarnings = r.gross_earnings ?? 0;
+      const nightlyRate = nights > 0 ? Math.round((grossEarnings - cleaningFee) / nights) : 0;
+      const platformCommission = r.service_fee != null ? Math.abs(r.service_fee) : 0;
+      const taxes = r.airbnb_remitted_tax ?? 0;
 
-      const existingMap = new Map(
-        (existing ?? []).map((r: { id: string; platform_booking_id: string }) => [
-          r.platform_booking_id,
-          r.id,
-        ]),
-      );
-
-      for (const r of reservationRows) {
-        const nights = r.nights ?? 1;
-        const cleaningFee = r.cleaning_fee ?? 0;
-        const grossEarnings = r.gross_earnings ?? 0;
-        const nightlyRate = nights > 0 ? Math.round((grossEarnings - cleaningFee) / nights) : 0;
-        const platformCommission = r.service_fee != null ? Math.abs(r.service_fee) : 0;
-        const taxes = r.airbnb_remitted_tax ?? 0;
-
-        const existingId = existingMap.get(r.confirmation_code!);
-        if (existingId) {
-          const { error: updErr } = await looseDb
-            .from('reservations')
-            .update({
-              check_in: r.start_date,
-              check_out: r.end_date,
-              nightly_rate: nightlyRate,
-              cleaning_fee: cleaningFee,
-              platform_commission: platformCommission,
-              taxes,
-              guest_name: r.guest ?? null,
-            })
-            .eq('id', existingId);
-          if (updErr) reservationErrors.push(`update ${r.confirmation_code}: ${updErr.message}`);
-          else reservationsUpserted++;
-        } else {
-          const { error: insErr } = await looseDb.from('reservations').insert({
-            organization_id: organizationId,
-            property_id: propertyId,
-            channel: 'airbnb',
-            platform_booking_id: r.confirmation_code,
+      const existingId = existingMap.get(r.confirmation_code!);
+      if (existingId) {
+        const { error: updErr } = await looseDb
+          .from('reservations')
+          .update({
             check_in: r.start_date,
             check_out: r.end_date,
-            adults: 1,
-            children: 0,
-            pets: 0,
             nightly_rate: nightlyRate,
             cleaning_fee: cleaningFee,
-            taxes,
-            other_fees: 0,
             platform_commission: platformCommission,
+            taxes,
             guest_name: r.guest ?? null,
-            status: 'confirmed',
-          });
-          if (insErr) reservationErrors.push(`insert ${r.confirmation_code}: ${insErr.message}`);
-          else reservationsUpserted++;
-        }
+          })
+          .eq('id', existingId);
+        if (updErr) reservationErrors.push(`update ${r.confirmation_code}: ${updErr.message}`);
+        else reservationsUpserted++;
+      } else {
+        const { error: insErr } = await looseDb.from('reservations').insert({
+          organization_id: organizationId,
+          property_id: propertyId,
+          channel: 'airbnb',
+          platform_booking_id: r.confirmation_code,
+          check_in: r.start_date,
+          check_out: r.end_date,
+          adults: 1,
+          children: 0,
+          pets: 0,
+          nightly_rate: nightlyRate,
+          cleaning_fee: cleaningFee,
+          taxes,
+          other_fees: 0,
+          platform_commission: platformCommission,
+          guest_name: r.guest ?? null,
+          status: 'confirmed',
+        });
+        if (insErr) reservationErrors.push(`insert ${r.confirmation_code}: ${insErr.message}`);
+        else reservationsUpserted++;
       }
     }
   }
 
   void writeAuditLog({
-    userId: profile!.id, propertyId, action: 'import',
+    userId: ctx!.userId, propertyId, action: 'import',
     resourceType: 'property_finance_import',
     afterState: { period_month: periodMonth, rows_imported: inserted, headers_ok: headersOk, reservations_upserted: reservationsUpserted },
   });

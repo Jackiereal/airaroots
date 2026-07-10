@@ -1,14 +1,23 @@
 import { writeAuditLog } from '@/lib/admin/audit';
-import { requireAdmin, requirePropertyAccess } from '@/lib/auth';
+import { requireOrgRole, requireOrgWrite } from '@/src/shared/utils/route-auth';
 import { directBookingAuditSnapshot } from '@/lib/property-finance/audit-snapshots';
 import { toPeriodMonth } from '@/lib/property-finance/parse-airbnb-csv';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError } = await requirePropertyAccess(propertyId);
+  const { error: authError, ctx } = await requireOrgRole('viewer');
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const url = new URL(req.url);
   const month = url.searchParams.get('month');
@@ -33,8 +42,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prop
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, profile } = await requireAdmin();
+  const { error: authError, ctx } = await requireOrgWrite();
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const body = (await req.json()) as {
     month?: string;
@@ -72,14 +84,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
       check_out: body.check_out || null,
       nights: body.nights ?? null,
       notes: body.notes?.trim() || null,
-      created_by: profile!.id,
+      created_by: ctx!.userId,
     })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   void writeAuditLog({
-    userId: profile!.id, propertyId, action: 'create',
+    userId: ctx!.userId, propertyId, action: 'create',
     resourceType: 'property_finance_direct_booking', resourceId: data.id,
     afterState: directBookingAuditSnapshot(data as unknown as Record<string, unknown>),
   });

@@ -1,15 +1,17 @@
-import { requirePropertyAccess } from '@/lib/auth';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { requireOrgRole } from '@/src/shared/utils/route-auth';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError, profile } = await requirePropertyAccess(propertyId);
+  // Activity/audit log was admin-only under the legacy role flag; preserved as 'admin' here.
+  const { error: authError, ctx } = await requireOrgRole('admin');
   if (authError) return authError;
 
-  // Clients cannot see activity log
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const propDb = createServiceRoleClientLoose();
+  const { data: property } = await propDb.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  if (!property || property.organization_id !== ctx!.organizationId) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   const url = new URL(req.url);

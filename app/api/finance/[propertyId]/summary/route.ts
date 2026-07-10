@@ -9,9 +9,15 @@ import {
 import { lastNMonthStartsUtc } from '@/lib/property-finance/months';
 import { toPeriodMonth } from '@/lib/property-finance/parse-airbnb-csv';
 import { sumOutOfPocketByOwner } from '@/lib/property-finance/expense-paid-source';
-import { requirePropertyAccess } from '@/lib/auth';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { requireOrgRole } from '@/src/shared/utils/route-auth';
+import { createServiceRoleClient, createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+
+async function assertPropertyInOrg(propertyId: string, organizationId: string): Promise<boolean> {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db.from('properties').select('organization_id').eq('id', propertyId).maybeSingle();
+  return !!data && data.organization_id === organizationId;
+}
 
 function ym(pm: string): string { return pm.slice(0, 7); }
 
@@ -46,8 +52,11 @@ function buildInsights(args: {
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
-  const { error: authError } = await requirePropertyAccess(propertyId);
+  const { error: authError, ctx } = await requireOrgRole('viewer');
   if (authError) return authError;
+  if (!(await assertPropertyInOrg(propertyId, ctx!.organizationId))) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   const { searchParams } = new URL(req.url);
   const month = searchParams.get('month');

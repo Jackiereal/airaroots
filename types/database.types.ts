@@ -823,6 +823,7 @@ export type Database = {
     }
     Functions: {
       get_current_user_org_id: { Args: never; Returns: string }
+      is_new_signup: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       calendar_block_type:
