@@ -60,7 +60,7 @@ export async function requireOrgAuth(): Promise<
 // can write.
 // ─────────────────────────────────────────────
 
-const ORG_ROLE_RANK = { viewer: 0, manager: 1, admin: 2, owner: 3 } as const;
+export const ORG_ROLE_RANK = { viewer: 0, manager: 1, admin: 2, owner: 3 } as const;
 
 export type OrgRole = keyof typeof ORG_ROLE_RANK;
 

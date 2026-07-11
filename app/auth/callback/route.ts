@@ -47,8 +47,11 @@ export async function GET(request: Request) {
         p_user_id: data.user.id,
       });
 
-      // New users go to onboarding; returning users respect the `next` param
-      if (isNewUser) {
+      // New users go to onboarding; returning users respect the `next` param.
+      // Exception: a new user arriving via an invite link should land back on
+      // that invite to complete joining the inviter's org, not the solo-org
+      // onboarding flow — they're not creating their own workspace here.
+      if (isNewUser && !next.startsWith('/invite/')) {
         const response = NextResponse.redirect(new URL('/onboarding', origin));
         newCookies.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);
