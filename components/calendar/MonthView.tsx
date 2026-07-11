@@ -195,7 +195,7 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                   <div
                     className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
                       isToday
-                        ? 'bg-[var(--accent)] text-white'
+                        ? 'bg-black text-white'
                         : isCurrentMonth
                         ? 'text-[var(--text-primary)]'
                         : 'text-[var(--text-tertiary)]'
