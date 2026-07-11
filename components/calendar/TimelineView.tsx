@@ -67,11 +67,13 @@ export function TimelineView({ properties, reservations, blocks, from, to, onRes
     const rawStartOffset = differenceInDays(blockStart, fromDay);
     const rawEndOffset = differenceInDays(blockEnd, fromDay);
 
-    // Half-day inset at the real start/end only — signals check-in starts mid-day
-    // and checkout frees up mid-day. Don't inset an edge that's clipped by the
-    // visible window (that boundary isn't the real start/end).
+    // Half-day inset at check-in, quarter-day inset at checkout. The asymmetry
+    // (0.5 vs 0.25) leaves a visible gap when the next guest's check-in pill
+    // starts at +0.5 into that same day — otherwise back-to-back bookings
+    // would touch with no visible turnover. Don't inset an edge that's
+    // clipped by the visible window (that boundary isn't the real start/end).
     const startEdge = rawStartOffset >= 0 ? rawStartOffset + 0.5 : 0;
-    const endEdge = rawEndOffset <= totalDays ? rawEndOffset - 0.5 : totalDays;
+    const endEdge = rawEndOffset <= totalDays ? rawEndOffset - 0.75 : totalDays;
 
     const startOffset = Math.max(0, startEdge);
     const endOffset = Math.min(totalDays, endEdge);

@@ -212,10 +212,17 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
               {visibleRows.map((row, ri) => (
                 <div key={ri} style={{ position: 'relative', height: BAR_HEIGHT, marginBottom: BAR_GAP }}>
                   {row.map((bar) => {
-                    // Start half a column into check-in day; end half a column into
-                    // checkout day — visually signals "checkout day is still free after noon".
+                    // Start half a column into check-in day; end a quarter-column into
+                    // checkout day. Using 0.25 (not 0.5) on the checkout edge leaves a
+                    // visible gap when the next guest's check-in pill starts at 0.5 into
+                    // the same day — otherwise back-to-back bookings would touch with no
+                    // visible turnover.
+                    // Checkout's own column is always endCol + 1 (the day after the last
+                    // occupied night), independent of endCol itself — a 1-night stay has
+                    // startCol === endCol but must still span a full column of width.
+                    const checkoutCol = bar.endCol + 1;
                     const startEdge = bar.startCol + (bar.isStart ? 0.5 : 0);
-                    const endEdge = bar.endCol + 1 - (bar.isEnd ? 0.5 : 0);
+                    const endEdge = bar.isEnd ? checkoutCol + 0.25 : checkoutCol;
                     const leftPct = (startEdge / 7) * 100;
                     const widthPct = ((endEdge - startEdge) / 7) * 100;
 
