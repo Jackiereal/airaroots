@@ -49,6 +49,24 @@ export class CalendarRepository {
     return (data ?? []).map((r) => this.toBlockEntity(r as CalendarBlockRow));
   }
 
+  /** Any calendar_blocks row (reservation mirror OR manual hold) overlapping
+   * [startDate, endDate). Used to stop a new manual block from being created
+   * over dates that are already reserved or already blocked. */
+  async findAnyOverlap(propertyId: string, startDate: string, endDate: string, excludeId?: string): Promise<CalendarBlock[]> {
+    let query = this.supabase
+      .from('calendar_blocks')
+      .select('*')
+      .eq('property_id', propertyId)
+      .lt('start_date', endDate)
+      .gt('end_date', startDate);
+
+    if (excludeId) query = query.neq('id', excludeId);
+
+    const { data, error } = await query;
+    if (error) throw new Error(`DB error: ${error.message}`);
+    return (data ?? []).map((r) => this.toBlockEntity(r as CalendarBlockRow));
+  }
+
   async findBlocksByProperty(propertyId: string, from: Date, to: Date): Promise<CalendarBlock[]> {
     const { data, error } = await this.supabase
       .from('calendar_blocks')

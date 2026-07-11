@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CalendarRepository } from '../repositories/calendar.repository';
-import { NotFoundError } from '../../../shared/errors/domain-errors';
+import { NotFoundError, ConflictError } from '../../../shared/errors/domain-errors';
 import type {
   CalendarBlock,
   SeasonalRate,
@@ -17,6 +17,19 @@ export class CalendarService {
   }
 
   async createBlock(input: CreateBlockInput, actorId: string): Promise<CalendarBlock> {
+    const overlapping = await this.repository.findAnyOverlap(input.propertyId, input.startDate, input.endDate);
+    if (overlapping.length > 0) {
+      throw new ConflictError(
+        'Dates overlap with an existing reservation or block',
+        overlapping.map((b) => ({
+          id: b.id,
+          startDate: b.startDate,
+          endDate: b.endDate,
+          blockType: b.blockType,
+          reason: b.reason ?? null,
+        }))
+      );
+    }
     return this.repository.createBlock(input, actorId);
   }
 
