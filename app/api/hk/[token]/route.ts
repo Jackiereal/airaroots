@@ -44,7 +44,7 @@ export async function POST(
     // Log inventory usage if provided
     if (input.inventoryUsed && input.inventoryUsed.length > 0) {
       const inventoryService = new InventoryService(supabase);
-      await inventoryService.logTaskUsage(task.id, input.inventoryUsed);
+      await inventoryService.logTaskUsage(task.propertyId, task.id, input.inventoryUsed);
     }
 
     return NextResponse.json({ task });

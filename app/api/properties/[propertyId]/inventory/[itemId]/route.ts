@@ -19,7 +19,7 @@ export async function PATCH(
 
     const supabase = await createClient();
     const service = new InventoryService(supabase);
-    const item = await service.update(itemId, input);
+    const item = await service.update(propertyId, itemId, input);
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -42,7 +42,7 @@ export async function POST(
 
     const supabase = await createClient();
     const service = new InventoryService(supabase);
-    const result = await service.logTransaction({
+    const result = await service.logTransaction(propertyId, {
       itemId,
       type: input.type,
       quantity: input.quantity,

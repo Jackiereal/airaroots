@@ -35,19 +35,19 @@ export class InventoryService {
     return this.repo.create({ ...input, organizationId });
   }
 
-  async update(id: string, input: UpdateInventoryItemInput): Promise<InventoryItem> {
+  async update(propertyId: string, id: string, input: UpdateInventoryItemInput): Promise<InventoryItem> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('InventoryItem', id);
+    if (!existing || existing.propertyId !== propertyId) throw new NotFoundError('InventoryItem', id);
     return this.repo.update(id, input);
   }
 
-  async logTransaction(input: LogInventoryTransactionInput): Promise<{
+  async logTransaction(propertyId: string, input: LogInventoryTransactionInput): Promise<{
     transaction: InventoryTransaction;
     item: InventoryItem;
     isLowStock: boolean;
   }> {
     const existing = await this.repo.findById(input.itemId);
-    if (!existing) throw new NotFoundError('InventoryItem', input.itemId);
+    if (!existing || existing.propertyId !== propertyId) throw new NotFoundError('InventoryItem', input.itemId);
 
     const transaction = await this.repo.logTransaction(input);
 
@@ -68,6 +68,7 @@ export class InventoryService {
 
   // Log multiple items used during a housekeeping task
   async logTaskUsage(
+    propertyId: string,
     taskId: string,
     usedItems: Array<{ itemId: string; quantity: number }>,
     createdBy?: string
@@ -75,7 +76,7 @@ export class InventoryService {
     const results: Array<{ item: InventoryItem; isLowStock: boolean }> = [];
 
     for (const usage of usedItems) {
-      const { item, isLowStock } = await this.logTransaction({
+      const { item, isLowStock } = await this.logTransaction(propertyId, {
         itemId: usage.itemId,
         taskId,
         type: 'used',
