@@ -21,19 +21,32 @@ const BLOCK_COLORS: Record<string, string> = {
   seasonal_close: '#9ca3af',
 };
 
+// Deterministic avatar hue per name — same guest always gets the same color.
+const AVATAR_HUES = [4, 24, 44, 160, 200, 260, 320];
+function avatarColor(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  const hue = AVATAR_HUES[Math.abs(hash) % AVATAR_HUES.length];
+  return `hsl(${hue} 70% 45%)`;
+}
+
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const BAR_HEIGHT = 18;
-const BAR_GAP = 2;
-const BAR_TOP_OFFSET = 28; // below the date number
+const BAR_HEIGHT = 28;
+const BAR_GAP = 4;
+const BAR_TOP_OFFSET = 30; // below the date number
+const CUT = 10; // px width of the diagonal cut at start/end caps
 
 type Bar = {
   key: string;
   label: string;
+  guestCount?: number;
+  avatarSeed?: string;
   color: string;
+  isBlock: boolean;
   startCol: number; // 0-6, inclusive
   endCol: number;   // 0-6, inclusive (last occupied column in this week)
-  isStart: boolean; // true if the bar's real start date falls in this week (rounded left cap)
-  isEnd: boolean;   // true if the bar's real end date falls in this week (rounded right cap)
+  isStart: boolean; // true if the bar's real start date falls in this week
+  isEnd: boolean;   // true if the bar's real end date falls in this week
   onClick?: () => void;
 };
 
@@ -57,7 +70,16 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
   // Bars per week row: each reservation/block clipped to [weekStart, weekEnd],
   // split into one segment per week it spans (Airbnb-style continuous bar).
   const barsByWeek = useMemo(() => {
-    type Span = { start: Date; end: Date; label: string; color: string; onClick?: () => void };
+    type Span = {
+      start: Date;
+      end: Date;
+      label: string;
+      guestCount?: number;
+      avatarSeed?: string;
+      color: string;
+      isBlock: boolean;
+      onClick?: () => void;
+    };
 
     const spans: Span[] = [
       ...blocks
@@ -67,14 +89,22 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
           end: startOfDay(new Date(b.endDate + 'T00:00:00')),
           label: b.reason || b.blockType,
           color: BLOCK_COLORS[b.blockType] ?? '#9ca3af',
+          isBlock: true,
         })),
-      ...reservations.map((r) => ({
-        start: startOfDay(new Date(r.checkIn + 'T00:00:00')),
-        end: startOfDay(new Date(r.checkOut + 'T00:00:00')),
-        label: r.guestName ?? 'Guest',
-        color: CHANNEL_COLORS[r.channel] ?? '#6b7280',
-        onClick: () => onReservationClick(r),
-      })),
+      ...reservations.map((r) => {
+        const guestCount = (r.adults ?? 1) + (r.children ?? 0);
+        const name = r.guestName?.trim() || 'Guest';
+        return {
+          start: startOfDay(new Date(r.checkIn + 'T00:00:00')),
+          end: startOfDay(new Date(r.checkOut + 'T00:00:00')),
+          label: guestCount > 1 ? `${name} +${guestCount - 1}` : name,
+          guestCount,
+          avatarSeed: name,
+          color: CHANNEL_COLORS[r.channel] ?? '#6b7280',
+          isBlock: false,
+          onClick: () => onReservationClick(r),
+        };
+      }),
     ];
 
     return weeks.map((week) => {
@@ -96,7 +126,10 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
         bars.push({
           key: `${span.label}-${span.start.toISOString()}-${startCol}`,
           label: span.label,
+          guestCount: span.guestCount,
+          avatarSeed: span.avatarSeed,
           color: span.color,
+          isBlock: span.isBlock,
           startCol,
           endCol,
           isStart: span.start >= weekStart,
@@ -143,7 +176,7 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
         const visibleRows = rows.slice(0, maxVisibleRows);
         const overflowCount = rows.length - maxVisibleRows;
         const rowsHeight = visibleRows.length * (BAR_HEIGHT + BAR_GAP);
-        const minHeight = Math.max(80, BAR_TOP_OFFSET + rowsHeight + (overflowCount > 0 ? 16 : 4));
+        const minHeight = Math.max(90, BAR_TOP_OFFSET + rowsHeight + (overflowCount > 0 ? 16 : 4));
 
         return (
           <div key={wi} className="relative grid grid-cols-7 border-b border-[var(--border-color)]" style={{ minHeight }}>
@@ -186,27 +219,47 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                     const endEdge = bar.endCol + 1 - (bar.isEnd ? 0.5 : 0);
                     const leftPct = (startEdge / 7) * 100;
                     const widthPct = ((endEdge - startEdge) / 7) * 100;
+
+                    // Diagonal cut caps: only at the bar's true start/end (not at a
+                    // week-boundary clip), matching Airbnb's check-in/checkout notch.
+                    const clipParts = ['0% 0%'];
+                    if (bar.isEnd) clipParts.push(`calc(100% - ${CUT}px) 0%`, `100% 50%`, `calc(100% - ${CUT}px) 100%`);
+                    else clipParts.push('100% 0%', '100% 100%');
+                    clipParts.push('0% 100%');
+                    if (bar.isStart) clipParts.push(`${CUT}px 50%`);
+                    const clipPath = `polygon(${clipParts.join(', ')})`;
+
+                    const initial = (bar.avatarSeed ?? bar.label).trim().charAt(0).toUpperCase() || '?';
+
                     return (
                       <button
                         key={bar.key}
                         type="button"
                         onClick={(e) => { e.stopPropagation(); bar.onClick?.(); }}
                         disabled={!bar.onClick}
-                        className={`absolute top-0 flex items-center justify-center sm:justify-start px-0 sm:px-1.5 text-[10px] text-white truncate pointer-events-auto ${bar.onClick ? 'hover:brightness-90 cursor-pointer' : 'cursor-default'} rounded-full sm:rounded-none ${
-                          bar.isStart ? 'sm:rounded-l' : ''
-                        } ${bar.isEnd ? 'sm:rounded-r' : ''}`}
+                        className={`absolute top-0 flex items-center gap-1.5 pointer-events-auto ${bar.onClick ? 'hover:brightness-110 cursor-pointer' : 'cursor-default'} ${
+                          bar.isStart ? 'pl-0.5' : 'pl-2'
+                        } ${bar.isEnd ? 'pr-3' : 'pr-2'}`}
                         style={{
                           left: `${leftPct}%`,
                           width: `${widthPct}%`,
                           height: BAR_HEIGHT,
                           backgroundColor: bar.color,
-                          marginLeft: bar.isStart ? 2 : 0,
-                          marginRight: bar.isEnd ? 2 : 0,
+                          clipPath,
                         }}
-                        title={bar.label}
+                        title={`${bar.label}${bar.isBlock ? '' : ` · ${bar.guestCount} guest${bar.guestCount === 1 ? '' : 's'}`}`}
                       >
-                        <span className="sm:hidden">{bar.label.charAt(0).toUpperCase()}</span>
-                        <span className="hidden sm:inline truncate">{bar.label}</span>
+                        {bar.isStart && !bar.isBlock && (
+                          <span
+                            className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold text-white ring-2 ring-white/20"
+                            style={{ backgroundColor: avatarColor(bar.avatarSeed ?? bar.label) }}
+                          >
+                            {initial}
+                          </span>
+                        )}
+                        <span className="truncate text-[11px] font-medium text-white">
+                          {bar.isBlock && bar.isStart ? bar.label : bar.isBlock ? '' : bar.isStart ? bar.label : ''}
+                        </span>
                       </button>
                     );
                   })}
