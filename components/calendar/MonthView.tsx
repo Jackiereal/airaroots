@@ -34,7 +34,6 @@ const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const BAR_HEIGHT = 28;
 const BAR_GAP = 4;
 const BAR_TOP_OFFSET = 30; // below the date number
-const CUT = 10; // px width of the diagonal cut at start/end caps
 
 type Bar = {
   key: string;
@@ -220,15 +219,6 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                     const leftPct = (startEdge / 7) * 100;
                     const widthPct = ((endEdge - startEdge) / 7) * 100;
 
-                    // Diagonal cut caps: only at the bar's true start/end (not at a
-                    // week-boundary clip), matching Airbnb's check-in/checkout notch.
-                    const clipParts = ['0% 0%'];
-                    if (bar.isEnd) clipParts.push(`calc(100% - ${CUT}px) 0%`, `100% 50%`, `calc(100% - ${CUT}px) 100%`);
-                    else clipParts.push('100% 0%', '100% 100%');
-                    clipParts.push('0% 100%');
-                    if (bar.isStart) clipParts.push(`${CUT}px 50%`);
-                    const clipPath = `polygon(${clipParts.join(', ')})`;
-
                     const initial = (bar.avatarSeed ?? bar.label).trim().charAt(0).toUpperCase() || '?';
 
                     return (
@@ -238,14 +228,13 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                         onClick={(e) => { e.stopPropagation(); bar.onClick?.(); }}
                         disabled={!bar.onClick}
                         className={`absolute top-0 flex items-center gap-1.5 pointer-events-auto ${bar.onClick ? 'hover:brightness-110 cursor-pointer' : 'cursor-default'} ${
-                          bar.isStart ? 'pl-0.5' : 'pl-2'
-                        } ${bar.isEnd ? 'pr-3' : 'pr-2'}`}
+                          bar.isStart ? 'pl-0.5 rounded-l-full' : 'pl-2'
+                        } ${bar.isEnd ? 'pr-3 rounded-r-full' : 'pr-2'}`}
                         style={{
                           left: `${leftPct}%`,
                           width: `${widthPct}%`,
                           height: BAR_HEIGHT,
                           backgroundColor: bar.color,
-                          clipPath,
                         }}
                         title={`${bar.label}${bar.isBlock ? '' : ` · ${bar.guestCount} guest${bar.guestCount === 1 ? '' : 's'}`}`}
                       >
