@@ -19,9 +19,24 @@ export async function getUserProfile() {
   return data ? { ...data, email: user.email } : null;
 }
 
+/** True if this user holds any property_access grant (any role, any property). */
+export async function hasAnyPropertyAccess(userId: string): Promise<boolean> {
+  const serviceClient = createServiceRoleClient();
+  const { data } = await serviceClient
+    .from('property_access')
+    .select('id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+  return !!data;
+}
+
 export async function requireAdmin() {
   const profile = await getUserProfile();
-  if (!profile || profile.role !== 'admin') {
+  if (!profile) {
+    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), profile: null };
+  }
+  if (!(await hasAnyPropertyAccess(profile.id))) {
     return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), profile: null };
   }
   return { error: null, profile };

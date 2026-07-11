@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { getUserProfile } from '@/lib/auth';
+import { requirePropertyAccess } from '@/src/shared/utils/route-auth';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import PropertyFinanceContent from '@/components/property/PropertyFinanceContent';
 
@@ -17,7 +18,9 @@ export default async function PropertyPage({
   const { propertyId } = await params;
   const profile = await getUserProfile();
   if (!profile) redirect('/auth/signin');
-  if (profile.role !== 'admin') redirect('/client/dashboard');
+
+  const { error: accessError, ctx } = await requirePropertyAccess(propertyId);
+  if (accessError) redirect('/client/dashboard');
 
   const property = await getProperty(propertyId);
   if (!property) notFound();
@@ -26,7 +29,7 @@ export default async function PropertyPage({
     <PropertyFinanceContent
       propertyId={property.id}
       propertyName={property.name}
-      isReadOnly={false}
+      isReadOnly={ctx.propertyRole !== 'admin'}
     />
   );
 }

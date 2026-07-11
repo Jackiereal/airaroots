@@ -18,13 +18,14 @@ export default function Home() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('role')
-          .eq('id', user.id)
+        const { data: access } = await supabase
+          .from('property_access')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1)
           .maybeSingle();
 
-        if (profile?.role === 'admin') {
+        if (access) {
           router.replace('/dashboard');
         } else {
           router.replace('/client/dashboard');
