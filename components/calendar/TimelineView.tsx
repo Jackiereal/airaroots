@@ -157,9 +157,9 @@ export function TimelineView({ properties, reservations, blocks, from, to, onRes
                       key={block.id}
                       className="absolute inset-y-1 rounded opacity-70 flex items-center px-2 overflow-hidden"
                       style={{ ...style, backgroundColor: color }}
-                      title={block.reason ?? block.blockType}
+                      title={block.reason || block.blockType}
                     >
-                      <span className="text-white text-xs truncate">{block.reason ?? block.blockType}</span>
+                      <span className="text-white text-xs truncate">{block.reason || block.blockType}</span>
                     </div>
                   );
                 })}

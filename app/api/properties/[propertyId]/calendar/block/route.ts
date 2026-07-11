@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: Params): Promise<Ne
         startDate: input.startDate,
         endDate: input.endDate,
         blockType: input.blockType,
-        reason: input.reason,
+        reason: input.reason?.trim() || undefined,
         isPublic: input.isPublic,
       },
       ctx!.userId

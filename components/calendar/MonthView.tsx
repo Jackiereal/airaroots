@@ -125,7 +125,7 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                     className="text-[10px] text-white rounded px-1 py-0.5 mb-0.5 truncate"
                     style={{ backgroundColor: BLOCK_COLORS[b.blockType] ?? '#9ca3af' }}
                   >
-                    {b.reason ?? b.blockType}
+                    {b.reason || b.blockType}
                   </div>
                 ))}
 

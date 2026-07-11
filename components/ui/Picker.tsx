@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import * as Dialog from '@radix-ui/react-dialog';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 
 export type PickerOption = {
@@ -38,23 +38,6 @@ export default function Picker({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('keydown', onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open) setQuery('');
@@ -87,37 +70,38 @@ export default function Picker({
       {label && (
         <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">{label}</label>
       )}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen(true)}
-        className={`${triggerClassName} ${className}`}
-      >
-        <span className={`truncate ${!selected?.label && !placeholder ? 'text-[var(--text-tertiary)]' : ''}`}>
-          {triggerLabel}
-        </span>
-        <ChevronDown size={size === 'compact' ? 12 : 15} className="shrink-0 text-[var(--text-tertiary)]" />
-      </button>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Trigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            className={`${triggerClassName} ${className}`}
+          >
+            <span className={`truncate ${!selected?.label && !placeholder ? 'text-[var(--text-tertiary)]' : ''}`}>
+              {triggerLabel}
+            </span>
+            <ChevronDown size={size === 'compact' ? 12 : 15} className="shrink-0 text-[var(--text-tertiary)]" />
+          </button>
+        </Dialog.Trigger>
 
-      {mounted && open && createPortal(
-        <div className="fixed inset-0 z-[200]">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-
-          <div
-            className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-hidden rounded-t-2xl border-t border-[var(--border-color)] bg-[var(--bg-base)] pb-[env(safe-area-inset-bottom)] flex flex-col sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(90vw,22rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border"
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[200]" />
+          <Dialog.Content
+            className="fixed inset-x-0 bottom-0 z-[200] max-h-[80vh] overflow-hidden rounded-t-2xl border-t border-[var(--border-color)] bg-[var(--bg-base)] pb-[env(safe-area-inset-bottom)] flex flex-col sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(90vw,22rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)] shrink-0">
-              <h2 className="text-base font-semibold text-[var(--text-primary)]">
+              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">
                 {modalTitle ?? label ?? placeholder ?? 'Select'}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
-              >
-                <X size={18} />
-              </button>
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                >
+                  <X size={18} />
+                </button>
+              </Dialog.Close>
             </div>
 
             {searchable && (
@@ -166,10 +150,9 @@ export default function Picker({
                 })
               )}
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
