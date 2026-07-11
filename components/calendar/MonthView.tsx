@@ -64,7 +64,7 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
       if (b.blockType === 'reservation') continue;
       let d = new Date(b.startDate + 'T00:00:00');
       const end = new Date(b.endDate + 'T00:00:00');
-      while (d <= end) {
+      while (d < end) {
         const key = format(d, 'yyyy-MM-dd');
         const list = map.get(key) ?? [];
         list.push(b);

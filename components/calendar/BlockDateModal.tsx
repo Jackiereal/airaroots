@@ -96,7 +96,7 @@ export function BlockDateModal({ open, propertyId, defaultDate, onClose, onSucce
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">End date</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Checkout date</label>
                 <input
                   type="date"
                   value={form.endDate}
@@ -107,6 +107,9 @@ export function BlockDateModal({ open, propertyId, defaultDate, onClose, onSucce
                 />
               </div>
             </div>
+            <p className="text-xs text-[var(--text-tertiary)] -mt-2">
+              Last blocked night is the day before checkout — the checkout date itself stays bookable, same as a reservation.
+            </p>
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">Reason (optional)</label>

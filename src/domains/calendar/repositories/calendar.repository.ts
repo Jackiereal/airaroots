@@ -33,6 +33,22 @@ type SeasonalRateRow = {
 export class CalendarRepository {
   constructor(private supabase: SupabaseClient) {}
 
+  /** Manual holds (owner_hold/maintenance/buffer/seasonal_close) overlapping [checkIn, checkOut).
+   * Excludes block_type='reservation' rows — those mirror actual reservations,
+   * already covered by ReservationRepository.findConflicts. */
+  async findOverlappingHolds(propertyId: string, checkIn: Date, checkOut: Date): Promise<CalendarBlock[]> {
+    const { data, error } = await this.supabase
+      .from('calendar_blocks')
+      .select('*')
+      .eq('property_id', propertyId)
+      .neq('block_type', 'reservation')
+      .lt('start_date', checkOut.toISOString().split('T')[0])
+      .gt('end_date', checkIn.toISOString().split('T')[0]);
+
+    if (error) throw new Error(`DB error: ${error.message}`);
+    return (data ?? []).map((r) => this.toBlockEntity(r as CalendarBlockRow));
+  }
+
   async findBlocksByProperty(propertyId: string, from: Date, to: Date): Promise<CalendarBlock[]> {
     const { data, error } = await this.supabase
       .from('calendar_blocks')

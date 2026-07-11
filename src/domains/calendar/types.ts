@@ -6,7 +6,7 @@ export type CalendarBlock = {
   propertyId: string;
   reservationId: string | undefined;
   startDate: string;   // YYYY-MM-DD
-  endDate: string;     // YYYY-MM-DD (inclusive)
+  endDate: string;     // YYYY-MM-DD (exclusive, same convention as reservation checkOut)
   blockType: CalendarBlockType;
   reason: string | undefined;
   isPublic: boolean;

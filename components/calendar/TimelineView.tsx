@@ -65,7 +65,7 @@ export function TimelineView({ properties, reservations, blocks, from, to, onRes
     const fromDay = startOfDay(from);
 
     const startOffset = Math.max(0, differenceInDays(blockStart, fromDay));
-    const endOffset = Math.min(totalDays, differenceInDays(blockEnd, fromDay) + 1);
+    const endOffset = Math.min(totalDays, differenceInDays(blockEnd, fromDay));
     const width = endOffset - startOffset;
 
     if (width <= 0) return { display: 'none' };
