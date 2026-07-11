@@ -136,6 +136,19 @@ export async function requirePropertyAccess(
   if (error) return { error, ctx: null };
 
   const db = createServiceRoleClient();
+  const { data: property } = await db
+    .from('properties')
+    .select('organization_id')
+    .eq('id', propertyId)
+    .maybeSingle();
+
+  if (!property || (property as unknown as { organization_id: string }).organization_id !== ctx.organizationId) {
+    return {
+      error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      ctx: null,
+    };
+  }
+
   const { data } = await db
     .from('property_access')
     .select('role')

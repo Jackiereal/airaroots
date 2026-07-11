@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
   const beforeSnap = directBookingAuditSnapshot(existing as unknown as Record<string, unknown>);
   const { data: updated, error } = await createServiceRoleClientLoose()
     .from('property_finance_direct_bookings')
-    .update(updateData).eq('id', id).select().single();
+    .update(updateData).eq('id', id).eq('property_id', propertyId).select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const afterSnap = directBookingAuditSnapshot(updated as unknown as Record<string, unknown>);
@@ -50,7 +50,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     .select('*').eq('id', id).eq('property_id', propertyId).maybeSingle();
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const { error } = await db.from('property_finance_direct_bookings').delete().eq('id', id);
+  const { error } = await db.from('property_finance_direct_bookings').delete().eq('id', id).eq('property_id', propertyId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   void writeAuditLog({

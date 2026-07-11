@@ -42,6 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
     .from('property_finance_expenses')
     .update(updateData)
     .eq('id', id)
+    .eq('property_id', propertyId)
     .select()
     .single();
 
@@ -72,7 +73,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const { error } = await db.from('property_finance_expenses').delete().eq('id', id);
+  const { error } = await db.from('property_finance_expenses').delete().eq('id', id).eq('property_id', propertyId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   void writeAuditLog({

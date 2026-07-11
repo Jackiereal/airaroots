@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
 
   const { data, error } = await db
     .from('property_finance_airbnb_rows')
-    .update({ guest_count: gc }).eq('id', id).select().single();
+    .update({ guest_count: gc }).eq('id', id).eq('property_id', propertyId).select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ row: data });
