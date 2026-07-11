@@ -192,9 +192,9 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                         type="button"
                         onClick={(e) => { e.stopPropagation(); bar.onClick?.(); }}
                         disabled={!bar.onClick}
-                        className={`absolute top-0 flex items-center px-1.5 text-[10px] text-white truncate pointer-events-auto ${bar.onClick ? 'hover:brightness-90 cursor-pointer' : 'cursor-default'} ${
-                          bar.isStart ? 'rounded-l' : ''
-                        } ${bar.isEnd ? 'rounded-r' : ''}`}
+                        className={`absolute top-0 flex items-center justify-center sm:justify-start px-0 sm:px-1.5 text-[10px] text-white truncate pointer-events-auto ${bar.onClick ? 'hover:brightness-90 cursor-pointer' : 'cursor-default'} rounded-full sm:rounded-none ${
+                          bar.isStart ? 'sm:rounded-l' : ''
+                        } ${bar.isEnd ? 'sm:rounded-r' : ''}`}
                         style={{
                           left: `${leftPct}%`,
                           width: `${widthPct}%`,
@@ -205,7 +205,8 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
                         }}
                         title={bar.label}
                       >
-                        {bar.label}
+                        <span className="sm:hidden">{bar.label.charAt(0).toUpperCase()}</span>
+                        <span className="hidden sm:inline truncate">{bar.label}</span>
                       </button>
                     );
                   })}
