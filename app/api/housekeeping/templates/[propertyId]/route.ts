@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClientLoose } from '@/src/infrastructure/supabase/server';
 import { HousekeepingService } from '@/src/domains/operations/services/housekeeping.service';
 import { ChecklistItemSchema } from '@/src/domains/operations/schema';
-import { requireOrgAuth } from '@/src/shared/utils/route-auth';
+import { requireOrgAuth, requirePropertyAccess, requirePropertyWrite } from '@/src/shared/utils/route-auth';
 import { handleApiError } from '@/src/shared/utils/api-error-handler';
 import { z } from 'zod';
 
@@ -16,10 +16,10 @@ export async function GET(
   { params }: { params: Promise<{ propertyId: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { propertyId } = await params;
+    const { error } = await requirePropertyAccess(propertyId);
     if (error) return error;
 
-    const { propertyId } = await params;
     const supabase = createServiceRoleClientLoose();
     const service = new HousekeepingService(supabase);
     const items = await service.getTemplate(propertyId);
@@ -57,10 +57,10 @@ export async function DELETE(
   { params }: { params: Promise<{ propertyId: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { propertyId } = await params;
+    const { error } = await requirePropertyWrite(propertyId);
     if (error) return error;
 
-    const { propertyId } = await params;
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
     await service.resetTemplate(propertyId);
