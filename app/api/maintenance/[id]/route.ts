@@ -10,13 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
     const supabase = await createClient();
     const service = new MaintenanceService(supabase);
-    const maintenanceRequest = await service.get(id);
+    const maintenanceRequest = await service.get(id, ctx!.organizationId);
 
     return NextResponse.json({ request: maintenanceRequest });
   } catch (error) {
@@ -29,13 +29,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
     const supabase = await createClient();
     const service = new MaintenanceService(supabase);
-    await service.delete(id);
+    await service.delete(ctx!.organizationId, id);
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
@@ -48,7 +48,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
@@ -57,7 +57,7 @@ export async function PATCH(
 
     const supabase = await createClient();
     const service = new MaintenanceService(supabase);
-    const maintenanceRequest = await service.update(id, input);
+    const maintenanceRequest = await service.update(ctx!.organizationId, id, input);
 
     return NextResponse.json({ request: maintenanceRequest });
   } catch (error) {

@@ -10,9 +10,9 @@ export class VendorService {
     this.repo = new VendorRepository(supabase);
   }
 
-  async get(id: string): Promise<Vendor> {
+  async get(id: string, organizationId: string): Promise<Vendor> {
     const vendor = await this.repo.findById(id);
-    if (!vendor) throw new NotFoundError('Vendor', id);
+    if (!vendor || vendor.organizationId !== organizationId) throw new NotFoundError('Vendor', id);
     return vendor;
   }
 
@@ -27,15 +27,15 @@ export class VendorService {
     return this.repo.create({ ...input, organizationId });
   }
 
-  async update(id: string, input: UpdateVendorInput): Promise<Vendor> {
+  async update(organizationId: string, id: string, input: UpdateVendorInput): Promise<Vendor> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('Vendor', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('Vendor', id);
     return this.repo.update(id, input);
   }
 
-  async deactivate(id: string): Promise<Vendor> {
+  async deactivate(organizationId: string, id: string): Promise<Vendor> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('Vendor', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('Vendor', id);
     return this.repo.update(id, { isActive: false });
   }
 }

@@ -10,13 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
     const supabase = await createClient();
     const service = new VendorService(supabase);
-    const vendor = await service.get(id);
+    const vendor = await service.get(id, ctx!.organizationId);
 
     return NextResponse.json({ vendor });
   } catch (error) {
@@ -29,7 +29,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
@@ -38,7 +38,7 @@ export async function PATCH(
 
     const supabase = await createClient();
     const service = new VendorService(supabase);
-    const vendor = await service.update(id, input);
+    const vendor = await service.update(ctx!.organizationId, id, input);
 
     return NextResponse.json({ vendor });
   } catch (error) {

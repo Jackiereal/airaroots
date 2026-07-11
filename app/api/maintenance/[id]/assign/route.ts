@@ -15,7 +15,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
@@ -24,7 +24,7 @@ export async function POST(
 
     const supabase = await createClient();
     const service = new MaintenanceService(supabase);
-    const maintenanceRequest = await service.assign(id, {
+    const maintenanceRequest = await service.assign(ctx!.organizationId, id, {
       assignedTo: input.assignedTo ?? undefined,
       vendorId: input.vendorId ?? undefined,
     });

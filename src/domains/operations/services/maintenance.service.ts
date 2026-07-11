@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { MaintenanceRepository } from '../repositories/maintenance.repository';
+import { VendorRepository } from '../repositories/vendor.repository';
 import { NotFoundError } from '../../../shared/errors/domain-errors';
 import type {
   MaintenanceRequest,
@@ -13,14 +14,18 @@ import type {
 
 export class MaintenanceService {
   private repo: MaintenanceRepository;
+  private vendorRepo: VendorRepository;
 
   constructor(private supabase: SupabaseClient) {
     this.repo = new MaintenanceRepository(supabase);
+    this.vendorRepo = new VendorRepository(supabase);
   }
 
-  async get(id: string): Promise<MaintenanceRequest> {
+  async get(id: string, organizationId: string): Promise<MaintenanceRequest> {
     const request = await this.repo.findById(id);
-    if (!request) throw new NotFoundError('MaintenanceRequest', id);
+    if (!request || request.organizationId !== organizationId) {
+      throw new NotFoundError('MaintenanceRequest', id);
+    }
     return request;
   }
 
@@ -50,24 +55,32 @@ export class MaintenanceService {
     return this.repo.create({ ...input, organizationId }, reportedBy);
   }
 
-  async update(id: string, input: UpdateMaintenanceRequestInput): Promise<MaintenanceRequest> {
+  async update(organizationId: string, id: string, input: UpdateMaintenanceRequestInput): Promise<MaintenanceRequest> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('MaintenanceRequest', id);
     return this.repo.update(id, input);
   }
 
-  async assign(id: string, opts: { assignedTo?: string; vendorId?: string }): Promise<MaintenanceRequest> {
+  async assign(organizationId: string, id: string, opts: { assignedTo?: string; vendorId?: string }): Promise<MaintenanceRequest> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('MaintenanceRequest', id);
+
+    if (opts.vendorId) {
+      const vendor = await this.vendorRepo.findById(opts.vendorId);
+      if (!vendor || vendor.organizationId !== existing.organizationId) {
+        throw new NotFoundError('Vendor', opts.vendorId);
+      }
+    }
+
     return this.repo.update(id, {
       ...opts,
       status: 'assigned',
     });
   }
 
-  async updateStatus(id: string, status: MaintenanceStatus): Promise<MaintenanceRequest> {
+  async updateStatus(organizationId: string, id: string, status: MaintenanceStatus): Promise<MaintenanceRequest> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('MaintenanceRequest', id);
     return this.repo.update(id, { status });
   }
 
@@ -81,15 +94,15 @@ export class MaintenanceService {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(organizationId: string, id: string): Promise<void> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('MaintenanceRequest', id);
     await this.repo.delete(id);
   }
 
-  async close(id: string): Promise<MaintenanceRequest> {
+  async close(organizationId: string, id: string): Promise<MaintenanceRequest> {
     const existing = await this.repo.findById(id);
-    if (!existing) throw new NotFoundError('MaintenanceRequest', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('MaintenanceRequest', id);
     return this.repo.update(id, { status: 'closed' });
   }
 
