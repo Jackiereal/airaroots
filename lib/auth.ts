@@ -31,43 +31,10 @@ export async function hasAnyPropertyAccess(userId: string): Promise<boolean> {
   return !!data;
 }
 
-export async function requireAdmin() {
-  const profile = await getUserProfile();
-  if (!profile) {
-    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), profile: null };
-  }
-  if (!(await hasAnyPropertyAccess(profile.id))) {
-    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), profile: null };
-  }
-  return { error: null, profile };
-}
-
 export async function requireAuth() {
   const user = await getUser();
   if (!user) {
     return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), user: null };
   }
   return { error: null, user };
-}
-
-/** Check client can access this property (or is admin) */
-export async function requirePropertyAccess(propertyId: string) {
-  const profile = await getUserProfile();
-  if (!profile) {
-    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), profile: null };
-  }
-  if (profile.role === 'admin') {
-    return { error: null, profile };
-  }
-  const serviceClient = createServiceRoleClient();
-  const { data } = await serviceClient
-    .from('property_access')
-    .select('id')
-    .eq('property_id', propertyId)
-    .eq('user_id', profile.id)
-    .maybeSingle();
-  if (!data) {
-    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }), profile: null };
-  }
-  return { error: null, profile };
 }
