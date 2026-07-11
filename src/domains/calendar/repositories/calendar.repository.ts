@@ -128,7 +128,7 @@ export class CalendarRepository {
     return this.toBlockEntity(data as CalendarBlockRow);
   }
 
-  async updateBlock(id: string, input: UpdateBlockInput): Promise<CalendarBlock> {
+  async updateBlock(propertyId: string, id: string, input: UpdateBlockInput): Promise<CalendarBlock> {
     const updateData: Record<string, unknown> = {};
     if (input.startDate !== undefined) updateData['start_date'] = input.startDate;
     if (input.endDate !== undefined) updateData['end_date'] = input.endDate;
@@ -139,6 +139,7 @@ export class CalendarRepository {
       .from('calendar_blocks')
       .update(updateData)
       .eq('id', id)
+      .eq('property_id', propertyId)
       .select()
       .single();
 
@@ -158,11 +159,12 @@ export class CalendarRepository {
     if (error) throw new Error(`DB error: ${error.message}`);
   }
 
-  async deleteBlock(id: string): Promise<void> {
+  async deleteBlock(propertyId: string, id: string): Promise<void> {
     const { error } = await this.supabase
       .from('calendar_blocks')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('property_id', propertyId);
 
     if (error) throw new Error(`DB error: ${error.message}`);
   }

@@ -225,6 +225,10 @@ export class ReservationService {
 
     if (action === 'cancel_conflicting') {
       if (!conflictingId) throw new Error('conflictingId required for cancel_conflicting action');
+      const conflicting = await this.repository.findById(conflictingId);
+      if (!conflicting || conflicting.organizationId !== reservation.organizationId) {
+        throw new NotFoundError('Reservation', conflictingId);
+      }
       await this.cancel(conflictingId, 'Conflict resolved: cancelled in favour of another reservation', actorId);
       return this.transitionStatus(id, 'confirmed', actorId, 'Conflict resolved: conflicting reservation cancelled');
     }

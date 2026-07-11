@@ -18,7 +18,7 @@ export async function PATCH(request: NextRequest, { params }: Params): Promise<N
 
     const supabase = await createClient();
     const service = new CalendarService(supabase);
-    const block = await service.updateBlock(blockId, input);
+    const block = await service.updateBlock(propertyId, blockId, input);
 
     return NextResponse.json({ block });
   } catch (error) {
@@ -34,7 +34,7 @@ export async function DELETE(_request: NextRequest, { params }: Params): Promise
 
     const supabase = await createClient();
     const service = new CalendarService(supabase);
-    await service.deleteBlock(blockId, ctx!.userId);
+    await service.deleteBlock(propertyId, blockId, ctx!.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

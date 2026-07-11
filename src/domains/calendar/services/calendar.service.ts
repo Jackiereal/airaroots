@@ -33,12 +33,12 @@ export class CalendarService {
     return this.repository.createBlock(input, actorId);
   }
 
-  async updateBlock(id: string, input: UpdateBlockInput): Promise<CalendarBlock> {
-    return this.repository.updateBlock(id, input);
+  async updateBlock(propertyId: string, id: string, input: UpdateBlockInput): Promise<CalendarBlock> {
+    return this.repository.updateBlock(propertyId, id, input);
   }
 
-  async deleteBlock(id: string, _actorId: string): Promise<void> {
-    return this.repository.deleteBlock(id);
+  async deleteBlock(propertyId: string, id: string, _actorId: string): Promise<void> {
+    return this.repository.deleteBlock(propertyId, id);
   }
 
   async getBlocksForProperty(propertyId: string, from: Date, to: Date): Promise<CalendarBlock[]> {
