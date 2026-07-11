@@ -64,8 +64,17 @@ export function TimelineView({ properties, reservations, blocks, from, to, onRes
     const blockEnd = startOfDay(new Date(endDate + 'T00:00:00'));
     const fromDay = startOfDay(from);
 
-    const startOffset = Math.max(0, differenceInDays(blockStart, fromDay));
-    const endOffset = Math.min(totalDays, differenceInDays(blockEnd, fromDay));
+    const rawStartOffset = differenceInDays(blockStart, fromDay);
+    const rawEndOffset = differenceInDays(blockEnd, fromDay);
+
+    // Half-day inset at the real start/end only — signals check-in starts mid-day
+    // and checkout frees up mid-day. Don't inset an edge that's clipped by the
+    // visible window (that boundary isn't the real start/end).
+    const startEdge = rawStartOffset >= 0 ? rawStartOffset + 0.5 : 0;
+    const endEdge = rawEndOffset <= totalDays ? rawEndOffset - 0.5 : totalDays;
+
+    const startOffset = Math.max(0, startEdge);
+    const endOffset = Math.min(totalDays, endEdge);
     const width = endOffset - startOffset;
 
     if (width <= 0) return { display: 'none' };

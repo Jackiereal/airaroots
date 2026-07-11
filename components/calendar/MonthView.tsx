@@ -180,8 +180,12 @@ export function MonthView({ month, reservations, blocks, onReservationClick, onD
               {visibleRows.map((row, ri) => (
                 <div key={ri} style={{ position: 'relative', height: BAR_HEIGHT, marginBottom: BAR_GAP }}>
                   {row.map((bar) => {
-                    const leftPct = (bar.startCol / 7) * 100;
-                    const widthPct = ((bar.endCol - bar.startCol + 1) / 7) * 100;
+                    // Start half a column into check-in day; end half a column into
+                    // checkout day — visually signals "checkout day is still free after noon".
+                    const startEdge = bar.startCol + (bar.isStart ? 0.5 : 0);
+                    const endEdge = bar.endCol + 1 - (bar.isEnd ? 0.5 : 0);
+                    const leftPct = (startEdge / 7) * 100;
+                    const widthPct = ((endEdge - startEdge) / 7) * 100;
                     return (
                       <button
                         key={bar.key}

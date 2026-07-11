@@ -22,7 +22,7 @@ type Props = {
 };
 
 export function ReservationCalendar({ properties, defaultPropertyId }: Props) {
-  const [viewMode, setViewMode] = useState<ViewMode>('timeline');
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedProperty, setSelectedProperty] = useState(defaultPropertyId ?? properties[0]?.id ?? '');
 
