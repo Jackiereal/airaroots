@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Trash2, ExternalLink } from 'lucide-react';
+import PlanLimitPanel from '@/components/billing/PlanLimitPanel';
+import type { Plan } from '@/src/domains/billing/constants';
 
 type Property = { id: string; name: string; slug: string; address: string | null };
+type LimitInfo = { code: 'plan_limit_reached' | 'trial_expired'; message?: string; plan?: Plan };
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -14,6 +17,7 @@ export default function PropertiesPage() {
   const [newAddress, setNewAddress] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
 
   const load = () =>
     fetch('/api/properties')
@@ -27,6 +31,7 @@ export default function PropertiesPage() {
     e.preventDefault();
     setCreating(true);
     setError(null);
+    setLimitInfo(null);
     try {
       const res = await fetch('/api/properties', {
         method: 'POST',
@@ -38,6 +43,10 @@ export default function PropertiesPage() {
         }),
       });
       const json = await res.json();
+      if (res.status === 403 && (json.error === 'plan_limit_reached' || json.error === 'trial_expired')) {
+        setLimitInfo({ code: json.error, message: json.message, plan: json.plan });
+        return;
+      }
       if (!res.ok) throw new Error(json.error || 'Failed');
       setNewName('');
       setNewAddress('');
@@ -71,7 +80,24 @@ export default function PropertiesPage() {
         </button>
       </div>
 
-      {showForm && (
+      {showForm && limitInfo && (
+        <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 space-y-4">
+          <PlanLimitPanel
+            code={limitInfo.code}
+            message={limitInfo.message}
+            currentPlan={limitInfo.plan}
+          />
+          <button
+            type="button"
+            onClick={() => setLimitInfo(null)}
+            className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+          >
+            Back
+          </button>
+        </div>
+      )}
+
+      {showForm && !limitInfo && (
         <form
           onSubmit={handleCreate}
           className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 space-y-4"
