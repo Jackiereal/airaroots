@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, ChevronRight, Loader2, Link2 } from 'lucide-react';
+import PlanLimitPanel from '@/components/billing/PlanLimitPanel';
+import type { Plan } from '@/src/domains/billing/constants';
 
 type Step = 'property' | 'channel' | 'done';
+type LimitInfo = { code: 'plan_limit_reached' | 'trial_expired'; message?: string; plan?: Plan };
 
 function toSlug(name: string): string {
   return name
@@ -25,6 +28,7 @@ export default function OnboardingPage() {
   const [address, setAddress] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
 
   // Step 2 fields
   const [icalUrl, setIcalUrl] = useState('');
@@ -35,6 +39,7 @@ export default function OnboardingPage() {
     if (!name.trim()) return;
     setCreating(true);
     setCreateError('');
+    setLimitInfo(null);
     try {
       const res = await fetch('/api/properties', {
         method: 'POST',
@@ -45,7 +50,11 @@ export default function OnboardingPage() {
           address: address.trim() || null,
         }),
       });
-      const data = await res.json() as { property?: { id: string }; error?: string };
+      const data = await res.json() as { property?: { id: string }; error?: string; message?: string; plan?: Plan };
+      if (res.status === 403 && (data.error === 'plan_limit_reached' || data.error === 'trial_expired')) {
+        setLimitInfo({ code: data.error, message: data.message, plan: data.plan });
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? 'Failed to create property');
       setPropertyId(data.property!.id);
       setStep('channel');
@@ -136,63 +145,85 @@ export default function OnboardingPage() {
               Takes 30 seconds. You can add more later.
             </p>
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  Property name <span style={{ color: 'var(--color-red)' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && createProperty()}
-                  placeholder="e.g. Sea Breeze Villa, Anjuna"
-                  autoFocus
-                  className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none"
-                  style={{
-                    background: 'var(--bg-base)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
-                  onBlur={e => (e.target.style.borderColor = 'var(--border-color)')}
+            {limitInfo ? (
+              <div className="space-y-4 mb-4">
+                <PlanLimitPanel
+                  code={limitInfo.code}
+                  message={limitInfo.message}
+                  currentPlan={limitInfo.plan}
                 />
+                <button
+                  type="button"
+                  onClick={() => setLimitInfo(null)}
+                  className="w-full py-2.5 rounded-lg border text-sm font-medium"
+                  style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+                >
+                  Back
+                </button>
               </div>
-              <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  Location <span style={{ color: 'var(--text-tertiary)' }}>(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && createProperty()}
-                  placeholder="e.g. Anjuna, Goa"
-                  className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none"
-                  style={{
-                    background: 'var(--bg-base)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
-                  onBlur={e => (e.target.style.borderColor = 'var(--border-color)')}
-                />
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      Property name <span style={{ color: 'var(--color-red)' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && createProperty()}
+                      placeholder="e.g. Sea Breeze Villa, Anjuna"
+                      autoFocus
+                      className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none"
+                      style={{
+                        background: 'var(--bg-base)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-primary)',
+                      }}
+                      onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
+                      onBlur={e => (e.target.style.borderColor = 'var(--border-color)')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      Location <span style={{ color: 'var(--text-tertiary)' }}>(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && createProperty()}
+                      placeholder="e.g. Anjuna, Goa"
+                      className="w-full rounded-lg border px-3 py-2.5 text-sm transition-colors focus:outline-none"
+                      style={{
+                        background: 'var(--bg-base)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-primary)',
+                      }}
+                      onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
+                      onBlur={e => (e.target.style.borderColor = 'var(--border-color)')}
+                    />
+                  </div>
+                </div>
 
-            {createError && (
-              <p className="text-sm mb-4" style={{ color: 'var(--color-red)' }}>{createError}</p>
+                {createError && (
+                  <p className="text-sm mb-4" style={{ color: 'var(--color-red)' }}>{createError}</p>
+                )}
+              </>
             )}
 
-            <button
-              onClick={createProperty}
-              disabled={!name.trim() || creating}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-              style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
-            >
-              {creating ? <Loader2 size={16} className="animate-spin" /> : <ChevronRight size={16} />}
-              {creating ? 'Creating…' : 'Continue'}
-            </button>
+            {!limitInfo && (
+              <button
+                onClick={createProperty}
+                disabled={!name.trim() || creating}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
+                style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
+              >
+                {creating ? <Loader2 size={16} className="animate-spin" /> : <ChevronRight size={16} />}
+                {creating ? 'Creating…' : 'Continue'}
+              </button>
+            )}
           </>
         )}
 

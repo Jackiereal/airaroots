@@ -16,4 +16,14 @@ export const PLAN_PROPERTY_LIMITS: Record<Plan, number | null> = {
   enterprise: null,
 };
 
+// Display labels for the plan-selection / upgrade UI. Prices are
+// deliberately NOT here yet — pricing isn't decided, and there's no
+// checkout, so tiers are shown by property capacity only for now.
+export const PLAN_LABELS: Record<Plan, string> = {
+  starter: 'Starter',
+  growth: 'Growth',
+  pro: 'Pro',
+  enterprise: 'Enterprise',
+};
+
 export const TRIAL_DAYS = 14;
