@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2, ClipboardCheck, Wrench, Package, HardHat } from 'lucide-react';
+import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2, ClipboardCheck, Wrench, Package, HardHat, Settings } from 'lucide-react';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import MobileSidebarShell from '@/components/ui/MobileSidebarShell';
 
@@ -14,6 +14,7 @@ const NAV = [
   { href: '/dashboard/channels', label: 'Channels', icon: Link2 },
   { href: '/properties', label: 'Properties', icon: Building2 },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/dashboard/settings/communication', label: 'Settings', icon: Settings },
 ];
 
 const OPS_NAV = [
