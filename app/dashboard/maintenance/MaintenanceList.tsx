@@ -11,6 +11,8 @@ import type {
   MaintenanceStatus,
   Vendor,
 } from '@/src/domains/operations/types';
+import { renderTemplate } from '@/src/domains/communication/render';
+import type { CommunicationTemplate } from '@/src/domains/communication/types';
 
 type Property = { id: string; name: string };
 
@@ -218,9 +220,22 @@ function CreateModal({
   );
 }
 
-function buildVendorWhatsAppUrl(request: MaintenanceRequest, vendor: Vendor, baseUrl: string) {
+function buildVendorWhatsAppUrl(
+  request: MaintenanceRequest,
+  vendor: Vendor,
+  baseUrl: string,
+  template?: string,
+) {
   const tokenUrl = `${baseUrl}/maintenance/${request.accessToken}`;
-  const msg = `Hi ${vendor.name}, you have a maintenance job assigned:\n\n${request.title}${request.description ? `\n${request.description}` : ''}\n\nView details & mark resolved: ${tokenUrl}`;
+  const msg = template
+    ? renderTemplate(template, {
+        vendor_name: vendor.name,
+        priority: request.priority,
+        category: request.category ?? 'maintenance',
+        title: request.title,
+        request_url: tokenUrl,
+      })
+    : `Hi ${vendor.name}, you have a maintenance job assigned:\n\n${request.title}${request.description ? `\n${request.description}` : ''}\n\nView details & mark resolved: ${tokenUrl}`;
   return `https://wa.me/${vendor.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -234,8 +249,22 @@ export function MaintenanceList() {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [dispatchTemplate, setDispatchTemplate] = useState<string | undefined>();
 
   const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
+
+  // Load the org's vendor-dispatch message template (if customized) for the
+  // WhatsApp links. Falls back to the built-in text.
+  useEffect(() => {
+    fetch('/api/communication/templates')
+      .then((r) => r.json())
+      .then((d) => {
+        const list: CommunicationTemplate[] = d.templates ?? [];
+        const tpl = list.find((t) => t.trigger === 'vendor_dispatch' && t.isActive);
+        if (tpl) setDispatchTemplate(tpl.body);
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -348,7 +377,7 @@ export function MaintenanceList() {
                   {requests.map(r => {
                     const vendor = vendors.find(v => v.id === r.vendorId);
                     const waUrl = vendor?.phone
-                      ? buildVendorWhatsAppUrl(r, vendor, window.location.origin)
+                      ? buildVendorWhatsAppUrl(r, vendor, window.location.origin, dispatchTemplate)
                       : null;
                     return (
                       <tr key={r.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/60 transition-colors">
@@ -426,7 +455,7 @@ export function MaintenanceList() {
               {requests.map(r => {
                 const vendor = vendors.find(v => v.id === r.vendorId);
                 const waUrl = vendor?.phone
-                  ? buildVendorWhatsAppUrl(r, vendor, window.location.origin)
+                  ? buildVendorWhatsAppUrl(r, vendor, window.location.origin, dispatchTemplate)
                   : null;
                 return (
                   <TableCard

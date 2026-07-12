@@ -1,62 +1,68 @@
-import type { CommunicationTrigger, Channel } from './types';
+import type { NotificationTrigger, Channel } from './types';
 
-export const TRIGGERS: CommunicationTrigger[] = [
-  'booking_confirmation',
-  'checkin_welcome',
+export const TRIGGERS: NotificationTrigger[] = [
+  'housekeeping_assignment',
+  'housekeeping_reminder',
+  'vendor_dispatch',
+  'reservation_confirmed',
   'checkout_thankyou',
 ];
 
-export const TRIGGER_LABELS: Record<CommunicationTrigger, string> = {
-  booking_confirmation: 'Booking confirmation',
-  checkin_welcome: 'Check-in welcome',
-  checkout_thankyou: 'Checkout thank-you',
+export const TRIGGER_LABELS: Record<NotificationTrigger, string> = {
+  housekeeping_assignment: 'Housekeeping — task assigned',
+  housekeeping_reminder: 'Housekeeping — reminder',
+  vendor_dispatch: 'Vendor — maintenance dispatch',
+  reservation_confirmed: 'Guest — booking confirmed',
+  checkout_thankyou: 'Guest — checkout thank-you',
 };
 
-// Which reservation lifecycle event fires each trigger.
-export const TRIGGER_EVENTS: Record<CommunicationTrigger, string> = {
-  booking_confirmation: 'reservation.created',
-  checkin_welcome: 'reservation.checked_in',
-  checkout_thankyou: 'reservation.checked_out',
+// Placeholders each trigger's template can use, surfaced in the editor.
+// Keep in sync with the vars each caller passes to NotificationService.notify.
+export const TRIGGER_VARS: Record<NotificationTrigger, string[]> = {
+  housekeeping_assignment: ['staff_name', 'property_name', 'date', 'time', 'task_type', 'checklist_url'],
+  housekeeping_reminder: ['staff_name', 'property_name', 'time', 'checklist_url'],
+  vendor_dispatch: ['vendor_name', 'priority', 'category', 'title', 'request_url'],
+  reservation_confirmed: ['guest_name', 'property_name', 'check_in', 'check_out', 'nights'],
+  checkout_thankyou: ['guest_name', 'property_name'],
 };
 
-// Placeholders the editor advertises and the handler fills. Keep in sync
-// with buildVars() in communication.service.ts.
-export const TEMPLATE_VARS = [
-  'guest_name',
-  'property_name',
-  'check_in',
-  'check_out',
-  'nights',
-] as const;
-
-// Seed templates created per-org on first dispatch. Plain text, {{var}}
-// placeholders. Default channel is whatsapp (guest phone is the most
-// commonly populated contact field); email variants can be added in the
-// editor later.
+// Seed templates created per-org on first use. Bodies mirror the current
+// hardcoded wa.me text (housekeeping.service.ts / maintenance.service.ts +
+// HousekeepingBoard.tsx) so switching to templates changes nothing until a
+// manager edits them.
 export const DEFAULT_TEMPLATES: Record<
-  CommunicationTrigger,
+  NotificationTrigger,
   { channel: Channel; subject: string | null; body: string }
 > = {
-  booking_confirmation: {
+  housekeeping_assignment: {
+    channel: 'whatsapp',
+    subject: null,
+    body:
+      'Hi {{staff_name}}, you have a {{task_type}} task at {{property_name}} scheduled for ' +
+      '{{date}} at {{time}}.\n\nOpen task: {{checklist_url}}',
+  },
+  housekeeping_reminder: {
+    channel: 'whatsapp',
+    subject: null,
+    body: 'Reminder: {{property_name}} cleaning today by {{time}}. Checklist: {{checklist_url}}',
+  },
+  vendor_dispatch: {
+    channel: 'whatsapp',
+    subject: null,
+    body:
+      "Hi {{vendor_name}}, there's a {{priority}} priority {{category}} issue. " +
+      'Title: {{title}}. Tap here for details: {{request_url}}',
+  },
+  reservation_confirmed: {
     channel: 'whatsapp',
     subject: null,
     body:
       'Hi {{guest_name}}, your booking at {{property_name}} is confirmed! ' +
-      'Check-in {{check_in}}, check-out {{check_out}} ({{nights}} nights). ' +
-      'We look forward to hosting you.',
-  },
-  checkin_welcome: {
-    channel: 'whatsapp',
-    subject: null,
-    body:
-      'Welcome, {{guest_name}}! You are now checked in at {{property_name}}. ' +
-      'Reach out any time if you need anything during your stay.',
+      'Check-in {{check_in}}, check-out {{check_out}} ({{nights}} nights).',
   },
   checkout_thankyou: {
     channel: 'whatsapp',
     subject: null,
-    body:
-      'Thank you for staying at {{property_name}}, {{guest_name}}! ' +
-      'We hope you enjoyed your visit. Safe travels.',
+    body: 'Thank you for staying at {{property_name}}, {{guest_name}}! Safe travels.',
   },
 };

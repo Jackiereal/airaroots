@@ -7,7 +7,6 @@ export async function registerAllHandlers(): Promise<void> {
   const { calendarHandler } = await import('../../domains/reservation/event-handlers/calendar.handler');
   const { financeHandler } = await import('../../domains/reservation/event-handlers/finance.handler');
   const { housekeepingHandler } = await import('../../domains/operations/event-handlers/housekeeping.handler');
-  const { communicationHandler } = await import('../../domains/communication/event-handlers/communication.handler');
 
   eventBus.subscribe('reservation.created', calendarHandler.onReservationCreated);
   eventBus.subscribe('reservation.modified', calendarHandler.onReservationModified);
@@ -22,9 +21,4 @@ export async function registerAllHandlers(): Promise<void> {
   eventBus.subscribe('reservation.checked_out', housekeepingHandler.onCheckedOut);
   eventBus.subscribe('reservation.cancelled', housekeepingHandler.onCancelled);
   eventBus.subscribe('reservation.modified', housekeepingHandler.onModified);
-
-  // Phase 5: Automated guest communication
-  eventBus.subscribe('reservation.created', communicationHandler.onBooking);
-  eventBus.subscribe('reservation.checked_in', communicationHandler.onCheckIn);
-  eventBus.subscribe('reservation.checked_out', communicationHandler.onCheckOut);
 }

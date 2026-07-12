@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import type { CommunicationTemplate } from '@/src/domains/communication/types';
-import { TRIGGER_LABELS, TEMPLATE_VARS } from '@/src/domains/communication/constants';
+import type { CommunicationTemplate, NotificationTrigger } from '@/src/domains/communication/types';
+import { TRIGGER_LABELS, TRIGGER_VARS } from '@/src/domains/communication/constants';
 import { renderTemplate } from '@/src/domains/communication/render';
 
-// Sample values so the owner can preview how a template reads.
+// Sample values so the manager can preview how a template reads. Superset
+// across all triggers; renderTemplate ignores keys a template doesn't use.
 const PREVIEW_VARS: Record<string, string> = {
+  staff_name: 'Ramesh',
+  vendor_name: 'CoolAir Services',
   guest_name: 'Priya',
   property_name: 'Tamarind Villa',
+  date: '2026-08-01',
+  time: '11:00',
+  task_type: 'checkout clean',
+  checklist_url: 'https://airaroots.app/hk/abc123',
+  priority: 'high',
+  category: 'plumbing',
+  title: 'Leaking tap in kitchen',
+  request_url: 'https://airaroots.app/maintenance/xyz789',
   check_in: '2026-08-01',
   check_out: '2026-08-04',
   nights: '3',
@@ -62,16 +73,10 @@ export default function TemplateEditor() {
     <div className="space-y-4">
       {error && <p className="text-sm text-[var(--color-red)]">{error}</p>}
 
-      <p className="text-xs text-[var(--text-tertiary)]">
-        Placeholders:{' '}
-        {TEMPLATE_VARS.map((v) => (
-          <code key={v} className="mr-1 rounded bg-[var(--bg-elevated)] px-1 py-0.5">{`{{${v}}}`}</code>
-        ))}
-      </p>
-
       {templates.map((t) => {
         const body = drafts[t.id] ?? '';
         const dirty = body !== t.body;
+        const vars = TRIGGER_VARS[t.trigger as NotificationTrigger] ?? [];
         return (
           <div
             key={t.id}
@@ -90,6 +95,13 @@ export default function TemplateEditor() {
               rows={3}
               className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
             />
+
+            <p className="text-xs text-[var(--text-tertiary)]">
+              Placeholders:{' '}
+              {vars.map((v) => (
+                <code key={v} className="mr-1 rounded bg-[var(--bg-elevated)] px-1 py-0.5">{`{{${v}}}`}</code>
+              ))}
+            </p>
 
             <div className="rounded-lg bg-[var(--bg-base)] border border-[var(--border-color)] p-3">
               <p className="text-[10px] uppercase tracking-wide text-[var(--text-tertiary)] mb-1">Preview</p>

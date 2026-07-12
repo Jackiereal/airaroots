@@ -7,11 +7,12 @@ export default function CommunicationSettingsPage() {
     <div className="p-4 sm:p-6 space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
-          Guest messages
+          Notification templates
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Automated messages sent to guests across their stay. Sending is not connected yet —
-          messages are logged for now and will go out once a WhatsApp/email provider is set up.
+          Customize the messages sent to housekeeping staff, vendors, and guests. Today these
+          fill in the WhatsApp click-to-chat links your team taps to send. Connect your own
+          WhatsApp/email provider later to deliver them automatically.
         </p>
       </div>
       <TemplateEditor />

@@ -7,7 +7,6 @@ import { ReservationStatusBadge } from '@/components/reservation/ReservationStat
 import { ReservationActions } from '@/components/reservation/ReservationActions';
 import { ConflictAlertWrapper } from '@/components/reservation/ConflictAlertWrapper';
 import { GuestCard } from '@/components/guest/GuestCard';
-import { ReservationMessagesLog } from '@/components/communication/ReservationMessagesLog';
 import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
 import type { Reservation } from '@/src/domains/reservation/types';
 
@@ -209,8 +208,6 @@ export default async function ReservationDetailPage({ params }: Params) {
           </div>
         )}
 
-        {/* Automated guest messages */}
-        <ReservationMessagesLog reservationId={reservation.id} />
       </div>
     </div>
   );

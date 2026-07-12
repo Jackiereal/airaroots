@@ -1,13 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CommunicationTemplate, CommunicationTrigger } from '../types';
+import type { CommunicationTemplate, NotificationTrigger, Channel } from '../types';
 import { DEFAULT_TEMPLATES, TRIGGERS } from '../constants';
 import type { UpdateTemplateInput } from '../schema';
 
 type TemplateRow = {
   id: string;
   organization_id: string;
-  trigger: CommunicationTrigger;
-  channel: 'whatsapp' | 'email';
+  trigger: NotificationTrigger;
+  channel: Channel;
   subject: string | null;
   body: string;
   is_active: boolean;
@@ -45,7 +45,7 @@ export class TemplateRepository {
 
   async findActive(
     organizationId: string,
-    trigger: CommunicationTrigger
+    trigger: NotificationTrigger
   ): Promise<CommunicationTemplate | null> {
     const { data, error } = await this.supabase
       .from('communication_templates')

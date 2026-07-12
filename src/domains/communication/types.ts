@@ -1,16 +1,24 @@
-export type CommunicationTrigger =
-  | 'booking_confirmation'
-  | 'checkin_welcome'
+export type NotificationTrigger =
+  | 'housekeeping_assignment'
+  | 'housekeeping_reminder'
+  | 'vendor_dispatch'
+  | 'reservation_confirmed'
   | 'checkout_thankyou';
 
-export type Channel = 'whatsapp' | 'email';
+export type Channel = 'whatsapp' | 'email' | 'sms' | 'push';
 
-export type CommunicationStatus = 'stubbed' | 'sent' | 'failed' | 'skipped';
+export type DeliveryStatus =
+  | 'queued'
+  | 'link_generated'
+  | 'sent'
+  | 'failed'
+  | 'stubbed'
+  | 'skipped';
 
 export type CommunicationTemplate = {
   id: string;
   organizationId: string;
-  trigger: CommunicationTrigger;
+  trigger: NotificationTrigger;
   channel: Channel;
   subject: string | null;
   body: string;
@@ -19,18 +27,19 @@ export type CommunicationTemplate = {
   updatedAt: string;
 };
 
-export type CommunicationLogEntry = {
+export type NotificationLogEntry = {
   id: string;
   organizationId: string;
-  reservationId: string;
-  propertyId: string | null;
   trigger: string;
   channel: string;
   recipient: string | null;
   renderedBody: string | null;
-  status: CommunicationStatus;
-  provider: string | null;
+  providerType: string | null;
+  deliveryStatus: DeliveryStatus;
+  link: string | null;
   error: string | null;
+  context: Record<string, unknown>;
+  attempts: number;
   createdAt: string;
 };
 
