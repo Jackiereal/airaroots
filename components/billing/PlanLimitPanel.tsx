@@ -1,8 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
 const PLAN_ORDER: Plan[] = ['starter', 'growth', 'pro', 'enterprise'];
+// Plans a customer can self-subscribe to. Enterprise is custom / contact-us.
+const SUBSCRIBABLE: Plan[] = ['starter', 'growth', 'pro'];
 
 type Props = {
   code: 'plan_limit_reached' | 'trial_expired';
@@ -15,10 +19,80 @@ function limitLabel(plan: Plan): string {
   return limit === null ? 'Unlimited properties' : `Up to ${limit} properties`;
 }
 
-// Informational only for now — plans are shown by property capacity, and
-// upgrading is a "contact us" action. Self-service plan switching + pricing
-// land with the checkout phase (no payment integration yet).
+// Rank so we only offer UPGRADES (a higher tier than the current plan).
+const RANK: Record<Plan, number> = { starter: 0, growth: 1, pro: 2, enterprise: 3 };
+
 export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
+  const [subscribing, setSubscribing] = useState<Plan | null>(null);
+  const [error, setError] = useState('');
+  // Post-checkout: Razorpay redirects back with ?checkout=done. The webhook is
+  // the source of truth, so we poll subscription status rather than trust the
+  // redirect. `activating` shows the interim state.
+  const [activating, setActivating] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') !== 'done') return;
+
+    setActivating(true);
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries++;
+      try {
+        const res = await fetch('/api/billing/subscription');
+        const d = await res.json();
+        if (d.subscriptionStatus === 'active') {
+          clearInterval(timer);
+          window.location.href = window.location.pathname; // drop the query, reload
+        }
+      } catch {
+        /* keep polling */
+      }
+      if (tries >= 20) clearInterval(timer); // ~1 min then give up quietly
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  async function subscribe(plan: Plan) {
+    setSubscribing(plan);
+    setError('');
+    try {
+      const res = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(d.error ?? 'Could not start checkout');
+        setSubscribing(null);
+        return;
+      }
+      if (d.shortUrl) {
+        window.location.href = d.shortUrl; // Razorpay hosted checkout
+        return;
+      }
+      setError('No checkout link returned');
+      setSubscribing(null);
+    } catch {
+      setError('Could not start checkout');
+      setSubscribing(null);
+    }
+  }
+
+  if (activating) {
+    return (
+      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 flex items-center gap-3">
+        <Loader2 size={18} className="animate-spin text-[var(--accent)]" />
+        <p className="text-sm text-[var(--text-secondary)]">
+          Activating your subscription… this usually takes a few seconds.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 space-y-4">
       <div className="space-y-1">
@@ -28,9 +102,13 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
         {message && <p className="text-sm text-[var(--text-secondary)]">{message}</p>}
       </div>
 
+      {error && <p className="text-sm text-[var(--color-red)]">{error}</p>}
+
       <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] divide-y divide-[var(--border-color)]">
         {PLAN_ORDER.map((plan) => {
           const isCurrent = plan === currentPlan;
+          const isUpgrade =
+            SUBSCRIBABLE.includes(plan) && (!currentPlan || RANK[plan] > RANK[currentPlan]);
           return (
             <div key={plan} className="flex items-center justify-between px-4 py-2.5 text-sm">
               <span className="flex items-center gap-2">
@@ -41,14 +119,31 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
                   </span>
                 )}
               </span>
-              <span className="text-xs text-[var(--text-secondary)]">{limitLabel(plan)}</span>
+              <span className="flex items-center gap-3">
+                <span className="text-xs text-[var(--text-secondary)]">{limitLabel(plan)}</span>
+                {isUpgrade && (
+                  <button
+                    type="button"
+                    disabled={subscribing !== null}
+                    onClick={() => subscribe(plan)}
+                    className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1 text-xs font-medium text-[var(--accent-fg)] disabled:opacity-50"
+                  >
+                    {subscribing === plan && <Loader2 size={12} className="animate-spin" />}
+                    Subscribe
+                  </button>
+                )}
+                {plan === 'enterprise' && (
+                  <span className="text-xs text-[var(--text-tertiary)]">Contact us</span>
+                )}
+              </span>
             </div>
           );
         })}
       </div>
 
       <p className="text-xs text-[var(--text-tertiary)]">
-        Need a higher limit? Contact us to upgrade your plan.
+        Subscriptions are billed monthly through Razorpay (UPI, cards, netbanking).
+        For Enterprise, contact us.
       </p>
     </div>
   );
