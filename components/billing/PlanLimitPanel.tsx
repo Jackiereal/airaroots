@@ -4,9 +4,13 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
-const PLAN_ORDER: Plan[] = ['starter', 'growth', 'pro', 'enterprise'];
+// Tiers shown in the panel. Pro is deliberately hidden: 26–100 properties is a
+// rarer, higher-value deal we negotiate via Enterprise/contact-us rather than
+// sell self-serve. 'pro' still exists in the Plan type + limits so a signed deal
+// can be assigned it manually (100-property cap) without a code change.
+const PLAN_ORDER: Plan[] = ['starter', 'growth', 'enterprise'];
 // Plans a customer can self-subscribe to. Enterprise is custom / contact-us.
-const SUBSCRIBABLE: Plan[] = ['starter', 'growth', 'pro'];
+const SUBSCRIBABLE: Plan[] = ['starter', 'growth'];
 
 type Props = {
   code: 'plan_limit_reached' | 'trial_expired';
