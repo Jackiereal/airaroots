@@ -207,6 +207,7 @@ export default async function ReservationDetailPage({ params }: Params) {
             <p className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{reservation.notes}</p>
           </div>
         )}
+
       </div>
     </div>
   );

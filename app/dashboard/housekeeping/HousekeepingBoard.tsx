@@ -10,6 +10,8 @@ import type {
   HousekeepingTaskStatus,
 } from '@/src/domains/operations/types';
 import Picker from '@/components/ui/Picker';
+import { renderTemplate } from '@/src/domains/communication/render';
+import type { CommunicationTemplate } from '@/src/domains/communication/types';
 
 type Property = { id: string; name: string };
 
@@ -40,19 +42,44 @@ function fmtDate(d: string) {
   });
 }
 
-function buildWhatsAppUrl(task: HousekeepingTask, staff: HousekeepingStaff, baseUrl: string) {
+function buildWhatsAppUrl(
+  task: HousekeepingTask,
+  staff: HousekeepingStaff,
+  baseUrl: string,
+  propertyName: string,
+  template?: string,
+) {
   const date = fmtDate(task.scheduledDate);
   const time = task.scheduledTime ?? '14:00';
   const type = TASK_TYPE_LABELS[task.taskType];
   const taskUrl = `${baseUrl}/hk/${task.accessToken}`;
-  const msg = `Hi ${staff.name}, you have a ${type} task scheduled for ${date} at ${time}.\n\nOpen task: ${taskUrl}`;
+  const vars = {
+    staff_name: staff.name,
+    property_name: propertyName,
+    date,
+    time,
+    task_type: type,
+    checklist_url: taskUrl,
+  };
+  const msg = template
+    ? renderTemplate(template, vars)
+    : `Hi ${staff.name}, you have a ${type} task scheduled for ${date} at ${time}.\n\nOpen task: ${taskUrl}`;
   return `https://wa.me/${staff.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
 }
 
-function buildReminderUrl(task: HousekeepingTask, staff: HousekeepingStaff, baseUrl: string) {
+function buildReminderUrl(
+  task: HousekeepingTask,
+  staff: HousekeepingStaff,
+  baseUrl: string,
+  propertyName = '',
+  template?: string,
+) {
   const time = task.scheduledTime ?? '14:00';
   const taskUrl = `${baseUrl}/hk/${task.accessToken}`;
-  const msg = `Reminder: Property cleaning today by ${time}. Checklist: ${taskUrl}`;
+  const vars = { staff_name: staff.name, property_name: propertyName, time, checklist_url: taskUrl };
+  const msg = template
+    ? renderTemplate(template, vars)
+    : `Reminder: Property cleaning today by ${time}. Checklist: ${taskUrl}`;
   return `https://wa.me/${staff.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -61,17 +88,19 @@ function buildReminderUrl(task: HousekeepingTask, staff: HousekeepingStaff, base
 function TaskCard({
   task,
   propertyName,
+  assignmentTemplate,
   onAssign,
   onDelete,
 }: {
   task: HousekeepingTask;
   propertyName: string;
+  assignmentTemplate?: string;
   onAssign: (task: HousekeepingTask) => void;
   onDelete: (id: string) => void;
 }) {
   const waUrl =
     task.staff?.phone
-      ? buildWhatsAppUrl(task, task.staff, window.location.origin)
+      ? buildWhatsAppUrl(task, task.staff, window.location.origin, propertyName, assignmentTemplate)
       : null;
 
   return (
@@ -421,8 +450,22 @@ export function HousekeepingBoard() {
   const [propertyId, setPropertyId] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [assignTask, setAssignTask] = useState<HousekeepingTask | null>(null);
+  const [assignmentTemplate, setAssignmentTemplate] = useState<string | undefined>();
 
   const propertyMap = Object.fromEntries(properties.map(p => [p.id, p.name]));
+
+  // Load the org's housekeeping-assignment message template (if customized)
+  // to render into the WhatsApp links. Falls back to the built-in text.
+  useEffect(() => {
+    fetch('/api/communication/templates')
+      .then((r) => r.json())
+      .then((d) => {
+        const list: CommunicationTemplate[] = d.templates ?? [];
+        const tpl = list.find((t) => t.trigger === 'housekeeping_assignment' && t.isActive);
+        if (tpl) setAssignmentTemplate(tpl.body);
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -553,6 +596,7 @@ export function HousekeepingBoard() {
                       key={task.id}
                       task={task}
                       propertyName={propertyMap[task.propertyId] ?? task.propertyId}
+                      assignmentTemplate={assignmentTemplate}
                       onAssign={setAssignTask}
                       onDelete={handleDeleteTask}
                     />
