@@ -22,6 +22,45 @@ function limitLabel(plan: Plan): string {
 // Rank so we only offer UPGRADES (a higher tier than the current plan).
 const RANK: Record<Plan, number> = { starter: 0, growth: 1, pro: 2, enterprise: 3 };
 
+const CHECKOUT_JS = 'https://checkout.razorpay.com/v1/checkout.js';
+
+type RazorpayOptions = {
+  key: string;
+  subscription_id: string;
+  name: string;
+  description?: string;
+  handler?: (response: unknown) => void;
+  modal?: { ondismiss?: () => void };
+  theme?: { color?: string };
+};
+
+type RazorpayInstance = { open: () => void };
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+// Load Razorpay checkout.js once, resolving when window.Razorpay is available.
+function loadCheckoutScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${CHECKOUT_JS}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve(!!window.Razorpay));
+      existing.addEventListener('error', () => resolve(false));
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = CHECKOUT_JS;
+    script.onload = () => resolve(!!window.Razorpay);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
   const [subscribing, setSubscribing] = useState<Plan | null>(null);
   const [error, setError] = useState('');
@@ -70,11 +109,34 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
         setSubscribing(null);
         return;
       }
-      if (d.shortUrl) {
-        window.location.href = d.shortUrl; // Razorpay hosted checkout
+
+      // Preferred: open the Razorpay checkout modal so its success handler can
+      // redirect back to the app. Falls back to the hosted short_url page (which
+      // can't redirect back) only if checkout.js fails to load.
+      const ready = await loadCheckoutScript();
+      if (ready && window.Razorpay && d.subscriptionId && d.keyId) {
+        const rzp = new window.Razorpay({
+          key: d.keyId,
+          subscription_id: d.subscriptionId,
+          name: 'Airaroots',
+          description: `${PLAN_LABELS[plan]} plan`,
+          handler: () => {
+            // Payment authorised. The webhook is the source of truth; the return
+            // URL just puts the panel into its polling ("activating…") state.
+            window.location.href = `${window.location.pathname}?checkout=done`;
+          },
+          modal: { ondismiss: () => setSubscribing(null) },
+          theme: { color: '#16a34a' },
+        });
+        rzp.open();
         return;
       }
-      setError('No checkout link returned');
+
+      if (d.shortUrl) {
+        window.location.href = d.shortUrl; // fallback: hosted page (no redirect back)
+        return;
+      }
+      setError('Could not start checkout');
       setSubscribing(null);
     } catch {
       setError('Could not start checkout');
