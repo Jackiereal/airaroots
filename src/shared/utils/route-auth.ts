@@ -149,6 +149,24 @@ export async function requirePropertyAccess(
     };
   }
 
+  // Org owner/admin get implicit admin-level access to every property in
+  // their own org, bypassing the per-property grant lookup below. Without
+  // this, an owner can be 403'd out of their own org's property if the
+  // property_access grant landed on a different account (e.g. via the
+  // invite flow) — a real footgun, not intended scoping. Regular members
+  // (manager/viewer) still need an explicit property_access grant.
+  const { data: memberRow } = await db
+    .from('organization_members')
+    .select('role')
+    .eq('organization_id', ctx.organizationId)
+    .eq('user_id', ctx.userId)
+    .maybeSingle();
+  const orgRole = (memberRow as { role?: OrgRole } | null)?.role;
+
+  if (orgRole === 'owner' || orgRole === 'admin') {
+    return { error: null, ctx: { ...ctx, propertyRole: 'admin' } };
+  }
+
   const { data } = await db
     .from('property_access')
     .select('role')
