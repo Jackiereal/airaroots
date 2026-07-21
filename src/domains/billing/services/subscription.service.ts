@@ -166,7 +166,7 @@ export class SubscriptionService {
         break;
       case 'subscription.cancelled':
         orgStatus = 'cancelled';
-        orgPlan = 'starter'; // revert to free tier (existing props untouched)
+        orgPlan = 'solo'; // revert to lowest tier (existing props untouched)
         break;
       default:
         return; // unhandled event → ledger recorded, no org change
