@@ -89,7 +89,7 @@ export function MaintenanceVendorClient({
       <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
         <CheckCircle2 size={56} className="text-[var(--accent)]" />
         <div>
-          <h2 className="text-xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+          <h2 className="text-xl font-bold font-[family-name:var(--font-fraunces)] text-[var(--text-primary)]">
             Marked as Resolved
           </h2>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -121,7 +121,7 @@ export function MaintenanceVendorClient({
           </span>
         </div>
 
-        <h2 className="text-lg font-bold text-[var(--text-primary)] font-[family-name:var(--font-rajdhani)]">
+        <h2 className="text-lg font-bold text-[var(--text-primary)] font-[family-name:var(--font-fraunces)]">
           {request.title}
         </h2>
 

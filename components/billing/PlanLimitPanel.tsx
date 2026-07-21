@@ -161,7 +161,7 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
   return (
     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 space-y-4">
       <div className="space-y-1">
-        <h3 className="text-base font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+        <h3 className="text-base font-bold font-[family-name:var(--font-fraunces)] text-[var(--text-primary)]">
           {code === 'trial_expired' ? 'Your free trial has ended' : "You've reached your plan limit"}
         </h3>
         {message && <p className="text-sm text-[var(--text-secondary)]">{message}</p>}

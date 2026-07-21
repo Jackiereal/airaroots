@@ -99,7 +99,7 @@ export function HousekeepingTaskClient({
       <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
         <CheckCircle2 size={56} className="text-[var(--accent)]" />
         <div>
-          <h2 className="text-xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+          <h2 className="text-xl font-bold font-[family-name:var(--font-fraunces)] text-[var(--text-primary)]">
             Task Complete!
           </h2>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -131,7 +131,7 @@ export function HousekeepingTaskClient({
             <span className="text-sm text-[var(--text-tertiary)]">⏰ {task.scheduledTime}</span>
           )}
         </div>
-        <p className="text-lg font-bold text-[var(--text-primary)] font-[family-name:var(--font-rajdhani)]">
+        <p className="text-lg font-bold text-[var(--text-primary)] font-[family-name:var(--font-fraunces)]">
           {fmtDate(task.scheduledDate)}
         </p>
         {task.notes && (

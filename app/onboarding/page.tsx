@@ -103,7 +103,7 @@ export default function OnboardingPage() {
         </div>
         <span
           className="text-xl font-bold"
-          style={{ fontFamily: 'var(--font-rajdhani), sans-serif', color: 'var(--accent)' }}
+          style={{ fontFamily: 'var(--font-fraunces), sans-serif', color: 'var(--accent)' }}
         >
           Hostezy
         </span>
@@ -137,7 +137,7 @@ export default function OnboardingPage() {
           <>
             <h1
               className="text-2xl font-bold mb-1"
-              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+              style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
             >
               Add your first property
             </h1>
@@ -235,7 +235,7 @@ export default function OnboardingPage() {
             </div>
             <h1
               className="text-2xl font-bold mb-1"
-              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+              style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
             >
               Connect Airbnb
             </h1>
@@ -315,7 +315,7 @@ export default function OnboardingPage() {
             </div>
             <h1
               className="text-2xl font-bold mb-2"
-              style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+              style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
             >
               You&apos;re all set!
             </h1>

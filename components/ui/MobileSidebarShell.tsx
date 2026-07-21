@@ -25,7 +25,7 @@ export default function MobileSidebarShell({ children }: Props) {
       <div className="flex md:hidden items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-[var(--accent)]" />
-          <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-rajdhani)] text-lg">
+          <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-fraunces)] text-lg">
             Hostezy
           </span>
         </div>

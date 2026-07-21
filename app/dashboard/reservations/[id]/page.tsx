@@ -97,7 +97,7 @@ export default async function ReservationDetailPage({ params }: Params) {
       </Link>
 
       <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+        <h1 className="text-2xl font-bold font-[family-name:var(--font-fraunces)] text-[var(--text-primary)]">
           {reservation.guestName ?? 'Reservation'}
         </h1>
         <ReservationStatusBadge status={reservation.status} />

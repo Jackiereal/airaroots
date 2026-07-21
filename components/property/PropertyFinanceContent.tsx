@@ -1205,7 +1205,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
         <div className="shrink-0">
           <h1
             className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]"
-            style={{ fontFamily: 'var(--font-rajdhani)' }}
+            style={{ fontFamily: 'var(--font-fraunces)' }}
           >
             {propertyName} P&L
           </h1>

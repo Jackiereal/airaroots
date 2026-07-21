@@ -466,7 +466,7 @@ export default function LoanManager({ propertyId }: { propertyId: string }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-rajdhani)' }}>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-fraunces)' }}>
             Loan Manager
           </h2>
           <p className="text-sm text-[var(--text-secondary)]">Track all loans, EMIs, and debt-free timelines.</p>

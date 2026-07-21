@@ -75,7 +75,7 @@ function SignInContent() {
         </div>
         <span
           className="text-2xl font-bold tracking-tight"
-          style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+          style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
         >
           Hostezy
         </span>
@@ -88,7 +88,7 @@ function SignInContent() {
         <div className="text-center">
           <h2
             className="text-2xl font-bold"
-            style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}
+            style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
           >
             Welcome back
           </h2>

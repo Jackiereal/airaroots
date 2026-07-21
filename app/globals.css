@@ -1,89 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base:     #FFFFFF;
-  --bg-raised:   #F9F9F9;
-  --bg-surface:  #F5F5F5;
-  --bg-elevated: #EEEEEE;
+  --bg-base:     #FBF8F3;
+  --bg-raised:   #F5F1E9;
+  --bg-surface:  #EFEADD;
+  --bg-elevated: #E7E0D1;
 
-  --border-color:  #E0E0E0;
-  --border-subtle: #F0F0F0;
-  --border-strong: #D0D0D0;
+  --border-color:  #DDD4C0;
+  --border-subtle: #E9E2D2;
+  --border-strong: #C9BEA5;
 
-  --text-primary:   #1A1A1A;
-  --text-secondary: #666666;
-  --text-tertiary:  #999999;
+  --text-primary:   #2B241D;
+  --text-secondary: #6E6455;
+  --text-tertiary:  #9C9182;
 
-  --accent:       #1DB954;
-  --accent-hover: #1ED760;
-  --accent-muted: #E8F5E9;
+  --accent:       #B85C2E;
+  --accent-hover: #C96A38;
+  --accent-muted: #F0DECB;
   --accent-fg:    #FFFFFF;
 
-  --color-gold:        #F0B429;
-  --color-gold-muted:  #FFF8E1;
-  --color-blue:        #4C9EEB;
-  --color-blue-muted:  #E3F2FD;
-  --color-red:         #FF4C4C;
-  --color-red-muted:   #FFEBEE;
-  --color-amber:       #F59E0B;
-  --color-amber-muted: #FEF3C7;
+  --color-gold:        #C98A1F;
+  --color-gold-muted:  #FBF0DA;
+  --color-blue:        #4A82B8;
+  --color-blue-muted:  #E6EEF5;
+  --color-red:         #D6483F;
+  --color-red-muted:   #FBEAE8;
+  --color-amber:       #C98A1F;
+  --color-amber-muted: #FBF0DA;
 
   --background: var(--bg-base);
   --foreground: var(--text-primary);
 
   /* card tone tokens — adapt automatically in dark mode */
-  --tone-income-bg:  rgba(29, 185, 84, 0.09);
-  --tone-income-bd:  rgba(29, 185, 84, 0.35);
-  --tone-income-tx:  #1DB954;
-  --tone-profit-bg:  rgba(76, 158, 235, 0.09);
-  --tone-profit-bd:  rgba(76, 158, 235, 0.35);
-  --tone-profit-tx:  #4C9EEB;
-  --tone-amber-bg:   rgba(245, 158, 11, 0.09);
-  --tone-amber-bd:   rgba(245, 158, 11, 0.35);
-  --tone-amber-tx:   #D97706;
-  --tone-rose-bg:    rgba(255, 76, 76, 0.09);
-  --tone-rose-bd:    rgba(255, 76, 76, 0.35);
-  --tone-rose-tx:    #E53535;
-  --tone-violet-bg:  rgba(139, 92, 246, 0.09);
-  --tone-violet-bd:  rgba(139, 92, 246, 0.30);
-  --tone-violet-tx:  #7C3AED;
+  --tone-income-bg:  rgba(63, 145, 66, 0.09);
+  --tone-income-bd:  rgba(63, 145, 66, 0.35);
+  --tone-income-tx:  #3F9142;
+  --tone-profit-bg:  rgba(74, 130, 184, 0.09);
+  --tone-profit-bd:  rgba(74, 130, 184, 0.35);
+  --tone-profit-tx:  #4A82B8;
+  --tone-amber-bg:   rgba(201, 138, 31, 0.09);
+  --tone-amber-bd:   rgba(201, 138, 31, 0.35);
+  --tone-amber-tx:   #A66E17;
+  --tone-rose-bg:    rgba(214, 72, 63, 0.09);
+  --tone-rose-bd:    rgba(214, 72, 63, 0.35);
+  --tone-rose-tx:    #C13F36;
+  --tone-violet-bg:  rgba(133, 104, 201, 0.09);
+  --tone-violet-bd:  rgba(133, 104, 201, 0.30);
+  --tone-violet-tx:  #7451B8;
 }
 
 [data-theme="dark"] {
-  --bg-base:     #0A0A0A;
-  --bg-raised:   #111111;
-  --bg-surface:  #171717;
-  --bg-elevated: #1F1F1F;
+  --bg-base:     #1C1712;
+  --bg-raised:   #221C16;
+  --bg-surface:  #2A231C;
+  --bg-elevated: #332B22;
 
-  --border-color:  #2B2B2B;
-  --border-subtle: #1E1E1E;
-  --border-strong: #383838;
+  --border-color:  #3D3327;
+  --border-subtle: #2E271F;
+  --border-strong: #4A3F30;
 
-  --text-primary:   #F0F0F0;
-  --text-secondary: #9A9A9A;
-  --text-tertiary:  #5E5E5E;
+  --text-primary:   #F0E9DC;
+  --text-secondary: #B0A490;
+  --text-tertiary:  #746A5A;
 
-  --accent-muted:      rgba(29, 185, 84, 0.14);
-  --color-gold-muted:  rgba(240, 180, 41, 0.13);
-  --color-blue-muted:  rgba(76, 158, 235, 0.13);
-  --color-red-muted:   rgba(255, 76, 76, 0.13);
-  --color-amber-muted: rgba(245, 158, 11, 0.13);
+  --accent:       #D97A44;
+  --accent-hover: #E28F5E;
+  --accent-muted: rgba(217, 122, 68, 0.16);
+  --accent-fg:    #1C1712;
 
-  --tone-income-bg:  rgba(29, 185, 84, 0.12);
-  --tone-income-bd:  rgba(29, 185, 84, 0.40);
-  --tone-income-tx:  #1DB954;
-  --tone-profit-bg:  rgba(76, 158, 235, 0.12);
-  --tone-profit-bd:  rgba(76, 158, 235, 0.38);
-  --tone-profit-tx:  #4C9EEB;
-  --tone-amber-bg:   rgba(245, 158, 11, 0.12);
-  --tone-amber-bd:   rgba(245, 158, 11, 0.38);
-  --tone-amber-tx:   #F59E0B;
-  --tone-rose-bg:    rgba(255, 76, 76, 0.12);
-  --tone-rose-bd:    rgba(255, 76, 76, 0.38);
-  --tone-rose-tx:    #FF4C4C;
-  --tone-violet-bg:  rgba(139, 92, 246, 0.12);
-  --tone-violet-bd:  rgba(139, 92, 246, 0.36);
-  --tone-violet-tx:  #A78BFA;
+  --color-gold:        #E0A83D;
+  --color-blue:        #6FA0D0;
+  --color-red:         #E5695F;
+  --color-amber:       #E0A83D;
+
+  --accent-muted:      rgba(217, 122, 68, 0.16);
+  --color-gold-muted:  rgba(224, 168, 61, 0.13);
+  --color-blue-muted:  rgba(111, 160, 208, 0.13);
+  --color-red-muted:   rgba(229, 105, 95, 0.13);
+  --color-amber-muted: rgba(224, 168, 61, 0.13);
+
+  --tone-income-bg:  rgba(92, 179, 95, 0.12);
+  --tone-income-bd:  rgba(92, 179, 95, 0.40);
+  --tone-income-tx:  #5CB35F;
+  --tone-profit-bg:  rgba(111, 160, 208, 0.12);
+  --tone-profit-bd:  rgba(111, 160, 208, 0.38);
+  --tone-profit-tx:  #6FA0D0;
+  --tone-amber-bg:   rgba(224, 168, 61, 0.12);
+  --tone-amber-bd:   rgba(224, 168, 61, 0.38);
+  --tone-amber-tx:   #E0A83D;
+  --tone-rose-bg:    rgba(229, 105, 95, 0.12);
+  --tone-rose-bd:    rgba(229, 105, 95, 0.38);
+  --tone-rose-tx:    #E5695F;
+  --tone-violet-bg:  rgba(150, 125, 214, 0.12);
+  --tone-violet-bd:  rgba(150, 125, 214, 0.36);
+  --tone-violet-tx:  #967DD6;
 }
 
 * {

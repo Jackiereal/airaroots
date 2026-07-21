@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
-import { Rajdhani, Inter, Fraunces, Manrope } from 'next/font/google';
+import { Inter, Fraunces, Manrope } from 'next/font/google';
 import './globals.css';
-
-const rajdhani = Rajdhani({
-  variable: '--font-rajdhani',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
 
 const inter = Inter({
   variable: '--font-inter',
@@ -16,9 +9,9 @@ const inter = Inter({
   display: 'swap',
 });
 
-// Marketing-page-only faces (homepage). The app shell (dashboard etc.) keeps
-// Rajdhani/Inter — these are scoped to marketing via the --font-fraunces /
-// --font-manrope variables, used only inside app/page.tsx.
+// Fraunces is used for headings app-wide (marketing page + dashboard/app
+// shell) since the brand redesign — --font-manrope stays marketing-only
+// (body text), the app shell keeps Inter for dense/tabular UI text.
 const fraunces = Fraunces({
   variable: '--font-fraunces',
   subsets: ['latin'],
@@ -55,7 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${rajdhani.variable} ${inter.variable} ${fraunces.variable} ${manrope.variable} antialiased`}
+        className={`${inter.variable} ${fraunces.variable} ${manrope.variable} antialiased`}
         suppressHydrationWarning
       >
         {children}

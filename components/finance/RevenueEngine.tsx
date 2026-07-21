@@ -229,7 +229,7 @@ export default function RevenueEngine({ month, propertyId, isReadOnly = false }:
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-rajdhani)' }}>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-fraunces)' }}>
             Revenue Engine
           </h2>
           <p className="text-sm text-[var(--text-secondary)]">All revenue sources for {month}. Airbnb + Direct auto-calculated.</p>

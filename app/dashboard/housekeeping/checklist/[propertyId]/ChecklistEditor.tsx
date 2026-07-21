@@ -107,7 +107,7 @@ export function ChecklistEditor({
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-[family-name:var(--font-rajdhani)] text-[var(--text-primary)]">
+          <h1 className="text-xl font-bold font-[family-name:var(--font-fraunces)] text-[var(--text-primary)]">
             Checklist — {propertyName}
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">
