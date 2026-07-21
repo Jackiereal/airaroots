@@ -73,7 +73,7 @@ export default function Home() {
       <HowItWorks />
       <Services />
       <OwnerPortal />
-      <WhyAiraroots />
+      <WhySection />
       <PricingSection />
       <FinalCTA />
       <Footer />
@@ -176,7 +176,7 @@ function Nav() {
             A
           </div>
           <span className="text-lg font-medium" style={{ fontFamily: 'var(--font-fraunces), serif', color: 'var(--m-ink)' }}>
-            Airaroots
+            Hostezy
           </span>
         </Link>
         <div className="flex items-center gap-6">
@@ -197,6 +197,18 @@ function Nav() {
 }
 
 function Hero() {
+  const [path, setPath] = useState<'owner' | 'pmc'>('owner');
+  const copy = {
+    owner: {
+      tag: 'I own my property',
+      desc: 'Stop juggling Airbnb messages, a cleaner\'s WhatsApp number, and a notes app for expenses. One dashboard tells you what\'s booked, what needs cleaning, and what you made.',
+    },
+    pmc: {
+      tag: 'I manage properties for others',
+      desc: 'Run your whole portfolio — staff, vendors, multiple owners — from one dashboard.',
+    },
+  };
+
   return (
     <section className="relative overflow-hidden">
       <div
@@ -207,19 +219,39 @@ function Hero() {
       />
       <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
         <div>
-          <p className="m-eyebrow mb-5">For property owners & management companies</p>
+          <p className="m-eyebrow mb-5">Property management software</p>
           <h1 className="text-5xl sm:text-6xl font-medium leading-[1.05] mb-6" style={{ color: 'var(--m-ink)' }}>
-            One home for every
+            Run your stays.
             <br />
-            booking, guest,
+            Skip the
             <br />
-            <span style={{ fontStyle: 'italic', color: 'var(--m-accent)' }}>and rupee.</span>
+            <span style={{ fontStyle: 'italic', color: 'var(--m-accent)' }}>chaos.</span>
           </h1>
-          <p className="text-lg mb-10 max-w-md" style={{ color: 'var(--m-ink-soft)' }}>
-            Airaroots runs your short-stay properties end to end — calendar, channel sync,
-            housekeeping, and the books — whether you manage one home or run the operation
-            for fifty.
+          <p className="text-lg mb-8 max-w-md" style={{ color: 'var(--m-ink-soft)' }}>
+            One place for bookings, guests, cleaning, and money — whether you own one home
+            or manage fifty for other people.
           </p>
+
+          <div className="inline-flex p-1 rounded-full mb-5" style={{ background: 'var(--m-ground-raised)', border: '1px solid var(--m-border)' }}>
+            {(['owner', 'pmc'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPath(p)}
+                className="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
+                style={{
+                  background: path === p ? 'var(--m-accent)' : 'transparent',
+                  color: path === p ? '#FFFDF9' : 'var(--m-ink-soft)',
+                }}
+              >
+                {copy[p].tag}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm mb-8 max-w-md" style={{ color: 'var(--m-ink-soft)' }}>
+            {copy[path].desc}
+          </p>
+
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/auth/signin"
@@ -303,8 +335,8 @@ function Hero() {
 function TrustStrip() {
   const items = [
     { value: '10+', label: 'Booking channels synced' },
-    { value: '24/7', label: 'Calendar &amp; guest visibility' },
-    { value: '1–100', label: 'Properties, one plan or many' },
+    { value: '1–100', label: 'Properties on one plan or many' },
+    { value: '5', label: 'Automated guest messages, start to finish' },
   ];
   return (
     <section className="py-10" style={{ borderTop: '1px solid var(--m-border)', borderBottom: '1px solid var(--m-border)', background: 'var(--m-ground-raised)' }}>
@@ -323,16 +355,16 @@ function TrustStrip() {
 function HowItWorks() {
   const steps = [
     {
-      title: 'Add your properties',
-      desc: 'Connect Airbnb and Booking.com. Your calendar, rates, and reservations sync in.',
+      title: 'Connect what you already use',
+      desc: 'Link your Airbnb and Booking.com listings. Your existing calendar and reservations pull in — nothing to re-enter by hand.',
     },
     {
-      title: 'Run day to day from one place',
-      desc: 'Bookings, guest messages, cleaning turnovers, and maintenance — one dashboard.',
+      title: 'Stop switching apps',
+      desc: 'A new booking, a guest question, a cleaner finishing a turnover — it all shows up in one place instead of three different apps.',
     },
     {
-      title: 'Watch the numbers add up',
-      desc: 'Revenue, expenses, and occupancy update as bookings and payouts come in.',
+      title: 'Know what you actually made',
+      desc: 'Revenue and expenses update themselves as bookings and payouts come in — no month-end spreadsheet reconciliation.',
     },
   ];
 
@@ -382,12 +414,12 @@ function Services() {
     {
       icon: ClipboardCheck,
       title: 'Housekeeping',
-      desc: 'Turnover tasks created automatically at checkout, tracked until they’re done.',
+      desc: 'A turnover task is created the moment a guest checks out — do it yourself, or assign it to a cleaner or your whole team.',
     },
     {
       icon: Wrench,
       title: 'Maintenance & vendors',
-      desc: 'Log requests, assign vendors, track resolution before small issues become big ones.',
+      desc: 'Log a leaky tap or a broken AC, track it to done — across one property or every property you manage.',
     },
     {
       icon: Wallet,
@@ -476,42 +508,51 @@ function OwnerPortal() {
   );
 }
 
-function WhyAiraroots() {
-  const reasons = [
-    {
-      title: 'Fuller calendars',
-      desc: 'Sync across 10+ channels keeps every property visible without manual double-checking.',
-    },
-    {
-      title: 'Less chaos',
-      desc: 'No spreadsheets. No missed guest messages. No maintenance request falling through.',
-    },
-    {
-      title: 'Real transparency',
-      desc: 'Every rupee in and out, in real time — no waiting on someone else’s report.',
-    },
+function WhySection() {
+  const ownerReasons = [
+    { title: 'Fuller calendars', desc: 'Sync across 10+ channels keeps your property visible without manual double-checking.' },
+    { title: 'Less chaos', desc: 'No spreadsheets. No missed guest messages. No maintenance request falling through.' },
+    { title: 'Real transparency', desc: 'Every rupee in and out, in real time — no waiting on someone else’s report.' },
+  ];
+  const pmcReasons = [
+    { title: 'One view of every property', desc: 'Staff, vendors, and owners all working off the same live calendar and task board.' },
+    { title: 'Owners see for themselves', desc: 'Give every owner their own portal instead of fielding "how did my property do" calls.' },
+    { title: 'Scales without new hires', desc: 'Add properties without adding a person to manually track each one.' },
   ];
 
   return (
     <section className="py-24" style={{ background: 'var(--m-ground-raised)' }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="max-w-xl mb-16">
-          <p className="m-eyebrow mb-3">Why owners & PMCs choose Airaroots</p>
+          <p className="m-eyebrow mb-3">Why owners &amp; PMCs choose Hostezy</p>
           <h2 className="text-4xl font-medium" style={{ color: 'var(--m-ink)' }}>
             Built for how short-stay actually runs.
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {reasons.map((reason, idx) => (
-            <div key={idx}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-5 text-sm font-medium" style={{ background: 'var(--m-accent)', color: '#FFFDF9', fontFamily: 'var(--font-fraunces), serif' }}>
-                {idx + 1}
-              </div>
-              <h3 className="text-xl font-medium mb-2" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>{reason.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--m-ink-soft)' }}>{reason.desc}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div>
+            <p className="text-sm font-semibold mb-8" style={{ color: 'var(--m-accent)' }}>For property owners</p>
+            <div className="space-y-8">
+              {ownerReasons.map((reason, idx) => (
+                <div key={idx}>
+                  <h3 className="text-lg font-medium mb-1.5" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>{reason.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--m-ink-soft)' }}>{reason.desc}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          <div>
+            <p className="text-sm font-semibold mb-8" style={{ color: 'var(--m-accent)' }}>For property management companies</p>
+            <div className="space-y-8">
+              {pmcReasons.map((reason, idx) => (
+                <div key={idx}>
+                  <h3 className="text-lg font-medium mb-1.5" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>{reason.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--m-ink-soft)' }}>{reason.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -553,11 +594,11 @@ function Footer() {
             A
           </div>
           <div>
-            <p className="font-medium" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>Airaroots</p>
+            <p className="font-medium" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>Hostezy</p>
             <p className="text-xs" style={{ color: 'var(--m-ink-faint)' }}>Property management, simplified.</p>
           </div>
         </div>
-        <p className="text-sm" style={{ color: 'var(--m-ink-faint)' }}>© 2026 Airaroots. All rights reserved.</p>
+        <p className="text-sm" style={{ color: 'var(--m-ink-faint)' }}>© 2026 Hostezy. All rights reserved.</p>
       </div>
     </footer>
   );

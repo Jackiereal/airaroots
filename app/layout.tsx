@@ -35,8 +35,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Airaroots — Property Finance Manager',
-  description: 'Multi-property P&L tracker for property owners and managers.',
+  title: 'Hostezy — Property Management Software',
+  description: 'Bookings, guests, housekeeping, and finance in one place — for property owners and management companies.',
 };
 
 export default function RootLayout({
