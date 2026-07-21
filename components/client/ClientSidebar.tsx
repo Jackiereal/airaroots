@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Building2, LayoutDashboard, LogOut, ChevronRight } from 'lucide-react';
 import MobileSidebarShell from '@/components/ui/MobileSidebarShell';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV = [
   { href: '/client/dashboard', label: 'My Properties', icon: LayoutDashboard },
@@ -69,6 +70,7 @@ function SidebarContent({
 
       <div className="border-t border-[var(--border-color)] p-3">
         <p className="mb-1.5 truncate px-1 text-xs text-[var(--text-tertiary)]">{email}</p>
+        <ThemeToggle />
         <button
           type="button"
           onClick={onSignOut}
