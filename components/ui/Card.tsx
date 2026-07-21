@@ -1,12 +1,13 @@
 type Props = {
   children: React.ReactNode;
   className?: string;
-  padding?: 'default' | 'compact' | 'none';
+  padding?: 'default' | 'compact' | 'responsive' | 'none';
 };
 
 const PADDING = {
   default: 'p-5',
   compact: 'p-3',
+  responsive: 'p-4 sm:p-5',
   none: '',
 };
 

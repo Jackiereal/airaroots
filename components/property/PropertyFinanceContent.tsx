@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import Picker from '@/components/ui/Picker';
 import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import { formatExpensePaidLabel } from '@/lib/property-finance/expense-paid-source';
@@ -409,7 +410,7 @@ function BookingsTab({
   return (
     <div className="space-y-6">
       {/* Direct Bookings */}
-      <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+      <Card padding="none" className="overflow-hidden">
         <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)] flex items-center gap-2">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">Direct Bookings</h2>
           <span className="rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
@@ -513,10 +514,10 @@ function BookingsTab({
             }
           />
         )}
-      </section>
+      </Card>
 
       {/* Airbnb Reservations */}
-      <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+      <Card padding="none" className="overflow-hidden">
         <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-color)] flex items-center gap-2">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">Airbnb Reservations</h2>
           <span className="rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
@@ -624,7 +625,7 @@ function BookingsTab({
             }
           />
         )}
-      </section>
+      </Card>
     </div>
   );
 }
@@ -1497,18 +1498,18 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
           </div>
 
           {data?.insights && data.insights.length > 0 && (
-            <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 sm:p-5">
+            <Card padding="responsive">
               <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Insights</h2>
               <ul className="list-disc pl-5 space-y-2 text-sm text-[var(--text-secondary)]">
                 {data.insights.map((t, i) => (
                   <li key={i}>{t}</li>
                 ))}
               </ul>
-            </section>
+            </Card>
           )}
 
           <div className="grid lg:grid-cols-2 gap-6">
-            <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 sm:p-5 min-h-[260px] sm:min-h-[320px]">
+            <Card padding="responsive" className="min-h-[260px] sm:min-h-[320px]">
               <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Expense mix</h2>
               {pieData.length === 0 ? (
                 <p className="text-sm text-[var(--text-tertiary)]">Add expenses to see the chart.</p>
@@ -1531,9 +1532,9 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   </ResponsiveContainer>
                 </div>
               )}
-            </section>
+            </Card>
 
-            <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 sm:p-5 min-h-[260px] sm:min-h-[320px]">
+            <Card padding="responsive" className="min-h-[260px] sm:min-h-[320px]">
               <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Net cash trend</h2>
               {(data?.trend?.length ?? 0) === 0 ? (
                 <p className="text-sm text-[var(--text-tertiary)]">No multi-month data yet.</p>
@@ -1554,7 +1555,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   </ResponsiveContainer>
                 </div>
               )}
-            </section>
+            </Card>
           </div>
 
         </>
