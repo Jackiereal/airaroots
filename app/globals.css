@@ -47,6 +47,13 @@
   --tone-violet-bg:  rgba(133, 104, 201, 0.09);
   --tone-violet-bd:  rgba(133, 104, 201, 0.30);
   --tone-violet-tx:  #7451B8;
+
+  /* extra chart-only colors — no semantic meaning (not income/warning/etc),
+     purely for category variety in charts with 5+ series (e.g. expense pie) */
+  --chart-1: #4F8A6A;
+  --chart-2: #B0562F;
+  --chart-3: #C05B7A;
+  --chart-4: #5B6FA8;
 }
 
 [data-theme="dark"] {
@@ -94,6 +101,11 @@
   --tone-violet-bg:  rgba(150, 125, 214, 0.12);
   --tone-violet-bd:  rgba(150, 125, 214, 0.36);
   --tone-violet-tx:  #967DD6;
+
+  --chart-1: #6FAE8C;
+  --chart-2: #D97E4E;
+  --chart-3: #DB84A2;
+  --chart-4: #8394C9;
 }
 
 * {

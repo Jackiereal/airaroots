@@ -19,7 +19,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import * as Dialog from '@radix-ui/react-dialog';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 import Picker from '@/components/ui/Picker';
 import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import { formatExpensePaidLabel } from '@/lib/property-finance/expense-paid-source';
@@ -39,7 +40,6 @@ import {
   Phone,
   Trash2,
   Upload,
-  X,
 } from 'lucide-react';
 import {
   downloadMonthEndCsv,
@@ -103,11 +103,11 @@ const PIE_COLORS = [
   'var(--accent)',
   'var(--color-blue)',
   'var(--color-gold)',
-  'var(--color-purple)',
-  '#22c55e',
-  '#f97316',
-  '#ec4899',
-  '#6366f1',
+  'var(--tone-violet-tx)',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
 ];
 
 /** Tinted shells + value colors — uses CSS tokens so they adapt to light/dark */
@@ -738,7 +738,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
   >([]);
   const refreshUpcoming = useCallback(async () => {
     try {
-      const res = await fetch('/api/finance/${propertyId}/direct-bookings/upcoming');
+      const res = await fetch(`/api/finance/${propertyId}/direct-bookings/upcoming`);
       const json = await res.json();
       if (res.ok) setUpcoming(json.upcoming ?? []);
       else setUpcoming([]);
@@ -779,13 +779,6 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
   const loadRef = useRef(load);
   useEffect(() => { loadRef.current = load; }, [load]);
 
-  useEffect(() => {
-    fetch('/api/finance/${propertyId}/expenses/backfill-emi', { method: 'POST' })
-      .then((r) => r.json())
-      .then((json) => { if (json.inserted > 0) void loadRef.current(); })
-      .catch(() => {});
-  }, []);
-
   const openAllMonthsSummary = async () => {
     setAllMonthsOpen(true);
     setAllMonthsLoading(true);
@@ -818,7 +811,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
     if (!expenseType) { setError('Category is required'); return; }
     setExpenseSaving(true);
     try {
-      const res = await fetch('/api/finance/${propertyId}/expenses', {
+      const res = await fetch(`/api/finance/${propertyId}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1272,24 +1265,14 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
             onChange={onCsvImport}
           />
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <button
-              type="button"
-              disabled={loading || !data}
-              onClick={handleExportCsv}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
-            >
+            <Button variant="secondary" disabled={loading || !data} onClick={handleExportCsv}>
               <Download className="h-4 w-4 shrink-0" />
               <span>CSV</span>
-            </button>
-            <button
-              type="button"
-              disabled={loading || !data}
-              onClick={handleExportPdf}
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
-            >
+            </Button>
+            <Button variant="secondary" disabled={loading || !data} onClick={handleExportPdf}>
               <FileDown className="h-4 w-4 shrink-0" />
               <span>PDF report</span>
-            </button>
+            </Button>
           </div>
           {importMsg && (
             <p className="text-xs text-emerald-400">{importMsg}</p>
@@ -1302,38 +1285,23 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
 
       {!isReadOnly && activeTab === 'expenses' && (
         <div className="flex justify-end pt-3">
-          <button
-            type="button"
-            disabled={loading || !data}
-            onClick={() => setAddExpenseOpen(true)}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-          >
+          <Button disabled={loading || !data} onClick={() => setAddExpenseOpen(true)}>
             <Plus className="h-4 w-4 shrink-0" />
             <span>Add expense</span>
-          </button>
+          </Button>
         </div>
       )}
 
       {!isReadOnly && activeTab === 'bookings' && (
         <div className="flex flex-wrap justify-end gap-2 pt-3">
-          <button
-            type="button"
-            disabled={importing}
-            onClick={() => csvImportRef.current?.click()}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-raised)] disabled:opacity-40"
-          >
+          <Button variant="secondary" disabled={importing} onClick={() => csvImportRef.current?.click()}>
             {importing ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Upload className="h-4 w-4 shrink-0" />}
             <span className="truncate">{importing ? 'Importing…' : 'Import Airbnb CSV'}</span>
-          </button>
-          <button
-            type="button"
-            disabled={loading || !data}
-            onClick={() => setAddDirectOpen(true)}
-            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-[var(--accent)]/45 bg-[var(--accent)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 disabled:opacity-40"
-          >
+          </Button>
+          <Button disabled={loading || !data} onClick={() => setAddDirectOpen(true)}>
             <Plus className="h-4 w-4 shrink-0" />
             <span>Add direct booking</span>
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1594,23 +1562,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
         </>
       )}
 
-      <Dialog.Root open={addExpenseOpen} onOpenChange={setAddExpenseOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,26rem)] max-h-[min(92dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">Add expense</Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
+      <Modal open={addExpenseOpen} onOpenChange={setAddExpenseOpen} title="Add expense">
             <form onSubmit={onAddExpense} className="flex flex-col gap-3 overflow-y-auto p-4">
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
@@ -1674,14 +1626,13 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </label>
               </div>
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-                <Dialog.Close asChild>
-                  <button
-                    type="button"
-                    className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
-                  >
-                    Cancel
-                  </button>
-                </Dialog.Close>
+                <button
+                  type="button"
+                  onClick={() => setAddExpenseOpen(false)}
+                  className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={expenseSaving}
@@ -1691,27 +1642,9 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </button>
               </div>
             </form>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root open={addDirectOpen} onOpenChange={setAddDirectOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,40rem)] max-h-[min(92dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">Add direct booking</Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
+      <Modal open={addDirectOpen} onOpenChange={setAddDirectOpen} title="Add direct booking" width="40rem">
             <form onSubmit={onAddDirect} className="flex flex-col gap-3 overflow-y-auto p-4">
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
@@ -1809,14 +1742,13 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </label>
               </div>
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-                <Dialog.Close asChild>
-                  <button
-                    type="button"
-                    className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
-                  >
-                    Cancel
-                  </button>
-                </Dialog.Close>
+                <button
+                  type="button"
+                  onClick={() => setAddDirectOpen(false)}
+                  className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={dsaving}
@@ -1826,34 +1758,15 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </button>
               </div>
             </form>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root
+      <Modal
         open={directEditDraft != null}
         onOpenChange={(open) => {
           if (!open) setDirectEditDraft(null);
         }}
+        title="Edit direct booking"
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,26rem)] max-h-[min(92dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">
-                Edit direct booking
-              </Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
             {directEditDraft && (
               <form onSubmit={onSaveDirectEdit} className="flex flex-col gap-3 overflow-y-auto p-4">
                 <label className="flex flex-col gap-1 text-xs text-[var(--text-tertiary)]">
@@ -1958,14 +1871,13 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   />
                 </label>
                 <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
-                    >
-                      Cancel
-                    </button>
-                  </Dialog.Close>
+                  <button
+                    type="button"
+                    onClick={() => setDirectEditDraft(null)}
+                    className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
                     disabled={directEditSaving}
@@ -1976,34 +1888,15 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </div>
               </form>
             )}
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root
+      <Modal
         open={airbnbGuestEdit != null}
         onOpenChange={(open) => {
           if (!open) setAirbnbGuestEdit(null);
         }}
+        title={`Guests — ${airbnbGuestEdit?.guest_label ?? 'Reservation'}`}
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,26rem)] max-h-[min(92dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">
-                Guests — {airbnbGuestEdit?.guest_label ?? 'Reservation'}
-              </Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
             {airbnbGuestEdit && (
               <form onSubmit={onSaveAirbnbGuestEdit} className="flex flex-col gap-3 overflow-y-auto p-4">
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -2027,14 +1920,13 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   />
                 </label>
                 <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
-                    >
-                      Cancel
-                    </button>
-                  </Dialog.Close>
+                  <button
+                    type="button"
+                    onClick={() => setAirbnbGuestEdit(null)}
+                    className="min-h-11 rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:min-h-9"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
                     disabled={airbnbGuestEditSaving}
@@ -2045,35 +1937,17 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </div>
               </form>
             )}
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root
+      <Modal
         open={activityOpen}
         onOpenChange={(open) => {
           setActivityOpen(open);
           if (!open) setActivityError(null);
         }}
+        title={`Activity log — ${propertyName} P&L`}
+        width="40rem"
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,40rem)] max-h-[min(88dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby="activity-log-desc"
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">
-                Activity log — {propertyName} P&L
-              </Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
             <p id="activity-log-desc" className="px-4 pb-2 text-xs text-[var(--text-tertiary)] leading-relaxed">
               Expenses, direct bookings, Airbnb guest-count edits, and CSV imports — who changed what and when.
             </p>
@@ -2113,11 +1987,9 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </ul>
               )}
             </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root
+      <Modal
         open={oopListOpen}
         onOpenChange={(open) => {
           setOopListOpen(open);
@@ -2127,25 +1999,9 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
             setOopListError(null);
           }
         }}
+        title={`Out of pocket — ${owners.find(o => o.id === oopListPayer)?.name ?? 'Owner'}`}
+        width="34rem"
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,34rem)] max-h-[min(88dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">
-                Out of pocket — {owners.find(o => o.id === oopListPayer)?.name ?? 'Owner'}
-              </Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
             <div className="flex-1 overflow-auto p-4">
               {oopListLoading ? (
                 <div className="flex items-center justify-center gap-2 py-16 text-[var(--text-secondary)]">
@@ -2213,32 +2069,15 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 />
               )}
             </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root
+      <Modal
         open={expenseEditDraft != null}
         onOpenChange={(open) => {
           if (!open) setExpenseEditDraft(null);
         }}
+        title="Edit expense"
       >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex w-[min(100vw-1.5rem,26rem)] max-h-[min(92dvh,90vh)] flex-col overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="text-base font-semibold text-[var(--text-primary)]">Edit expense</Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
             {expenseEditDraft && (
               <form onSubmit={onSaveExpenseEdit} className="flex flex-col gap-3 overflow-y-auto p-4">
                 <ExpenseCategoryPicker
@@ -2310,14 +2149,13 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                   />
                 </label>
                 <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      className="min-h-11 w-full rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:w-auto"
-                    >
-                      Cancel
-                    </button>
-                  </Dialog.Close>
+                  <button
+                    type="button"
+                    onClick={() => setExpenseEditDraft(null)}
+                    className="min-h-11 w-full rounded-lg border border-[var(--border-color)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] sm:w-auto"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
                     disabled={expenseEditSaving}
@@ -2328,29 +2166,9 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </div>
               </form>
             )}
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
 
-      <Dialog.Root open={allMonthsOpen} onOpenChange={setAllMonthsOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out" />
-          <Dialog.Content
-            className="fixed z-[101] flex flex-col overflow-hidden border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:pb-[env(safe-area-inset-bottom)] sm:left-1/2 sm:top-1/2 sm:w-[min(100vw-1.5rem,52rem)] sm:max-h-[min(90vh,720px)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
-            aria-describedby={undefined}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-4 py-3">
-              <Dialog.Title className="min-w-0 pr-2 text-base font-semibold text-[var(--text-primary)]">
-                Summary — all months with data
-              </Dialog.Title>
-              <Dialog.Close
-                type="button"
-                className="inline-flex shrink-0 min-h-11 min-w-11 items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] sm:min-h-9 sm:min-w-9"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </Dialog.Close>
-            </div>
+      <Modal open={allMonthsOpen} onOpenChange={setAllMonthsOpen} title="Summary — all months with data" width="52rem">
             <div className="flex-1 overflow-auto overflow-x-auto overscroll-x-contain touch-pan-x p-4">
               {allMonthsLoading ? (
                 <div className="flex items-center gap-2 py-12 justify-center text-[var(--text-secondary)]">
@@ -2466,9 +2284,7 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
                 </p>
               )}
             </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </Modal>
     </div>
   );
 }
