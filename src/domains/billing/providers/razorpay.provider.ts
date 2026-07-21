@@ -49,6 +49,13 @@ export async function createSubscription(
   };
 }
 
+// Cancels immediately (not at cycle end) — the webhook's subscription.cancelled
+// event is what actually flips organizations.plan/subscription_status; this
+// call just tells Razorpay to stop billing.
+export async function cancelSubscription(razorpaySubscriptionId: string): Promise<void> {
+  await getRazorpayClient().subscriptions.cancel(razorpaySubscriptionId, false);
+}
+
 export type FetchedSubscription = {
   status: string;
   currentPeriodEnd: string | null; // ISO, from current_end (unix seconds)

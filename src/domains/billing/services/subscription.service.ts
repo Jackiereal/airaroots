@@ -54,6 +54,34 @@ export class SubscriptionService {
     return (data ?? []).length > 0;
   }
 
+  // ─── Current subscription lookup (billing settings page) ──────────────────────
+  // Most recent row in a billable state — what the settings page shows and what
+  // "cancel" targets. Distinct from hasLiveSubscription: this also returns
+  // 'halted' (past_due/dunning) so the UI can show a cancel option even mid-grace.
+  async findCurrentSubscription(
+    organizationId: string
+  ): Promise<{ id: string; razorpaySubscriptionId: string; plan: Plan; status: string; currentPeriodEnd: string | null } | null> {
+    const { data, error } = await this.db
+      .from('subscriptions')
+      .select('id, razorpay_subscription_id, plan, status, current_period_end')
+      .eq('organization_id', organizationId)
+      .in('status', ['authenticated', 'active', 'pending', 'halted'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw new Error(`DB error: ${error.message}`);
+    if (!data) return null;
+    const r = data as Record<string, unknown>;
+    return {
+      id: r['id'] as string,
+      razorpaySubscriptionId: r['razorpay_subscription_id'] as string,
+      plan: r['plan'] as Plan,
+      status: r['status'] as string,
+      currentPeriodEnd: (r['current_period_end'] as string | null) ?? null,
+    };
+  }
+
   // ─── Reconciliation ──────────────────────────────────────────────────────────
   // Subscriptions worth polling against the Razorpay API: anything not already
   // in a settled terminal state. 'created'/'authenticated' are included too —
