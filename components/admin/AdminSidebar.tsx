@@ -56,7 +56,7 @@ function SidebarContent({
       <div className="flex items-center gap-2 border-b border-[var(--border-color)] px-4 py-4">
         <Building2 className="h-5 w-5 text-[var(--accent)]" />
         <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-rajdhani)] text-lg">
-          Airaroots
+          Hostezy
         </span>
       </div>
 

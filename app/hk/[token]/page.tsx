@@ -31,7 +31,7 @@ export default async function HkTokenPage({
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="mb-6 flex items-center gap-2">
           <span className="font-bold text-lg font-[family-name:var(--font-rajdhani)] text-[var(--accent)]">
-            Airaroots
+            Hostezy
           </span>
           <span className="text-[var(--text-tertiary)] text-sm">· Housekeeping</span>
         </div>

@@ -83,7 +83,7 @@ export default function PricingSection() {
                   <p className="text-sm" style={{ color: 'var(--m-ink-soft)' }}>25+ properties, negotiated terms</p>
                 </div>
                 <a
-                  href="mailto:teja.jackie@gmail.com?subject=Airaroots%20Enterprise%20plan"
+                  href="mailto:teja.jackie@gmail.com?subject=Hostezy%20Enterprise%20plan"
                   className="text-sm font-semibold"
                   style={{ color: 'var(--m-accent)' }}
                 >

@@ -121,7 +121,7 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
         const rzp = new window.Razorpay({
           key: d.keyId,
           subscription_id: d.subscriptionId,
-          name: 'Airaroots',
+          name: 'Hostezy',
           description: `${PLAN_LABELS[plan]} plan`,
           handler: () => {
             // Payment authorised. The webhook is the source of truth; the return
@@ -223,7 +223,7 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
           )}
           {plan === 'enterprise' && (
             <a
-              href="mailto:teja.jackie@gmail.com?subject=Airaroots%20Enterprise%20plan"
+              href="mailto:teja.jackie@gmail.com?subject=Hostezy%20Enterprise%20plan"
               className="text-xs font-medium text-[var(--accent)]"
             >
               Contact us

@@ -62,7 +62,7 @@ export async function GET(
   const cal = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Airaroots//EN',
+    'PRODID:-//Hostezy//EN',
     `X-WR-CALNAME:${escapeICalText(propertyName)}`,
     'X-WR-TIMEZONE:Asia/Kolkata',
     'CALSCALE:GREGORIAN',

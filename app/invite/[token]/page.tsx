@@ -92,7 +92,7 @@ export default function InvitePage() {
             A
           </div>
           <span className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-            Airaroots
+            Hostezy
           </span>
         </div>
 

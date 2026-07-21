@@ -26,7 +26,7 @@ export default function MobileSidebarShell({ children }: Props) {
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-[var(--accent)]" />
           <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-rajdhani)] text-lg">
-            Airaroots
+            Hostezy
           </span>
         </div>
         <button

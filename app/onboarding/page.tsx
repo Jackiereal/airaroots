@@ -105,7 +105,7 @@ export default function OnboardingPage() {
           className="text-xl font-bold"
           style={{ fontFamily: 'var(--font-rajdhani), sans-serif', color: 'var(--accent)' }}
         >
-          Airaroots
+          Hostezy
         </span>
       </div>
 
