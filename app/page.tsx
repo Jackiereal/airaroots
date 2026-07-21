@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../lib/supabase/client';
 import { Megaphone, Calendar, Star, Wrench, BarChart3, LineChart, ArrowRight, CheckCircle2 } from 'lucide-react';
+import PricingSection from '@/components/marketing/PricingSection';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as RechartsLineChart, Line, AreaChart, Area, Legend } from 'recharts';
 
 export default function Home() {
@@ -53,6 +54,7 @@ export default function Home() {
       <OwnerPortal />
       <WhyAiraroots />
       <SocialProof />
+      <PricingSection />
       <FinalCTA />
       <Footer />
     </div>
@@ -91,18 +93,18 @@ function Hero() {
 
       <div className="relative max-w-4xl mx-auto px-6 py-24 sm:py-32 text-center">
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight mb-6" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-          Own the Property.<br />
-          We Handle<br />
-          Everything Else.
+          Run Your Properties.<br />
+          Skip the<br />
+          Spreadsheet Chaos.
         </h1>
 
         <p className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-          <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span> manages your rental property end-to-end — from marketing and bookings to operations and guest experience. You collect the income. We do the work.
+          <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span> is the software that runs your rental property end-to-end — bookings, channel sync, operations, and guest experience, all in one place, however many properties you manage.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link href="/auth/signin" className="px-8 py-4 rounded-lg text-base font-semibold transition-all hover:scale-105 active:scale-95" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
-            List Your Property
+            Get Started
             <ArrowRight className="inline ml-2" size={18} />
           </Link>
           <Link href="/auth/signin" className="px-8 py-4 rounded-lg text-base font-semibold border transition-all hover:scale-105 active:scale-95" style={{ borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}>
@@ -165,17 +167,17 @@ function HowItWorks() {
   const steps = [
     {
       num: 1,
-      title: 'List Your Property',
-      desc: 'Tell us about your property. We assess, onboard, and get it ready for bookings.'
+      title: 'Set Up Your Properties',
+      desc: 'Add your properties and connect your booking channels. Ready to go in minutes.'
     },
     {
       num: 2,
-      title: 'We Manage Everything',
-      desc: 'Marketing, bookings, guest communication, cleaning, maintenance — all handled.'
+      title: 'Run Everything in One Place',
+      desc: 'Bookings, guest communication, cleaning, maintenance — all managed from one dashboard.'
     },
     {
       num: 3,
-      title: 'You Earn & Track',
+      title: 'Track & Grow',
       desc: 'Log in anytime to see your revenue, bookings, and property performance.'
     }
   ];
@@ -217,28 +219,28 @@ function Services() {
   const services = [
     {
       icon: Megaphone,
-      title: 'Multi-Channel Marketing',
-      desc: 'Listed on Airbnb, Vrbo, Booking.com and more. We write listings, optimize photos, and maximize visibility.'
+      title: 'Multi-Channel Sync',
+      desc: 'Connect Airbnb, Booking.com, and more. Calendars, availability, and rates stay in sync automatically.'
     },
     {
       icon: Calendar,
       title: 'Booking Management',
-      desc: 'We handle all reservations, dynamic pricing, availability, and last-minute requests. Zero effort from you.'
+      desc: 'Handle all reservations, availability, and last-minute requests from one universal calendar.'
     },
     {
       icon: Star,
       title: 'Guest Experience',
-      desc: 'Check-in, communication, reviews, and resolution — every guest interaction managed by our team.'
+      desc: 'Check-in, communication, reviews, and resolution — every guest interaction in one thread.'
     },
     {
       icon: Wrench,
       title: 'Operations & Maintenance',
-      desc: 'Cleaning schedules, routine checks, and maintenance requests handled before they become problems.'
+      desc: 'Cleaning schedules, routine checks, and maintenance requests tracked before they become problems.'
     },
     {
       icon: BarChart3,
-      title: 'Revenue Optimization',
-      desc: 'Dynamic pricing based on market demand, seasonality, and local events to maximize your earnings.'
+      title: 'Revenue Tracking',
+      desc: 'See revenue, expenses, and occupancy by property, updated as bookings and payouts come in.'
     },
     {
       icon: LineChart,
@@ -254,7 +256,7 @@ function Services() {
           <h2 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
             Everything Your Property Needs
           </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Done for you</p>
+          <p style={{ color: 'var(--text-secondary)' }}>All in one dashboard</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -329,7 +331,7 @@ function OwnerPortal() {
             Full Visibility. Zero Guesswork.
           </h2>
           <p className="mb-8 text-lg" style={{ color: 'var(--text-secondary)' }}>
-            Every property owner gets a private portal with live data — your bookings, earnings, expenses, and net income. Understand exactly what you're earning and why.
+            Every property owner gets a live dashboard — bookings, earnings, expenses, and net income. Understand exactly what you're earning and why.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -397,15 +399,15 @@ function WhyAiraroots() {
   const reasons = [
     {
       title: 'More Bookings',
-      desc: 'Our marketing across 10+ channels fills your calendar better than managing alone.'
+      desc: 'Sync across 10+ channels keeps your calendar filled without manual double-checking.'
     },
     {
-      title: 'Less Stress',
-      desc: 'No guest messages at 2am. No chasing cleaners. No maintenance emergencies landing on you.'
+      title: 'Less Chaos',
+      desc: 'No juggling spreadsheets. No missed guest messages. No maintenance requests falling through the cracks.'
     },
     {
       title: 'Full Transparency',
-      desc: 'Unlike traditional property managers, you see every rupee in and out, in real time.'
+      desc: 'See every rupee in and out, in real time — no waiting on someone else\'s report.'
     }
   ];
 
@@ -413,7 +415,7 @@ function WhyAiraroots() {
     <section className="py-24" style={{ background: 'var(--bg-raised)' }}>
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-16" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-          Why Property Owners Choose <span style={{ color: 'var(--accent)' }}>Airaroots</span>
+          Why Owners & PMCs Choose <span style={{ color: 'var(--accent)' }}>Airaroots</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -460,10 +462,10 @@ function FinalCTA() {
     <section className="py-24" style={{ background: 'var(--bg-surface)', borderTop: '2px solid var(--accent)' }}>
       <div className="max-w-4xl mx-auto px-6 text-center">
         <h2 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-          Ready to Put Your Property to Work?
+          Ready to Run Your Properties Better?
         </h2>
         <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
-          List with <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span>. We handle the rest.
+          Start with <span className="font-bold" style={{ color: 'var(--accent)' }}>Airaroots</span> — a 14-day free trial, no card required.
         </p>
         <Link href="/auth/signin" className="inline-block px-8 py-4 rounded-lg text-base font-semibold transition-all hover:scale-105 active:scale-95" style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}>
           Get Started

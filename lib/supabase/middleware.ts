@@ -33,7 +33,10 @@ export async function updateSession(request: NextRequest) {
     // Inbound webhooks (Razorpay, Airbnb, Booking.com) have no user session —
     // they authenticate via signature/secret in the route itself. Redirecting
     // them to /auth/signin makes them permanently unreachable.
-    request.nextUrl.pathname.startsWith('/api/webhooks');
+    request.nextUrl.pathname.startsWith('/api/webhooks') ||
+    // Public plan catalog for the marketing pricing section — an anonymous
+    // visitor on '/' has no session, so this must be reachable pre-auth too.
+    request.nextUrl.pathname === '/api/billing/plans';
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
