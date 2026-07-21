@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
@@ -82,9 +81,13 @@ export default function PricingSection() {
                   <p className="font-bold">{PLAN_LABELS.enterprise}</p>
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>25+ properties, negotiated terms</p>
                 </div>
-                <Link href="/auth/signin" className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                <a
+                  href="mailto:teja.jackie@gmail.com?subject=Airaroots%20Enterprise%20plan"
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--accent)' }}
+                >
                   Contact us
-                </Link>
+                </a>
               </div>
             </div>
           </div>

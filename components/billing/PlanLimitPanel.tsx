@@ -222,7 +222,12 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
             </button>
           )}
           {plan === 'enterprise' && (
-            <span className="text-xs text-[var(--text-tertiary)]">Contact us</span>
+            <a
+              href="mailto:teja.jackie@gmail.com?subject=Airaroots%20Enterprise%20plan"
+              className="text-xs font-medium text-[var(--accent)]"
+            >
+              Contact us
+            </a>
           )}
         </span>
       </div>
