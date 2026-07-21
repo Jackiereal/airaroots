@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
 
   const db = createServiceRoleClientLoose();
 
-  // Plan-limit enforcement. Fail closed to Starter if the org row is
+  // Plan-limit enforcement. Fail closed to Solo if the org row is
   // somehow missing (shouldn't happen post-020 backfill / 021 trigger).
   const orgPlan = (await getOrgPlan(db, ctx!.organizationId)) ?? {
-    plan: 'starter' as const,
+    plan: 'solo' as const,
     subscription_status: 'trialing' as const,
     trial_ends_at: new Date(0).toISOString(),
   };

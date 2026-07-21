@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
-// Tiers shown in the panel. Pro is deliberately hidden: 26–100 properties is a
-// rarer, higher-value deal we negotiate via Enterprise/contact-us rather than
-// sell self-serve. 'pro' still exists in the Plan type + limits so a signed deal
-// can be assigned it manually (100-property cap) without a code change.
-const PLAN_ORDER: Plan[] = ['starter', 'growth', 'enterprise'];
+// Two tracks shown side by side: Individual (Solo/Small, 1–3 properties) and
+// PMC (Growth/Pro, 4–25 properties). Enterprise (25+) is custom / contact-us.
+const INDIVIDUAL_TIERS: Plan[] = ['solo', 'small'];
+const PMC_TIERS: Plan[] = ['growth', 'pro', 'enterprise'];
 // Plans a customer can self-subscribe to. Enterprise is custom / contact-us.
-const SUBSCRIBABLE: Plan[] = ['starter', 'growth'];
+const SUBSCRIBABLE: Plan[] = ['solo', 'small', 'growth', 'pro'];
 
 type Props = {
   code: 'plan_limit_reached' | 'trial_expired';
@@ -24,7 +23,7 @@ function limitLabel(plan: Plan): string {
 }
 
 // Rank so we only offer UPGRADES (a higher tier than the current plan).
-const RANK: Record<Plan, number> = { starter: 0, growth: 1, pro: 2, enterprise: 3 };
+const RANK: Record<Plan, number> = { solo: 0, small: 1, growth: 2, pro: 3, enterprise: 4 };
 
 const CHECKOUT_JS = 'https://checkout.razorpay.com/v1/checkout.js';
 
@@ -170,41 +169,22 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
 
       {error && <p className="text-sm text-[var(--color-red)]">{error}</p>}
 
-      <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] divide-y divide-[var(--border-color)]">
-        {PLAN_ORDER.map((plan) => {
-          const isCurrent = plan === currentPlan;
-          const isUpgrade =
-            SUBSCRIBABLE.includes(plan) && (!currentPlan || RANK[plan] > RANK[currentPlan]);
-          return (
-            <div key={plan} className="flex items-center justify-between px-4 py-2.5 text-sm">
-              <span className="flex items-center gap-2">
-                <span className="font-medium text-[var(--text-primary)]">{PLAN_LABELS[plan]}</span>
-                {isCurrent && (
-                  <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent)] bg-[var(--accent-muted)]">
-                    Current
-                  </span>
-                )}
-              </span>
-              <span className="flex items-center gap-3">
-                <span className="text-xs text-[var(--text-secondary)]">{limitLabel(plan)}</span>
-                {isUpgrade && (
-                  <button
-                    type="button"
-                    disabled={subscribing !== null}
-                    onClick={() => subscribe(plan)}
-                    className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1 text-xs font-medium text-[var(--accent-fg)] disabled:opacity-50"
-                  >
-                    {subscribing === plan && <Loader2 size={12} className="animate-spin" />}
-                    Subscribe
-                  </button>
-                )}
-                {plan === 'enterprise' && (
-                  <span className="text-xs text-[var(--text-tertiary)]">Contact us</span>
-                )}
-              </span>
-            </div>
-          );
-        })}
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
+          Individual owners
+        </p>
+        <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] divide-y divide-[var(--border-color)]">
+          {INDIVIDUAL_TIERS.map((plan) => renderPlanRow(plan))}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
+          Property management companies
+        </p>
+        <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-elevated)] divide-y divide-[var(--border-color)]">
+          {PMC_TIERS.map((plan) => renderPlanRow(plan))}
+        </div>
       </div>
 
       <p className="text-xs text-[var(--text-tertiary)]">
@@ -213,4 +193,39 @@ export default function PlanLimitPanel({ code, message, currentPlan }: Props) {
       </p>
     </div>
   );
+
+  function renderPlanRow(plan: Plan) {
+    const isCurrent = plan === currentPlan;
+    const isUpgrade =
+      SUBSCRIBABLE.includes(plan) && (!currentPlan || RANK[plan] > RANK[currentPlan]);
+    return (
+      <div key={plan} className="flex items-center justify-between px-4 py-2.5 text-sm">
+        <span className="flex items-center gap-2">
+          <span className="font-medium text-[var(--text-primary)]">{PLAN_LABELS[plan]}</span>
+          {isCurrent && (
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[var(--accent)] bg-[var(--accent-muted)]">
+              Current
+            </span>
+          )}
+        </span>
+        <span className="flex items-center gap-3">
+          <span className="text-xs text-[var(--text-secondary)]">{limitLabel(plan)}</span>
+          {isUpgrade && (
+            <button
+              type="button"
+              disabled={subscribing !== null}
+              onClick={() => subscribe(plan)}
+              className="flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1 text-xs font-medium text-[var(--accent-fg)] disabled:opacity-50"
+            >
+              {subscribing === plan && <Loader2 size={12} className="animate-spin" />}
+              Subscribe
+            </button>
+          )}
+          {plan === 'enterprise' && (
+            <span className="text-xs text-[var(--text-tertiary)]">Contact us</span>
+          )}
+        </span>
+      </div>
+    );
+  }
 }
