@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Rajdhani, Inter } from 'next/font/google';
+import { Rajdhani, Inter, Fraunces, Manrope } from 'next/font/google';
 import './globals.css';
 
 const rajdhani = Rajdhani({
@@ -11,6 +11,24 @@ const rajdhani = Rajdhani({
 
 const inter = Inter({
   variable: '--font-inter',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+// Marketing-page-only faces (homepage). The app shell (dashboard etc.) keeps
+// Rajdhani/Inter — these are scoped to marketing via the --font-fraunces /
+// --font-manrope variables, used only inside app/page.tsx.
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
+
+const manrope = Manrope({
+  variable: '--font-manrope',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
@@ -37,7 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${rajdhani.variable} ${inter.variable} antialiased`}
+        className={`${rajdhani.variable} ${inter.variable} ${fraunces.variable} ${manrope.variable} antialiased`}
         suppressHydrationWarning
       >
         {children}

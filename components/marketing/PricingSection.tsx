@@ -39,22 +39,23 @@ export default function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="py-24" style={{ background: 'var(--bg-raised)' }}>
+    <section id="pricing" className="py-24" style={{ background: 'var(--m-ground-raised)' }}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-4">
-          <h2 className="text-4xl font-bold mb-4" style={{ fontFamily: 'var(--font-rajdhani), sans-serif' }}>
-            Simple Pricing, Sized For You
+        <div className="max-w-xl mb-4">
+          <p className="m-eyebrow mb-3">Pricing</p>
+          <h2 className="text-4xl font-medium mb-4" style={{ color: 'var(--m-ink)' }}>
+            Sized for how you work.
           </h2>
-          <p className="max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-            Whether you own one property or run a portfolio for others, there's a plan built for how you work.
+          <p style={{ color: 'var(--m-ink-soft)' }}>
+            Whether you own one property or run a portfolio for others, there's a plan built for you.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
           <div>
             <div className="mb-6">
-              <h3 className="text-xl font-bold mb-1">For Property Owners</h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--m-ink)' }}>For property owners</h3>
+              <p className="text-sm" style={{ color: 'var(--m-ink-soft)' }}>
                 Replace the spreadsheet and WhatsApp juggling with one place to manage bookings — no operations team needed.
               </p>
             </div>
@@ -67,8 +68,8 @@ export default function PricingSection() {
 
           <div>
             <div className="mb-6">
-              <h3 className="text-xl font-bold mb-1">For Property Management Companies</h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--m-ink)' }}>For property management companies</h3>
+              <p className="text-sm" style={{ color: 'var(--m-ink-soft)' }}>
                 Built for teams — housekeeping boards, vendor coordination, multi-property reporting, and staff logins.
               </p>
             </div>
@@ -76,15 +77,15 @@ export default function PricingSection() {
               {PMC_TIERS.map((plan) => (
                 <PlanCard key={plan} plan={plan} price={priceLabel(plan)} />
               ))}
-              <div className="p-5 rounded-xl flex items-center justify-between" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+              <div className="p-5 rounded-2xl flex items-center justify-between" style={{ background: 'var(--m-card)', border: '1px solid var(--m-border)' }}>
                 <div>
-                  <p className="font-bold">{PLAN_LABELS.enterprise}</p>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>25+ properties, negotiated terms</p>
+                  <p className="font-semibold" style={{ color: 'var(--m-ink)' }}>{PLAN_LABELS.enterprise}</p>
+                  <p className="text-sm" style={{ color: 'var(--m-ink-soft)' }}>25+ properties, negotiated terms</p>
                 </div>
                 <a
                   href="mailto:teja.jackie@gmail.com?subject=Airaroots%20Enterprise%20plan"
                   className="text-sm font-semibold"
-                  style={{ color: 'var(--accent)' }}
+                  style={{ color: 'var(--m-accent)' }}
                 >
                   Contact us
                 </a>
@@ -93,7 +94,7 @@ export default function PricingSection() {
           </div>
         </div>
 
-        <p className="text-center text-sm mt-12 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-center text-sm mt-12 max-w-2xl mx-auto" style={{ color: 'var(--m-ink-faint)' }}>
           All plans include the same core toolset — reservations, calendar, channel sync, housekeeping, maintenance, and finance tracking.
           Higher tiers exist for portfolio size, not fewer features.
         </p>
@@ -104,17 +105,17 @@ export default function PricingSection() {
 
 function PlanCard({ plan, price }: { plan: Plan; price: string }) {
   return (
-    <div className="p-5 rounded-xl" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+    <div className="p-5 rounded-2xl" style={{ background: 'var(--m-card)', border: '1px solid var(--m-border)' }}>
       <div className="flex items-baseline justify-between mb-1">
-        <p className="font-bold text-lg">{PLAN_LABELS[plan]}</p>
-        <p className="font-bold" style={{ color: 'var(--accent)' }}>
+        <p className="font-semibold text-lg" style={{ color: 'var(--m-ink)', fontFamily: 'var(--font-fraunces), serif' }}>{PLAN_LABELS[plan]}</p>
+        <p className="font-medium m-tabular" style={{ color: 'var(--m-accent)' }}>
           {price}
-          <span className="text-xs font-normal" style={{ color: 'var(--text-tertiary)' }}>/mo</span>
+          <span className="text-xs font-normal" style={{ color: 'var(--m-ink-faint)' }}>/mo</span>
         </p>
       </div>
-      <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{limitLabel(plan)}</p>
-      <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-        <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />
+      <p className="text-sm mb-3" style={{ color: 'var(--m-ink-soft)' }}>{limitLabel(plan)}</p>
+      <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--m-ink-faint)' }}>
+        <CheckCircle2 size={14} style={{ color: 'var(--m-sage)' }} />
         Every feature included
       </div>
     </div>
