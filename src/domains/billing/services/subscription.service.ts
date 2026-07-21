@@ -39,12 +39,15 @@ export class SubscriptionService {
 
   // ─── Live-subscription guard ──────────────────────────────────────────────────
   // A subscription that's mid-flight or paying — used to block double-subscribe.
+  // 'created' is deliberately excluded: it means a Razorpay subscription object
+  // exists but checkout was never completed (abandoned modal, failed attempt) —
+  // no mandate, no money moved, so blocking retry here would strand the user.
   async hasLiveSubscription(organizationId: string): Promise<boolean> {
     const { data, error } = await this.db
       .from('subscriptions')
       .select('id')
       .eq('organization_id', organizationId)
-      .in('status', ['created', 'authenticated', 'active', 'pending'])
+      .in('status', ['authenticated', 'active', 'pending'])
       .limit(1);
 
     if (error) throw new Error(`DB error: ${error.message}`);
