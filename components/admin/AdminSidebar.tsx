@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Building2, LayoutDashboard, Users, LogOut, ChevronRight, Calendar, BookOpen, Link2, ClipboardCheck, Wrench, Package, HardHat, Settings, CreditCard, type LucideIcon } from 'lucide-react';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import MobileSidebarShell from '@/components/ui/MobileSidebarShell';
+import SidebarBrand from '@/components/ui/SidebarBrand';
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -83,12 +84,7 @@ function SidebarContent({
 }) {
   return (
     <aside className="flex h-full w-56 flex-col border-r border-[var(--border-color)] bg-[var(--bg-surface)]">
-      <div className="flex items-center gap-2 border-b border-[var(--border-color)] px-4 py-4">
-        <Building2 className="h-5 w-5 text-[var(--accent)]" />
-        <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-fraunces)] text-lg">
-          Hostezy
-        </span>
-      </div>
+      <SidebarBrand />
 
       <nav className="flex-1 overflow-y-auto p-2">
         {renderNavGroup(OPERATE_NAV, pathname)}

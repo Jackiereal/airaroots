@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Building2, LayoutDashboard, LogOut, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, LogOut, ChevronRight } from 'lucide-react';
 import MobileSidebarShell from '@/components/ui/MobileSidebarShell';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import SidebarBrand from '@/components/ui/SidebarBrand';
 
 const NAV = [
   { href: '/client/dashboard', label: 'My Properties', icon: LayoutDashboard },
@@ -39,12 +40,7 @@ function SidebarContent({
 }) {
   return (
     <aside className="flex h-full w-56 flex-col border-r border-[var(--border-color)] bg-[var(--bg-surface)]">
-      <div className="flex items-center gap-2 border-b border-[var(--border-color)] px-4 py-4">
-        <Building2 className="h-5 w-5 text-[var(--accent)]" />
-        <span className="font-semibold text-[var(--text-primary)] font-[family-name:var(--font-fraunces)] text-lg">
-          Hostezy
-        </span>
-      </div>
+      <SidebarBrand />
 
       <nav className="flex-1 overflow-y-auto p-2">
         {NAV.map(({ href, label, icon: Icon }) => {
