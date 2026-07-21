@@ -49,6 +49,22 @@ export async function createSubscription(
   };
 }
 
+export type FetchedSubscription = {
+  status: string;
+  currentPeriodEnd: string | null; // ISO, from current_end (unix seconds)
+};
+
+// Used by the reconciliation cron to poll the real state of a subscription
+// directly, in case a webhook was missed and our DB is stale.
+export async function fetchSubscription(razorpaySubscriptionId: string): Promise<FetchedSubscription> {
+  const sub = await getRazorpayClient().subscriptions.fetch(razorpaySubscriptionId);
+  const currentEnd = (sub as { current_end?: number | null }).current_end;
+  return {
+    status: sub.status,
+    currentPeriodEnd: currentEnd ? new Date(currentEnd * 1000).toISOString() : null,
+  };
+}
+
 // HMAC-SHA256 of the RAW request body with the webhook secret, timing-safe
 // compared to the x-razorpay-signature header. Returns a boolean; never throws
 // (a missing secret or malformed signature is just "not verified").

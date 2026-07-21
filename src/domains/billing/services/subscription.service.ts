@@ -54,6 +54,27 @@ export class SubscriptionService {
     return (data ?? []).length > 0;
   }
 
+  // ─── Reconciliation ──────────────────────────────────────────────────────────
+  // Subscriptions worth polling against the Razorpay API: anything not already
+  // in a settled terminal state. 'created'/'authenticated' are included too —
+  // a subscription stuck there might have actually activated via a webhook we
+  // never received.
+  async listReconcilableSubscriptions(): Promise<
+    { organizationId: string; razorpaySubscriptionId: string; dbStatus: string }[]
+  > {
+    const { data, error } = await this.db
+      .from('subscriptions')
+      .select('organization_id, razorpay_subscription_id, status')
+      .in('status', ['created', 'authenticated', 'active', 'pending', 'halted']);
+
+    if (error) throw new Error(`DB error: ${error.message}`);
+    return (data ?? []).map((r) => ({
+      organizationId: (r as { organization_id: string }).organization_id,
+      razorpaySubscriptionId: (r as { razorpay_subscription_id: string }).razorpay_subscription_id,
+      dbStatus: (r as { status: string }).status,
+    }));
+  }
+
   // ─── Persist the subscription created by the subscribe route ──────────────────
   async persistCreatedSubscription(args: {
     organizationId: string;
@@ -135,47 +156,67 @@ export class SubscriptionService {
     subEntity: NonNullable<RazorpayWebhookEvent['payload']['subscription']>['entity'],
     payEntity: NonNullable<RazorpayWebhookEvent['payload']['payment']>['entity'] | undefined
   ): Promise<void> {
-    const razorpaySubscriptionId = subEntity.id;
+    void payEntity; // charge details already persisted in billing_events
 
-    // The plan this subscription is for — read from our own subscriptions row
-    // (never trust the webhook's plan_id for gating).
-    const plan = await this.planForSubscription(razorpaySubscriptionId);
-
-    // Sub-row status + current_period_end from the entity.
-    const subStatus = subEntity.status;
     const periodEnd = subEntity.current_end
       ? new Date(subEntity.current_end * 1000).toISOString()
       : undefined;
 
-    await this.updateSubscriptionRow(razorpaySubscriptionId, subStatus, periodEnd);
+    // 'subscription.pending' and 'payment.failed' carry a Razorpay subscription
+    // status ('active' or 'pending') that doesn't by itself mean past_due — the
+    // event TYPE is what signals dunning here, the raw status doesn't. Map those
+    // two event types to the 'halted' status bucket in syncOrgFromStatus's terms
+    // so both paths (webhook event vs cron-polled status) converge on the same
+    // org-mirror logic.
+    const effectiveStatus =
+      eventType === 'subscription.pending' || eventType === 'payment.failed'
+        ? 'halted'
+        : subEntity.status;
 
-    // organizations mirror — see the transition map in the plan.
+    await this.syncOrgFromStatus(organizationId, subEntity.id, effectiveStatus, periodEnd);
+  }
+
+  // ─── Shared status → org-mirror logic (webhook + reconciliation cron) ─────────
+  // Given a Razorpay subscription's CURRENT status (from a webhook entity or a
+  // polled subscriptions.fetch()), updates our subscriptions row and mirrors the
+  // right organizations.plan/subscription_status. This is the single source of
+  // truth for "what does this Razorpay status mean for the org" — both the
+  // webhook handler and the reconciliation cron call it so they can never drift.
+  async syncOrgFromStatus(
+    organizationId: string,
+    razorpaySubscriptionId: string,
+    status: string,
+    currentPeriodEnd?: string
+  ): Promise<void> {
+    // The plan this subscription is for — read from our own subscriptions row
+    // (never trust the webhook's/API's plan_id for gating).
+    const plan = await this.planForSubscription(razorpaySubscriptionId);
+
+    await this.updateSubscriptionRow(razorpaySubscriptionId, status, currentPeriodEnd);
+
     let orgStatus: SubscriptionStatus | null = null;
     let orgPlan: Plan | null = null;
 
-    switch (eventType) {
-      case 'subscription.activated':
-      case 'subscription.charged':
-      case 'subscription.completed':
+    switch (status) {
+      case 'active':
+      case 'completed':
         orgStatus = 'active';
-        if (plan) orgPlan = plan; // completed keeps plan; activated/charged set it
+        if (plan) orgPlan = plan;
         break;
-      case 'subscription.pending':
-      case 'payment.failed':
-      case 'subscription.halted':
+      case 'pending':
+      case 'halted':
         // Grace: flag past_due but KEEP the plan — don't cap a paying customer
         // mid-dunning.
         orgStatus = 'past_due';
         break;
-      case 'subscription.cancelled':
+      case 'cancelled':
+      case 'expired':
         orgStatus = 'cancelled';
         orgPlan = 'solo'; // revert to lowest tier (existing props untouched)
         break;
       default:
-        return; // unhandled event → ledger recorded, no org change
+        return; // 'created' / 'authenticated' — no mandate yet, no org change
     }
-
-    void payEntity; // charge details already persisted in billing_events
 
     const patch: Record<string, unknown> = {};
     if (orgStatus) patch['subscription_status'] = orgStatus;

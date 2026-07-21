@@ -34,6 +34,10 @@ export async function updateSession(request: NextRequest) {
     // they authenticate via signature/secret in the route itself. Redirecting
     // them to /auth/signin makes them permanently unreachable.
     request.nextUrl.pathname.startsWith('/api/webhooks') ||
+    // Cron routes (channel sync, subscription reconciliation) are called by an
+    // external scheduler with no user session — same class of bug as webhooks,
+    // authenticate via CRON_SECRET header in the route itself.
+    request.nextUrl.pathname.startsWith('/api/cron') ||
     // Public plan catalog for the marketing pricing section — an anonymous
     // visitor on '/' has no session, so this must be reachable pre-auth too.
     request.nextUrl.pathname === '/api/billing/plans';
