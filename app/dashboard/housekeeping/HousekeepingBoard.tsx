@@ -10,6 +10,10 @@ import type {
   HousekeepingTaskStatus,
 } from '@/src/domains/operations/types';
 import Picker from '@/components/ui/Picker';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 import { renderTemplate } from '@/src/domains/communication/render';
 import type { CommunicationTemplate } from '@/src/domains/communication/types';
 
@@ -22,11 +26,11 @@ const TASK_TYPE_LABELS: Record<HousekeepingTaskType, string> = {
   deep_clean: 'Deep Clean',
 };
 
-const TASK_TYPE_COLORS: Record<HousekeepingTaskType, string> = {
-  checkout_clean: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  mid_stay: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  inspection: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  deep_clean: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+const TASK_TYPE_BADGE_VARIANT: Record<HousekeepingTaskType, 'profit' | 'violet' | 'amber' | 'rose'> = {
+  checkout_clean: 'profit',
+  mid_stay: 'violet',
+  inspection: 'amber',
+  deep_clean: 'rose',
 };
 
 const COLUMNS: { status: HousekeepingTaskStatus; label: string; color: string }[] = [
@@ -104,12 +108,12 @@ function TaskCard({
       : null;
 
   return (
-    <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] p-3 space-y-2 hover:border-[var(--border-color)] transition-colors">
+    <Card padding="compact" className="space-y-2 hover:border-[var(--border-strong)] transition-colors">
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs font-medium text-[var(--text-secondary)] leading-tight">{propertyName}</span>
-        <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border font-medium ${TASK_TYPE_COLORS[task.taskType]}`}>
+        <Badge variant={TASK_TYPE_BADGE_VARIANT[task.taskType]} className="shrink-0">
           {TASK_TYPE_LABELS[task.taskType]}
-        </span>
+        </Badge>
       </div>
 
       <div className="text-xs text-[var(--text-tertiary)]">
@@ -157,7 +161,7 @@ function TaskCard({
           <Trash2 size={12} />
         </button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -216,14 +220,8 @@ function CreateTaskModal({
     }
   }
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl">
-        <div className="border-b border-[var(--border-color)] px-5 py-4">
-          <h2 className="font-semibold text-[var(--text-primary)]">New Housekeeping Task</h2>
-        </div>
+    <Modal open={open} onOpenChange={(o) => { if (!o) onClose(); }} title="New Housekeeping Task">
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Property</label>
@@ -308,24 +306,15 @@ function CreateTaskModal({
           {error && <p className="text-xs text-rose-400">{error}</p>}
 
           <div className="flex gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
-            >
+            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
-            >
+            </Button>
+            <Button type="submit" loading={saving} className="flex-1">
               {saving ? 'Creating…' : 'Create Task'}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -357,9 +346,8 @@ function AssignModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl p-5 space-y-4">
-        <h2 className="font-semibold text-[var(--text-primary)]">Assign Staff</h2>
+    <Modal open onOpenChange={(o) => { if (!o) onClose(); }} title="Assign Staff">
+      <div className="p-5 space-y-4">
         <Picker
           value={staffId}
           onChange={setStaffId}
@@ -370,19 +358,15 @@ function AssignModal({
           className="w-full"
         />
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
+          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
+          </Button>
+          <Button type="button" onClick={handleSave} loading={saving} className="flex-1">
             {saving ? 'Saving…' : 'Assign'}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -536,13 +520,9 @@ export function HousekeepingBoard() {
           searchable
         />
 
-        <button
-          onClick={fetchData}
-          className="min-h-11 min-w-11 flex items-center justify-center rounded-lg border border-[var(--border-color)] p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
-          title="Refresh"
-        >
+        <Button variant="secondary" onClick={fetchData} title="Refresh" className="min-h-11 min-w-11">
           <RefreshCw size={14} />
-        </button>
+        </Button>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Link
             href="/dashboard/housekeeping/staff"
@@ -558,12 +538,9 @@ export function HousekeepingBoard() {
               Checklist
             </Link>
           )}
-          <button
-            onClick={() => setShowCreate(true)}
-            className="min-h-11 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
+          <Button onClick={() => setShowCreate(true)} className="min-h-11">
             <Plus size={15} /> New Task
-          </button>
+          </Button>
         </div>
       </div>
 
