@@ -1,15 +1,19 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getUserProfile } from '@/lib/auth';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClientLoose } from '@/lib/supabase/server';
 import { Plus, Building2 } from 'lucide-react';
 import PageHeader from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 
-async function getProperties() {
-  const db = createServiceRoleClient();
-  const { data } = await db.from('properties').select('id, name, slug, address').order('name');
+async function getProperties(organizationId: string) {
+  const db = createServiceRoleClientLoose();
+  const { data } = await db
+    .from('properties')
+    .select('id, name, slug, address')
+    .eq('organization_id', organizationId)
+    .order('name');
   return data ?? [];
 }
 
@@ -17,7 +21,10 @@ export default async function AdminDashboardPage() {
   const profile = await getUserProfile();
   if (!profile) redirect('/auth/signin');
 
-  const properties = await getProperties();
+  const organizationId = (profile as unknown as { organization_id?: string }).organization_id;
+  if (!organizationId) redirect('/auth/signin');
+
+  const properties = await getProperties(organizationId);
 
   // New user with no properties — send to onboarding
   if (properties.length === 0) redirect('/onboarding');
