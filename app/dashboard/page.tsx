@@ -20,7 +20,7 @@ async function getProperties(organizationId: string) {
 }
 
 async function getOnboardingState(organizationId: string) {
-  const db = createServiceRoleClient();
+  const db = createServiceRoleClientLoose();
   const [connections, { count }] = await Promise.all([
     channelConnectionService.findByOrganization(organizationId),
     db
@@ -46,8 +46,7 @@ export default async function AdminDashboardPage() {
   // New user with no properties — send to onboarding
   if (properties.length === 0) redirect('/onboarding');
 
-  const organizationId = (profile as unknown as { organization_id?: string }).organization_id;
-  const onboardingState = organizationId ? await getOnboardingState(organizationId) : null;
+  const onboardingState = await getOnboardingState(organizationId);
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto">
