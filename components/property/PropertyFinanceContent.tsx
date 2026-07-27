@@ -22,6 +22,7 @@ import {
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import HelpText from '@/components/ui/HelpText';
 import Picker from '@/components/ui/Picker';
 import { ResponsiveTable, TableCard } from '@/components/ui/ResponsiveTable';
 import { formatExpensePaidLabel } from '@/lib/property-finance/expense-paid-source';
@@ -99,6 +100,14 @@ const EXPENSE_CATEGORIES: { label: string; items: string[] }[] = [
     items: ['Miscellaneous'],
   },
 ];
+
+const FINANCE_TAB_HELP: Record<FinanceTab, string> = {
+  overview: 'A summary of income, expenses, and profit for the selected month, plus year-to-date totals.',
+  revenue: 'Every reservation that generated income this month, pulled from your connected channels and direct bookings.',
+  expenses: 'Money you spent on this property — cleaning, repairs, utilities, supplies — grouped by category.',
+  bookings: 'Bookings you took directly (not through Airbnb or another channel), added and tracked here manually.',
+  planning: 'Budget and forecast tools to plan ahead, separate from what has actually happened so far.',
+};
 
 const PIE_COLORS = [
   'var(--accent)',
@@ -1283,6 +1292,10 @@ export default function PropertyFinanceContent({ propertyId, propertyName = "Pro
       </div>
 
       <FinanceTabBar active={activeTab} onChange={setActiveTab} isReadOnly={isReadOnly} />
+
+      <HelpText label="What does this tab show?" className="pt-2">
+        {FINANCE_TAB_HELP[activeTab]}
+      </HelpText>
 
       {!isReadOnly && activeTab === 'expenses' && (
         <div className="flex justify-end pt-3">

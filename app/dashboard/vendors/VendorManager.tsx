@@ -276,6 +276,9 @@ export function VendorManager() {
       ) : vendors.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)] p-12 text-center">
           <p className="text-sm text-[var(--text-secondary)]">No vendors yet.</p>
+          <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+            Keep contacts for cleaners, electricians, plumbers, and other people you call for repairs — so anyone on your team can reach them.
+          </p>
           <button onClick={() => setShowAdd(true)} className="mt-3 text-sm text-[var(--accent)] hover:underline">
             Add your first vendor →
           </button>
