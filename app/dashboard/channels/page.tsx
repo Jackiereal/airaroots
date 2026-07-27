@@ -12,9 +12,11 @@ import HelpText from '@/components/ui/HelpText';
 
 async function getProperties(organizationId: string) {
   const db = createServiceRoleClientLoose();
-  // For Phase 1 org bridge, properties aren't org-scoped in DB — use service role + created_by heuristic
-  // TODO: add organization_id to properties in Phase 8
-  const { data } = await db.from('properties').select('id, name, slug').order('name');
+  const { data } = await db
+    .from('properties')
+    .select('id, name, slug')
+    .eq('organization_id', organizationId)
+    .order('name');
   return (data ?? []) as { id: string; name: string; slug: string }[];
 }
 
