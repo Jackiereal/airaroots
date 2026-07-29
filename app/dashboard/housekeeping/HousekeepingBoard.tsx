@@ -14,6 +14,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import HelpText from '@/components/ui/HelpText';
 import { renderTemplate } from '@/src/domains/communication/render';
 import type { CommunicationTemplate } from '@/src/domains/communication/types';
 
@@ -493,6 +494,12 @@ export function HousekeepingBoard() {
   return (
     <>
       <RemindersBanner onDismissOne={fetchData} />
+
+      <HelpText label="How this board works" className="mb-4">
+        Each card is a cleaning or inspection task. It starts as <strong>Pending</strong>, moves to{' '}
+        <strong>Assigned</strong> once you pick a staff member, then to <strong>In Progress</strong> and{' '}
+        <strong>Completed</strong> as the task moves along.
+      </HelpText>
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-5">

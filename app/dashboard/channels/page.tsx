@@ -8,6 +8,7 @@ import { CHANNEL_LABELS } from '@/src/domains/reservation/constants';
 import { ChannelStatusBadge } from '@/components/channel/ChannelStatusBadge';
 import { ConnectChannelButton } from '@/components/channel/ConnectChannelButton';
 import { ChannelConnectionActions } from '@/components/channel/ChannelConnectionActions';
+import HelpText from '@/components/ui/HelpText';
 
 async function getProperties(organizationId: string) {
   const db = createServiceRoleClientLoose();
@@ -50,6 +51,11 @@ export default async function ChannelsPage() {
           <p className="text-sm text-[var(--text-secondary)] mt-0.5">
             Connect Airbnb and Booking.com to sync reservations automatically.
           </p>
+          <HelpText label="What is a channel?" className="mt-2">
+            A &quot;channel&quot; is a booking site like Airbnb or Booking.com. Connecting one lets Hostezy
+            pull in new bookings and blocked dates automatically, so you don&apos;t have to update your
+            calendar by hand. &quot;Sync&quot; just means this happens on a schedule in the background.
+          </HelpText>
         </div>
       </div>
 

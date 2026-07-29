@@ -353,6 +353,9 @@ export function MaintenanceList() {
       ) : requests.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)] p-12 text-center">
           <p className="text-sm text-[var(--text-secondary)]">No maintenance requests.</p>
+          <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+            Log repairs and issues here — a leaking tap, broken AC — and track them through to a vendor fixing it.
+          </p>
           <button onClick={() => setShowCreate(true)} className="mt-3 text-sm text-[var(--accent)] hover:underline">
             Report first issue →
           </button>

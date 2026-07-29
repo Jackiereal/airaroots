@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { createClient } from '../../../lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { TRIAL_DAYS } from '@/src/domains/billing/constants';
 
 function SignInContent() {
   const [loading, setLoading] = useState(false);
@@ -90,10 +91,13 @@ function SignInContent() {
             className="text-2xl font-bold"
             style={{ fontFamily: 'var(--font-fraunces), sans-serif' }}
           >
-            Welcome back
+            Sign in to Hostezy
           </h2>
           <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Sign in to manage your properties
+            No password needed — just your Google account.
+          </p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            First time here? Your {TRIAL_DAYS}-day free trial starts right away, and we&apos;ll walk you through adding your first property.
           </p>
         </div>
 

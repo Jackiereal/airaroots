@@ -376,6 +376,9 @@ export function InventoryManager() {
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)] p-12 text-center">
           <p className="text-sm text-[var(--text-secondary)]">No inventory items yet.</p>
+          <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+            Track supplies like linens, toiletries, and cleaning products, so you know what to restock before you run out.
+          </p>
           <button onClick={() => setShowAdd(true)} className="mt-3 text-sm text-[var(--accent)] hover:underline">
             Add first item →
           </button>
