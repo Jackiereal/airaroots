@@ -17,12 +17,6 @@ export class InventoryService {
     this.repo = new InventoryRepository(supabase);
   }
 
-  async get(id: string): Promise<InventoryItem> {
-    const item = await this.repo.findById(id);
-    if (!item) throw new NotFoundError('InventoryItem', id);
-    return item;
-  }
-
   async listByProperty(propertyId: string, category?: InventoryCategory): Promise<InventoryItem[]> {
     return this.repo.findByProperty(propertyId, category);
   }
