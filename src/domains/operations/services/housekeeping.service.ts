@@ -22,9 +22,9 @@ export class HousekeepingService {
 
   // ─── Tasks ────────────────────────────────────────────────────────────────
 
-  async getTask(id: string): Promise<HousekeepingTask> {
+  async getTask(id: string, organizationId: string): Promise<HousekeepingTask> {
     const task = await this.repo.findTaskById(id);
-    if (!task) throw new NotFoundError('HousekeepingTask', id);
+    if (!task || task.organizationId !== organizationId) throw new NotFoundError('HousekeepingTask', id);
     return task;
   }
 
@@ -70,15 +70,15 @@ export class HousekeepingService {
     await this.repo.deleteTemplate(propertyId);
   }
 
-  async updateTask(id: string, input: UpdateHousekeepingTaskInput): Promise<HousekeepingTask> {
+  async updateTask(id: string, organizationId: string, input: UpdateHousekeepingTaskInput): Promise<HousekeepingTask> {
     const existing = await this.repo.findTaskById(id);
-    if (!existing) throw new NotFoundError('HousekeepingTask', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('HousekeepingTask', id);
     return this.repo.updateTask(id, input);
   }
 
-  async assignTask(id: string, staffId: string): Promise<HousekeepingTask> {
+  async assignTask(id: string, organizationId: string, staffId: string): Promise<HousekeepingTask> {
     const existing = await this.repo.findTaskById(id);
-    if (!existing) throw new NotFoundError('HousekeepingTask', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('HousekeepingTask', id);
     return this.repo.updateTask(id, { assignedTo: staffId, status: 'assigned' });
   }
 
@@ -135,9 +135,9 @@ export class HousekeepingService {
     return completed;
   }
 
-  async deleteTask(id: string): Promise<void> {
+  async deleteTask(id: string, organizationId: string): Promise<void> {
     const existing = await this.repo.findTaskById(id);
-    if (!existing) throw new NotFoundError('HousekeepingTask', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('HousekeepingTask', id);
     await this.repo.deleteTask(id);
   }
 
@@ -170,7 +170,9 @@ export class HousekeepingService {
     return this.repo.addPhoto(task.id, url, caption, uploadedBy);
   }
 
-  async addPhotoById(taskId: string, url: string, caption?: string, uploadedBy?: string): Promise<HousekeepingPhoto> {
+  async addPhotoById(taskId: string, organizationId: string, url: string, caption?: string, uploadedBy?: string): Promise<HousekeepingPhoto> {
+    const existing = await this.repo.findTaskById(taskId);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('HousekeepingTask', taskId);
     return this.repo.addPhoto(taskId, url, caption, uploadedBy);
   }
 
@@ -205,9 +207,9 @@ export class HousekeepingService {
 
   // ─── Staff ────────────────────────────────────────────────────────────────
 
-  async getStaff(id: string): Promise<HousekeepingStaff> {
+  async getStaff(id: string, organizationId: string): Promise<HousekeepingStaff> {
     const staff = await this.repo.findStaffById(id);
-    if (!staff) throw new NotFoundError('HousekeepingStaff', id);
+    if (!staff || staff.organizationId !== organizationId) throw new NotFoundError('HousekeepingStaff', id);
     return staff;
   }
 
@@ -222,9 +224,9 @@ export class HousekeepingService {
     return this.repo.createStaff({ ...input, organizationId });
   }
 
-  async updateStaff(id: string, input: UpdateHousekeepingStaffInput): Promise<HousekeepingStaff> {
+  async updateStaff(id: string, organizationId: string, input: UpdateHousekeepingStaffInput): Promise<HousekeepingStaff> {
     const existing = await this.repo.findStaffById(id);
-    if (!existing) throw new NotFoundError('HousekeepingStaff', id);
+    if (!existing || existing.organizationId !== organizationId) throw new NotFoundError('HousekeepingStaff', id);
     return this.repo.updateStaff(id, input);
   }
 }

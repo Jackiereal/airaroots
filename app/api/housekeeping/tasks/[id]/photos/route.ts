@@ -43,7 +43,7 @@ export async function POST(
 
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
-    const photo = await service.addPhotoById(id, url, caption, ctx!.userId);
+    const photo = await service.addPhotoById(id, ctx!.organizationId, url, caption, ctx!.userId);
 
     return NextResponse.json({ photo }, { status: 201 });
   } catch (error) {
