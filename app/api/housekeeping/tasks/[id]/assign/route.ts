@@ -14,7 +14,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
@@ -23,7 +23,7 @@ export async function POST(
 
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
-    const task = await service.assignTask(id, staffId);
+    const task = await service.assignTask(id, ctx.organizationId, staffId);
 
     return NextResponse.json({ task });
   } catch (error) {
