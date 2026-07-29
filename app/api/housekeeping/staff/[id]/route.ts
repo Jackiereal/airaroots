@@ -10,13 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
-    const member = await service.getStaff(id);
+    const member = await service.getStaff(id, ctx.organizationId);
 
     return NextResponse.json({ staff: member });
   } catch (error) {
@@ -29,7 +29,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { error } = await requireOrgAuth();
+    const { error, ctx } = await requireOrgAuth();
     if (error) return error;
 
     const { id } = await params;
@@ -38,7 +38,7 @@ export async function PATCH(
 
     const supabase = await createClient();
     const service = new HousekeepingService(supabase);
-    const member = await service.updateStaff(id, input);
+    const member = await service.updateStaff(id, ctx.organizationId, input);
 
     return NextResponse.json({ staff: member });
   } catch (error) {

@@ -82,9 +82,12 @@ export default async function ReservationDetailPage({ params }: Params) {
   const profile = await getUserProfile();
   if (!profile) redirect('/auth/signin');
 
+  const organizationId = (profile as unknown as { organization_id?: string }).organization_id;
+  if (!organizationId) redirect('/auth/signin');
+
   const { id } = await params;
   const reservation = await getReservation(id);
-  if (!reservation) notFound();
+  if (!reservation || reservation.organizationId !== organizationId) notFound();
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto">
