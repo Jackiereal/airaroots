@@ -240,7 +240,7 @@ export class SubscriptionService {
       case 'cancelled':
       case 'expired':
         orgStatus = 'cancelled';
-        orgPlan = 'solo'; // revert to lowest tier (existing props untouched)
+        orgPlan = 'owner'; // revert to lowest tier (existing props untouched)
         break;
       default:
         return; // 'created' / 'authenticated' — no mandate yet, no org change

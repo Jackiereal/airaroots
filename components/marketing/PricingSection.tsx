@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
-const INDIVIDUAL_TIERS: Plan[] = ['solo', 'small'];
+const INDIVIDUAL_TIERS: Plan[] = ['owner'];
 const PMC_TIERS: Plan[] = ['growth', 'pro'];
 
 type PlanRow = { plan: Plan; amount_paise: number; currency: string; billing_period: string };

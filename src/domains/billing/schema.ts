@@ -5,7 +5,7 @@ import { z } from 'zod';
 // never trusted from client input. All four are self-serve; only Enterprise
 // (25+ properties) is handled via contact-us, not self-checkout.
 export const SubscribeSchema = z.object({
-  plan: z.enum(['solo', 'small', 'growth', 'pro']),
+  plan: z.enum(['owner', 'growth', 'pro']),
 });
 
 export type SubscribeInput = z.infer<typeof SubscribeSchema>;

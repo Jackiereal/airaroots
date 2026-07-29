@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan, type SubscriptionStatus } from '@/src/domains/billing/constants';
 
-const ALL_TIERS: Plan[] = ['solo', 'small', 'growth', 'pro'];
-const RANK: Record<Plan, number> = { solo: 0, small: 1, growth: 2, pro: 3, enterprise: 4 };
+const ALL_TIERS: Plan[] = ['owner', 'growth', 'pro'];
+const RANK: Record<Plan, number> = { owner: 0, growth: 1, pro: 2, enterprise: 3 };
 
 type SubscriptionInfo = {
   plan: Plan | null;

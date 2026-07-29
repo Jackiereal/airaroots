@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { PLAN_LABELS, PLAN_PROPERTY_LIMITS, type Plan } from '@/src/domains/billing/constants';
 
-// Two tracks shown side by side: Individual (Solo/Small, 1–3 properties) and
+// Two tracks shown side by side: Individual (Owner, 1–3 properties) and
 // PMC (Growth/Pro, 4–25 properties). Enterprise (25+) is custom / contact-us.
-const INDIVIDUAL_TIERS: Plan[] = ['solo', 'small'];
+const INDIVIDUAL_TIERS: Plan[] = ['owner'];
 const PMC_TIERS: Plan[] = ['growth', 'pro', 'enterprise'];
 // Plans a customer can self-subscribe to. Enterprise is custom / contact-us.
-const SUBSCRIBABLE: Plan[] = ['solo', 'small', 'growth', 'pro'];
+const SUBSCRIBABLE: Plan[] = ['owner', 'growth', 'pro'];
 
 type Props = {
   code: 'plan_limit_reached' | 'trial_expired';
@@ -23,7 +23,7 @@ function limitLabel(plan: Plan): string {
 }
 
 // Rank so we only offer UPGRADES (a higher tier than the current plan).
-const RANK: Record<Plan, number> = { solo: 0, small: 1, growth: 2, pro: 3, enterprise: 4 };
+const RANK: Record<Plan, number> = { owner: 0, growth: 1, pro: 2, enterprise: 3 };
 
 const CHECKOUT_JS = 'https://checkout.razorpay.com/v1/checkout.js';
 
